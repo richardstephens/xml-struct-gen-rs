@@ -1,0 +1,7 @@
+[workspace]
+members = [
+    "xml-struct-gen",
+    "xmlstructs-podcast",
+]
+
+resolver = "2"
