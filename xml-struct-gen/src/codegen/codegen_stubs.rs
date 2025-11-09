@@ -46,7 +46,7 @@ pub fn gen_el_struct(
         quote! {}
     };
 
-    let parse_children_impl = generate_parse_children(&attr_fields, &elem_fields);
+    let parse_children_impl = generate_parse_children(&attr_fields, &elem_fields, v.has_text);
 
     quote! {
         #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -153,9 +153,17 @@ fn generate_parse_document(elem_props: &ElemProps) -> TokenStream {
 fn generate_parse_children(
     attr_fields: &Vec<AttrField>,
     elem_fields: &Vec<(Vec<OwnedName>, Ident, Ident)>,
+    has_text: bool,
 ) -> TokenStream {
     let attr_field_matchers = attr_field_matchers(attr_fields);
     let elem_matchers = elem_matchers(&elem_fields);
+
+    let text_handler = if has_text {
+        quote! {n.value = Some(val); }
+    } else {
+        //TODO throw an error here
+        quote! {}
+    };
     quote! {
         pub fn parse_children<T: std::io::Read>(
             attrs: Vec<xml::attribute::OwnedAttribute>,
@@ -187,7 +195,7 @@ fn generate_parse_children(
                         return n;
                     }
                     Ok(xml::reader::XmlEvent::Characters(val)) => {
-                        //TODO: store value
+                        #text_handler
                     }
                     _ => {}
                 }

@@ -195,7 +195,9 @@ impl RssChannelTitle {
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
                     return n;
                 }
-                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                Ok(xml::reader::XmlEvent::Characters(val)) => {
+                    n.value = Some(val);
+                }
                 _ => {}
             }
         }
@@ -236,7 +238,9 @@ impl RssChannelLink {
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
                     return n;
                 }
-                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                Ok(xml::reader::XmlEvent::Characters(val)) => {
+                    n.value = Some(val);
+                }
                 _ => {}
             }
         }
@@ -277,7 +281,9 @@ impl Language {
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
                     return n;
                 }
-                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                Ok(xml::reader::XmlEvent::Characters(val)) => {
+                    n.value = Some(val);
+                }
                 _ => {}
             }
         }
@@ -318,7 +324,9 @@ impl Copyright {
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
                     return n;
                 }
-                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                Ok(xml::reader::XmlEvent::Characters(val)) => {
+                    n.value = Some(val);
+                }
                 _ => {}
             }
         }
@@ -359,7 +367,9 @@ impl Author {
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
                     return n;
                 }
-                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                Ok(xml::reader::XmlEvent::Characters(val)) => {
+                    n.value = Some(val);
+                }
                 _ => {}
             }
         }
@@ -400,7 +410,9 @@ impl RssChannelDescription {
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
                     return n;
                 }
-                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                Ok(xml::reader::XmlEvent::Characters(val)) => {
+                    n.value = Some(val);
+                }
                 _ => {}
             }
         }
@@ -441,7 +453,9 @@ impl Type {
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
                     return n;
                 }
-                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                Ok(xml::reader::XmlEvent::Characters(val)) => {
+                    n.value = Some(val);
+                }
                 _ => {}
             }
         }
@@ -623,7 +637,9 @@ impl RssChannelItunesExplicit {
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
                     return n;
                 }
-                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                Ok(xml::reader::XmlEvent::Characters(val)) => {
+                    n.value = Some(val);
+                }
                 _ => {}
             }
         }
@@ -769,7 +785,9 @@ impl EpisodeType {
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
                     return n;
                 }
-                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                Ok(xml::reader::XmlEvent::Characters(val)) => {
+                    n.value = Some(val);
+                }
                 _ => {}
             }
         }
@@ -810,7 +828,9 @@ impl RssChannelItemItunesTitle {
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
                     return n;
                 }
-                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                Ok(xml::reader::XmlEvent::Characters(val)) => {
+                    n.value = Some(val);
+                }
                 _ => {}
             }
         }
@@ -851,7 +871,9 @@ impl RssChannelItemDescription {
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
                     return n;
                 }
-                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                Ok(xml::reader::XmlEvent::Characters(val)) => {
+                    n.value = Some(val);
+                }
                 _ => {}
             }
         }
@@ -944,7 +966,9 @@ impl Guid {
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
                     return n;
                 }
-                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                Ok(xml::reader::XmlEvent::Characters(val)) => {
+                    n.value = Some(val);
+                }
                 _ => {}
             }
         }
@@ -985,7 +1009,9 @@ impl PubDate {
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
                     return n;
                 }
-                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                Ok(xml::reader::XmlEvent::Characters(val)) => {
+                    n.value = Some(val);
+                }
                 _ => {}
             }
         }
@@ -1026,7 +1052,9 @@ impl Duration {
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
                     return n;
                 }
-                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                Ok(xml::reader::XmlEvent::Characters(val)) => {
+                    n.value = Some(val);
+                }
                 _ => {}
             }
         }
@@ -1067,7 +1095,9 @@ impl RssChannelItemItunesExplicit {
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
                     return n;
                 }
-                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                Ok(xml::reader::XmlEvent::Characters(val)) => {
+                    n.value = Some(val);
+                }
                 _ => {}
             }
         }
@@ -1108,7 +1138,9 @@ impl Episode {
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
                     return n;
                 }
-                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                Ok(xml::reader::XmlEvent::Characters(val)) => {
+                    n.value = Some(val);
+                }
                 _ => {}
             }
         }
@@ -1149,7 +1181,9 @@ impl Season {
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
                     return n;
                 }
-                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                Ok(xml::reader::XmlEvent::Characters(val)) => {
+                    n.value = Some(val);
+                }
                 _ => {}
             }
         }
@@ -1190,7 +1224,9 @@ impl RssChannelItemTitle {
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
                     return n;
                 }
-                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                Ok(xml::reader::XmlEvent::Characters(val)) => {
+                    n.value = Some(val);
+                }
                 _ => {}
             }
         }
@@ -1275,7 +1311,9 @@ impl RssChannelItemLink {
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
                     return n;
                 }
-                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                Ok(xml::reader::XmlEvent::Characters(val)) => {
+                    n.value = Some(val);
+                }
                 _ => {}
             }
         }
