@@ -1,6 +1,3 @@
-pub mod elem_props;
-
-use crate::struct_scan::elem_props::ElemProps;
 use indexmap::IndexMap;
 use std::collections::BTreeMap;
 use std::fs::File;
@@ -11,6 +8,7 @@ use xml::EventReader;
 use xml::name::OwnedName;
 use xml::namespace::Namespace;
 use xml::reader::XmlEvent;
+use crate::common::elem_props::ElemProps;
 
 pub struct StructScanner {
     elem_map: IndexMap<Vec<OwnedName>, ElemProps>,

@@ -1,9 +1,9 @@
-use crate::struct_scan::elem_props::ElemProps;
 use bimap::BiMap;
 use heck::ToSnakeCase;
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use xml::name::OwnedName;
+use crate::common::elem_props::ElemProps;
 
 pub fn gen_el_struct(
     k: &Vec<OwnedName>,
@@ -13,17 +13,9 @@ pub fn gen_el_struct(
     if k.is_empty() {
         return quote! {};
     }
-    let attr_fields: Vec<_> = v
-        .attributes
-        .iter()
-        .map(|x| x.local_name.clone())
-        .map(|x| {
-            let field_ident = format_ident!("{}", sanitize_field_name(&x));
-            quote! {
-                pub #field_ident: Option<String>,
-            }
-        })
-        .collect();
+    
+    let attr_fields = v.get_attr_fields();
+    let attr_field_tokens:Vec<TokenStream> = attr_fields_to_tokens(&attr_fields);
 
     let elem_fields: Vec<_> = v
         .child_stacks
@@ -53,13 +45,21 @@ pub fn gen_el_struct(
     quote! {
         #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
         pub struct #sn {
-            #(#attr_fields)*
+            #(#attr_field_tokens)*
             #(#elem_fields)*
             #maybe_val_field
         }
     }
 }
 
-fn sanitize_field_name(name: &str) -> String {
-    format!("r#{}", name.to_snake_case())
+fn attr_fields_to_tokens(attr_fields: &Vec<String>) -> Vec<TokenStream> {
+    attr_fields.iter()
+        .map(|x| {
+            let field_ident = format_ident!("{x}");
+            quote! {
+                pub #field_ident: Option<String>,
+            }
+        })
+        .collect()
 }
+

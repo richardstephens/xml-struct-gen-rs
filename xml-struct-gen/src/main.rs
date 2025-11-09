@@ -7,6 +7,7 @@ use std::path::PathBuf;
 mod codegen;
 mod postprocess;
 mod struct_scan;
+mod common;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]

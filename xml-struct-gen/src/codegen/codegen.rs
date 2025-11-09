@@ -1,11 +1,11 @@
 use crate::codegen::codegen_stubs::gen_el_struct;
 
 use crate::codegen::util::structname_for;
-use crate::struct_scan::elem_props::ElemProps;
 use bimap::BiMap;
 use indexmap::IndexMap;
 use std::collections::HashSet;
 use xml::name::OwnedName;
+use crate::common::elem_props::ElemProps;
 
 pub fn generate_code(e: IndexMap<Vec<OwnedName>, ElemProps>) -> String {
     let assigned_names = assign_struct_names(e.keys().filter(|k| !k.is_empty()).cloned().collect());
