@@ -51,7 +51,7 @@ pub fn gen_el_struct(
 
     let name_consts = generate_name_consts(k);
 
-    let write_element_impl = gen_write_element(&attr_fields);
+    let write_element_impl = gen_write_element(&attr_fields, &elem_fields, v.has_text);
 
     quote! {
         #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]

@@ -88,6 +88,9 @@ impl RssDocument {
             el_builder = el_builder.attr("version", v);
         }
         w.write(el_builder)?;
+        for child in self.channel_elems.iter() {
+            child.write_element(w)?;
+        }
         w.write(xml::writer::XmlEvent::end_element())?;
         Ok(())
     }
@@ -201,6 +204,39 @@ impl Channel {
     ) -> anyhow::Result<()> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         w.write(el_builder)?;
+        for child in self.rss_channel_title_elems.iter() {
+            child.write_element(w)?;
+        }
+        for child in self.rss_channel_link_elems.iter() {
+            child.write_element(w)?;
+        }
+        for child in self.language_elems.iter() {
+            child.write_element(w)?;
+        }
+        for child in self.copyright_elems.iter() {
+            child.write_element(w)?;
+        }
+        for child in self.author_elems.iter() {
+            child.write_element(w)?;
+        }
+        for child in self.rss_channel_description_elems.iter() {
+            child.write_element(w)?;
+        }
+        for child in self.type_elems.iter() {
+            child.write_element(w)?;
+        }
+        for child in self.rss_channel_itunes_image_elems.iter() {
+            child.write_element(w)?;
+        }
+        for child in self.rss_channel_itunes_category_elems.iter() {
+            child.write_element(w)?;
+        }
+        for child in self.rss_channel_itunes_explicit_elems.iter() {
+            child.write_element(w)?;
+        }
+        for child in self.item_elems.iter() {
+            child.write_element(w)?;
+        }
         w.write(xml::writer::XmlEvent::end_element())?;
         Ok(())
     }
@@ -260,6 +296,9 @@ impl RssChannelTitle {
     ) -> anyhow::Result<()> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         w.write(el_builder)?;
+        if let Some(val) = self.value.as_deref() {
+            w.write(xml::writer::XmlEvent::characters(val))?;
+        }
         w.write(xml::writer::XmlEvent::end_element())?;
         Ok(())
     }
@@ -319,6 +358,9 @@ impl RssChannelLink {
     ) -> anyhow::Result<()> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         w.write(el_builder)?;
+        if let Some(val) = self.value.as_deref() {
+            w.write(xml::writer::XmlEvent::characters(val))?;
+        }
         w.write(xml::writer::XmlEvent::end_element())?;
         Ok(())
     }
@@ -378,6 +420,9 @@ impl Language {
     ) -> anyhow::Result<()> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         w.write(el_builder)?;
+        if let Some(val) = self.value.as_deref() {
+            w.write(xml::writer::XmlEvent::characters(val))?;
+        }
         w.write(xml::writer::XmlEvent::end_element())?;
         Ok(())
     }
@@ -437,6 +482,9 @@ impl Copyright {
     ) -> anyhow::Result<()> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         w.write(el_builder)?;
+        if let Some(val) = self.value.as_deref() {
+            w.write(xml::writer::XmlEvent::characters(val))?;
+        }
         w.write(xml::writer::XmlEvent::end_element())?;
         Ok(())
     }
@@ -500,6 +548,9 @@ impl Author {
     ) -> anyhow::Result<()> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         w.write(el_builder)?;
+        if let Some(val) = self.value.as_deref() {
+            w.write(xml::writer::XmlEvent::characters(val))?;
+        }
         w.write(xml::writer::XmlEvent::end_element())?;
         Ok(())
     }
@@ -559,6 +610,9 @@ impl RssChannelDescription {
     ) -> anyhow::Result<()> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         w.write(el_builder)?;
+        if let Some(val) = self.value.as_deref() {
+            w.write(xml::writer::XmlEvent::characters(val))?;
+        }
         w.write(xml::writer::XmlEvent::end_element())?;
         Ok(())
     }
@@ -622,6 +676,9 @@ impl Type {
     ) -> anyhow::Result<()> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         w.write(el_builder)?;
+        if let Some(val) = self.value.as_deref() {
+            w.write(xml::writer::XmlEvent::characters(val))?;
+        }
         w.write(xml::writer::XmlEvent::end_element())?;
         Ok(())
     }
@@ -773,6 +830,12 @@ impl RssChannelItunesCategory {
             el_builder = el_builder.attr("text", v);
         }
         w.write(el_builder)?;
+        for child in self
+            .rss_channel_itunes_category_itunes_category_elems
+            .iter()
+        {
+            child.write_element(w)?;
+        }
         w.write(xml::writer::XmlEvent::end_element())?;
         Ok(())
     }
@@ -907,6 +970,9 @@ impl RssChannelItunesExplicit {
     ) -> anyhow::Result<()> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         w.write(el_builder)?;
+        if let Some(val) = self.value.as_deref() {
+            w.write(xml::writer::XmlEvent::characters(val))?;
+        }
         w.write(xml::writer::XmlEvent::end_element())?;
         Ok(())
     }
@@ -1032,6 +1098,45 @@ impl Item {
     ) -> anyhow::Result<()> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         w.write(el_builder)?;
+        for child in self.rss_channel_item_itunes_title_elems.iter() {
+            child.write_element(w)?;
+        }
+        for child in self.rss_channel_item_link_elems.iter() {
+            child.write_element(w)?;
+        }
+        for child in self.rss_channel_item_itunes_image_elems.iter() {
+            child.write_element(w)?;
+        }
+        for child in self.episode_type_elems.iter() {
+            child.write_element(w)?;
+        }
+        for child in self.episode_elems.iter() {
+            child.write_element(w)?;
+        }
+        for child in self.season_elems.iter() {
+            child.write_element(w)?;
+        }
+        for child in self.rss_channel_item_title_elems.iter() {
+            child.write_element(w)?;
+        }
+        for child in self.rss_channel_item_description_elems.iter() {
+            child.write_element(w)?;
+        }
+        for child in self.enclosure_elems.iter() {
+            child.write_element(w)?;
+        }
+        for child in self.guid_elems.iter() {
+            child.write_element(w)?;
+        }
+        for child in self.pub_date_elems.iter() {
+            child.write_element(w)?;
+        }
+        for child in self.duration_elems.iter() {
+            child.write_element(w)?;
+        }
+        for child in self.rss_channel_item_itunes_explicit_elems.iter() {
+            child.write_element(w)?;
+        }
         w.write(xml::writer::XmlEvent::end_element())?;
         Ok(())
     }
@@ -1095,6 +1200,9 @@ impl EpisodeType {
     ) -> anyhow::Result<()> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         w.write(el_builder)?;
+        if let Some(val) = self.value.as_deref() {
+            w.write(xml::writer::XmlEvent::characters(val))?;
+        }
         w.write(xml::writer::XmlEvent::end_element())?;
         Ok(())
     }
@@ -1158,6 +1266,9 @@ impl RssChannelItemItunesTitle {
     ) -> anyhow::Result<()> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         w.write(el_builder)?;
+        if let Some(val) = self.value.as_deref() {
+            w.write(xml::writer::XmlEvent::characters(val))?;
+        }
         w.write(xml::writer::XmlEvent::end_element())?;
         Ok(())
     }
@@ -1217,6 +1328,9 @@ impl RssChannelItemDescription {
     ) -> anyhow::Result<()> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         w.write(el_builder)?;
+        if let Some(val) = self.value.as_deref() {
+            w.write(xml::writer::XmlEvent::characters(val))?;
+        }
         w.write(xml::writer::XmlEvent::end_element())?;
         Ok(())
     }
@@ -1357,6 +1471,9 @@ impl Guid {
     ) -> anyhow::Result<()> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         w.write(el_builder)?;
+        if let Some(val) = self.value.as_deref() {
+            w.write(xml::writer::XmlEvent::characters(val))?;
+        }
         w.write(xml::writer::XmlEvent::end_element())?;
         Ok(())
     }
@@ -1416,6 +1533,9 @@ impl PubDate {
     ) -> anyhow::Result<()> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         w.write(el_builder)?;
+        if let Some(val) = self.value.as_deref() {
+            w.write(xml::writer::XmlEvent::characters(val))?;
+        }
         w.write(xml::writer::XmlEvent::end_element())?;
         Ok(())
     }
@@ -1479,6 +1599,9 @@ impl Duration {
     ) -> anyhow::Result<()> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         w.write(el_builder)?;
+        if let Some(val) = self.value.as_deref() {
+            w.write(xml::writer::XmlEvent::characters(val))?;
+        }
         w.write(xml::writer::XmlEvent::end_element())?;
         Ok(())
     }
@@ -1542,6 +1665,9 @@ impl RssChannelItemItunesExplicit {
     ) -> anyhow::Result<()> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         w.write(el_builder)?;
+        if let Some(val) = self.value.as_deref() {
+            w.write(xml::writer::XmlEvent::characters(val))?;
+        }
         w.write(xml::writer::XmlEvent::end_element())?;
         Ok(())
     }
@@ -1605,6 +1731,9 @@ impl Episode {
     ) -> anyhow::Result<()> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         w.write(el_builder)?;
+        if let Some(val) = self.value.as_deref() {
+            w.write(xml::writer::XmlEvent::characters(val))?;
+        }
         w.write(xml::writer::XmlEvent::end_element())?;
         Ok(())
     }
@@ -1668,6 +1797,9 @@ impl Season {
     ) -> anyhow::Result<()> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         w.write(el_builder)?;
+        if let Some(val) = self.value.as_deref() {
+            w.write(xml::writer::XmlEvent::characters(val))?;
+        }
         w.write(xml::writer::XmlEvent::end_element())?;
         Ok(())
     }
@@ -1727,6 +1859,9 @@ impl RssChannelItemTitle {
     ) -> anyhow::Result<()> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         w.write(el_builder)?;
+        if let Some(val) = self.value.as_deref() {
+            w.write(xml::writer::XmlEvent::characters(val))?;
+        }
         w.write(xml::writer::XmlEvent::end_element())?;
         Ok(())
     }
@@ -1857,6 +1992,9 @@ impl RssChannelItemLink {
     ) -> anyhow::Result<()> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         w.write(el_builder)?;
+        if let Some(val) = self.value.as_deref() {
+            w.write(xml::writer::XmlEvent::characters(val))?;
+        }
         w.write(xml::writer::XmlEvent::end_element())?;
         Ok(())
     }

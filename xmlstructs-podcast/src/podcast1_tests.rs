@@ -82,5 +82,8 @@ fn write_attrs() {
     let xml_str = String::from_utf8(out).unwrap();
 
     //TODO: is it safe to assume that xml-rs's output is stable?
-    assert_eq!(r#"<enclosure length="8727310" type="audio/x-m4a" url="http://example.com/podcasts/everything/mthood.m4a" />"#, xml_str);
+    assert_eq!(
+        r#"<enclosure length="8727310" type="audio/x-m4a" url="http://example.com/podcasts/everything/mthood.m4a" />"#,
+        xml_str
+    );
 }
