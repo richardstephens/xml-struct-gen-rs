@@ -82,7 +82,7 @@ impl RssDocument {
     pub fn write_element<W: std::io::Write>(
         &self,
         w: &mut xml::writer::EventWriter<W>,
-    ) -> anyhow::Result<()> {
+    ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         if let Some(v) = self.r#version.as_ref() {
             el_builder = el_builder.attr("version", v);
@@ -201,7 +201,7 @@ impl Channel {
     pub fn write_element<W: std::io::Write>(
         &self,
         w: &mut xml::writer::EventWriter<W>,
-    ) -> anyhow::Result<()> {
+    ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         w.write(el_builder)?;
         for child in self.rss_channel_title_elems.iter() {
@@ -293,7 +293,7 @@ impl RssChannelTitle {
     pub fn write_element<W: std::io::Write>(
         &self,
         w: &mut xml::writer::EventWriter<W>,
-    ) -> anyhow::Result<()> {
+    ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         w.write(el_builder)?;
         if let Some(val) = self.value.as_deref() {
@@ -355,7 +355,7 @@ impl RssChannelLink {
     pub fn write_element<W: std::io::Write>(
         &self,
         w: &mut xml::writer::EventWriter<W>,
-    ) -> anyhow::Result<()> {
+    ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         w.write(el_builder)?;
         if let Some(val) = self.value.as_deref() {
@@ -417,7 +417,7 @@ impl Language {
     pub fn write_element<W: std::io::Write>(
         &self,
         w: &mut xml::writer::EventWriter<W>,
-    ) -> anyhow::Result<()> {
+    ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         w.write(el_builder)?;
         if let Some(val) = self.value.as_deref() {
@@ -479,7 +479,7 @@ impl Copyright {
     pub fn write_element<W: std::io::Write>(
         &self,
         w: &mut xml::writer::EventWriter<W>,
-    ) -> anyhow::Result<()> {
+    ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         w.write(el_builder)?;
         if let Some(val) = self.value.as_deref() {
@@ -545,7 +545,7 @@ impl Author {
     pub fn write_element<W: std::io::Write>(
         &self,
         w: &mut xml::writer::EventWriter<W>,
-    ) -> anyhow::Result<()> {
+    ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         w.write(el_builder)?;
         if let Some(val) = self.value.as_deref() {
@@ -607,7 +607,7 @@ impl RssChannelDescription {
     pub fn write_element<W: std::io::Write>(
         &self,
         w: &mut xml::writer::EventWriter<W>,
-    ) -> anyhow::Result<()> {
+    ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         w.write(el_builder)?;
         if let Some(val) = self.value.as_deref() {
@@ -673,7 +673,7 @@ impl Type {
     pub fn write_element<W: std::io::Write>(
         &self,
         w: &mut xml::writer::EventWriter<W>,
-    ) -> anyhow::Result<()> {
+    ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         w.write(el_builder)?;
         if let Some(val) = self.value.as_deref() {
@@ -744,7 +744,7 @@ impl RssChannelItunesImage {
     pub fn write_element<W: std::io::Write>(
         &self,
         w: &mut xml::writer::EventWriter<W>,
-    ) -> anyhow::Result<()> {
+    ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         if let Some(v) = self.r#href.as_ref() {
             el_builder = el_builder.attr("href", v);
@@ -824,7 +824,7 @@ impl RssChannelItunesCategory {
     pub fn write_element<W: std::io::Write>(
         &self,
         w: &mut xml::writer::EventWriter<W>,
-    ) -> anyhow::Result<()> {
+    ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         if let Some(v) = self.r#text.as_ref() {
             el_builder = el_builder.attr("text", v);
@@ -901,7 +901,7 @@ impl RssChannelItunesCategoryItunesCategory {
     pub fn write_element<W: std::io::Write>(
         &self,
         w: &mut xml::writer::EventWriter<W>,
-    ) -> anyhow::Result<()> {
+    ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         if let Some(v) = self.r#text.as_ref() {
             el_builder = el_builder.attr("text", v);
@@ -967,7 +967,7 @@ impl RssChannelItunesExplicit {
     pub fn write_element<W: std::io::Write>(
         &self,
         w: &mut xml::writer::EventWriter<W>,
-    ) -> anyhow::Result<()> {
+    ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         w.write(el_builder)?;
         if let Some(val) = self.value.as_deref() {
@@ -1095,7 +1095,7 @@ impl Item {
     pub fn write_element<W: std::io::Write>(
         &self,
         w: &mut xml::writer::EventWriter<W>,
-    ) -> anyhow::Result<()> {
+    ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         w.write(el_builder)?;
         for child in self.rss_channel_item_itunes_title_elems.iter() {
@@ -1197,7 +1197,7 @@ impl EpisodeType {
     pub fn write_element<W: std::io::Write>(
         &self,
         w: &mut xml::writer::EventWriter<W>,
-    ) -> anyhow::Result<()> {
+    ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         w.write(el_builder)?;
         if let Some(val) = self.value.as_deref() {
@@ -1263,7 +1263,7 @@ impl RssChannelItemItunesTitle {
     pub fn write_element<W: std::io::Write>(
         &self,
         w: &mut xml::writer::EventWriter<W>,
-    ) -> anyhow::Result<()> {
+    ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         w.write(el_builder)?;
         if let Some(val) = self.value.as_deref() {
@@ -1325,7 +1325,7 @@ impl RssChannelItemDescription {
     pub fn write_element<W: std::io::Write>(
         &self,
         w: &mut xml::writer::EventWriter<W>,
-    ) -> anyhow::Result<()> {
+    ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         w.write(el_builder)?;
         if let Some(val) = self.value.as_deref() {
@@ -1400,7 +1400,7 @@ impl Enclosure {
     pub fn write_element<W: std::io::Write>(
         &self,
         w: &mut xml::writer::EventWriter<W>,
-    ) -> anyhow::Result<()> {
+    ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         if let Some(v) = self.r#length.as_ref() {
             el_builder = el_builder.attr("length", v);
@@ -1468,7 +1468,7 @@ impl Guid {
     pub fn write_element<W: std::io::Write>(
         &self,
         w: &mut xml::writer::EventWriter<W>,
-    ) -> anyhow::Result<()> {
+    ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         w.write(el_builder)?;
         if let Some(val) = self.value.as_deref() {
@@ -1530,7 +1530,7 @@ impl PubDate {
     pub fn write_element<W: std::io::Write>(
         &self,
         w: &mut xml::writer::EventWriter<W>,
-    ) -> anyhow::Result<()> {
+    ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         w.write(el_builder)?;
         if let Some(val) = self.value.as_deref() {
@@ -1596,7 +1596,7 @@ impl Duration {
     pub fn write_element<W: std::io::Write>(
         &self,
         w: &mut xml::writer::EventWriter<W>,
-    ) -> anyhow::Result<()> {
+    ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         w.write(el_builder)?;
         if let Some(val) = self.value.as_deref() {
@@ -1662,7 +1662,7 @@ impl RssChannelItemItunesExplicit {
     pub fn write_element<W: std::io::Write>(
         &self,
         w: &mut xml::writer::EventWriter<W>,
-    ) -> anyhow::Result<()> {
+    ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         w.write(el_builder)?;
         if let Some(val) = self.value.as_deref() {
@@ -1728,7 +1728,7 @@ impl Episode {
     pub fn write_element<W: std::io::Write>(
         &self,
         w: &mut xml::writer::EventWriter<W>,
-    ) -> anyhow::Result<()> {
+    ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         w.write(el_builder)?;
         if let Some(val) = self.value.as_deref() {
@@ -1794,7 +1794,7 @@ impl Season {
     pub fn write_element<W: std::io::Write>(
         &self,
         w: &mut xml::writer::EventWriter<W>,
-    ) -> anyhow::Result<()> {
+    ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         w.write(el_builder)?;
         if let Some(val) = self.value.as_deref() {
@@ -1856,7 +1856,7 @@ impl RssChannelItemTitle {
     pub fn write_element<W: std::io::Write>(
         &self,
         w: &mut xml::writer::EventWriter<W>,
-    ) -> anyhow::Result<()> {
+    ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         w.write(el_builder)?;
         if let Some(val) = self.value.as_deref() {
@@ -1927,7 +1927,7 @@ impl RssChannelItemItunesImage {
     pub fn write_element<W: std::io::Write>(
         &self,
         w: &mut xml::writer::EventWriter<W>,
-    ) -> anyhow::Result<()> {
+    ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         if let Some(v) = self.r#href.as_ref() {
             el_builder = el_builder.attr("href", v);
@@ -1989,7 +1989,7 @@ impl RssChannelItemLink {
     pub fn write_element<W: std::io::Write>(
         &self,
         w: &mut xml::writer::EventWriter<W>,
-    ) -> anyhow::Result<()> {
+    ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         w.write(el_builder)?;
         if let Some(val) = self.value.as_deref() {

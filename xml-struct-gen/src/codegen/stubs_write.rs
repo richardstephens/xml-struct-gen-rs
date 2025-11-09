@@ -21,7 +21,7 @@ pub fn gen_write_element(
     };
 
     quote! {
-        pub fn write_element<W: std::io::Write>(&self, w: &mut xml::writer::EventWriter<W>) -> anyhow::Result<()> {
+        pub fn write_element<W: std::io::Write>(&self, w: &mut xml::writer::EventWriter<W>) -> Result<(), XmlWriteError> {
 
             let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
             #(#attr_write_tokens)*
