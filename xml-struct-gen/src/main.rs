@@ -1,9 +1,11 @@
 use crate::codegen::codegen::generate_code;
+use crate::postprocess::mark_root;
 use crate::struct_scan::StructScanner;
 use clap::Parser;
 use std::path::PathBuf;
 
 mod codegen;
+mod postprocess;
 mod struct_scan;
 
 #[derive(Parser)]
@@ -22,7 +24,9 @@ fn main() -> anyhow::Result<()> {
     let args = Args::parse();
 
     let mut scanner = StructScanner::new();
-    let structs = scanner.scan_structs(&args.input)?;
+    let mut structs = scanner.scan_structs(&args.input)?;
+
+    mark_root(&mut structs)?;
 
     let generated_code = generate_code(structs);
 

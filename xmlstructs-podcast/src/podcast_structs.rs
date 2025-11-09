@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
-pub struct Rss {
+pub struct RssDocument {
     pub r#version: Option<String>,
     pub channel_elems: Vec<Channel>,
 }

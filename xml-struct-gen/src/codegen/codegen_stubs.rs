@@ -44,7 +44,11 @@ pub fn gen_el_struct(
     };
 
     let xml_name = format_ident!("{}", assigned.get_by_left(k).unwrap());
-    let sn = format_ident!("{xml_name}");
+    let sn = if v.is_root {
+        format_ident!("{xml_name}Document")
+    } else {
+        format_ident!("{xml_name}")
+    };
 
     quote! {
         #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]

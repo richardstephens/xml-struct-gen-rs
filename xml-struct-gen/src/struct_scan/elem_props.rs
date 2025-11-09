@@ -6,4 +6,5 @@ pub struct ElemProps {
     pub attributes: Vec<OwnedName>,
     pub child_stacks: LinkedHashSet<Vec<OwnedName>>,
     pub has_text: bool,
+    pub is_root: bool,
 }
