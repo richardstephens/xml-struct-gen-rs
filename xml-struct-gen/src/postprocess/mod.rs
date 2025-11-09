@@ -19,3 +19,18 @@ pub fn mark_root(structs: &mut IndexMap<Vec<OwnedName>, ElemProps>) -> anyhow::R
 
     Ok(())
 }
+
+pub fn validate_text_invariant(
+    structs: &IndexMap<Vec<OwnedName>, ElemProps>,
+) -> anyhow::Result<()> {
+    for (k, v) in structs.iter() {
+        if v.has_text && !v.child_stacks.is_empty() {
+            bail!(
+                "Path:{:?} has both text and child elements, this is unsupported",
+                k
+            );
+        }
+    }
+
+    Ok(())
+}
