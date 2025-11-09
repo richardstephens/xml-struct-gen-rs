@@ -1,4 +1,4 @@
-use crate::codegen::codegen_stubs::gen_el_struct;
+use crate::codegen::stubs::gen_el_struct;
 
 use crate::codegen::util::structname_for;
 use crate::common::elem_props::ElemProps;

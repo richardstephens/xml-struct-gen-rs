@@ -1,3 +1,4 @@
+use crate::codegen::stubs_write::gen_write_element;
 use crate::common::elem_props::{AttrField, ElemProps};
 use bimap::BiMap;
 use heck::ToSnakeCase;
@@ -49,6 +50,9 @@ pub fn gen_el_struct(
     let parse_children_impl = generate_parse_children(&attr_fields, &elem_fields, v.has_text);
 
     let name_consts = generate_name_consts(k);
+
+    let write_element_impl = gen_write_element(&attr_fields);
+
     quote! {
         #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
         pub struct #sn {
@@ -63,6 +67,8 @@ pub fn gen_el_struct(
 
             #maybe_parse_document_impl
             #parse_children_impl
+
+            #write_element_impl
         }
 
     }

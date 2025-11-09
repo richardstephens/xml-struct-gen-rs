@@ -14,3 +14,9 @@ pub enum XmlParseError {
     #[error("UnexpectedCharacters")]
     UnexpectedCharacters(XmlDocumentPosition),
 }
+
+#[derive(Error, Debug)]
+pub enum XmlWriteError {
+    #[error(transparent)]
+    XmlRsWrite(#[from] xml::writer::Error),
+}

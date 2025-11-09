@@ -79,6 +79,18 @@ impl RssDocument {
             XmlDocumentPosition::Unknown,
         ));
     }
+    pub fn write_element<W: std::io::Write>(
+        &self,
+        w: &mut xml::writer::EventWriter<W>,
+    ) -> anyhow::Result<()> {
+        let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        if let Some(v) = self.r#version.as_ref() {
+            el_builder = el_builder.attr("version", v);
+        }
+        w.write(el_builder)?;
+        w.write(xml::writer::XmlEvent::end_element())?;
+        Ok(())
+    }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Channel {
@@ -183,6 +195,15 @@ impl Channel {
             XmlDocumentPosition::Unknown,
         ));
     }
+    pub fn write_element<W: std::io::Write>(
+        &self,
+        w: &mut xml::writer::EventWriter<W>,
+    ) -> anyhow::Result<()> {
+        let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        w.write(el_builder)?;
+        w.write(xml::writer::XmlEvent::end_element())?;
+        Ok(())
+    }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct RssChannelTitle {
@@ -232,6 +253,15 @@ impl RssChannelTitle {
         return Err(XmlParseError::ExpectedEndElement(
             XmlDocumentPosition::Unknown,
         ));
+    }
+    pub fn write_element<W: std::io::Write>(
+        &self,
+        w: &mut xml::writer::EventWriter<W>,
+    ) -> anyhow::Result<()> {
+        let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        w.write(el_builder)?;
+        w.write(xml::writer::XmlEvent::end_element())?;
+        Ok(())
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -283,6 +313,15 @@ impl RssChannelLink {
             XmlDocumentPosition::Unknown,
         ));
     }
+    pub fn write_element<W: std::io::Write>(
+        &self,
+        w: &mut xml::writer::EventWriter<W>,
+    ) -> anyhow::Result<()> {
+        let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        w.write(el_builder)?;
+        w.write(xml::writer::XmlEvent::end_element())?;
+        Ok(())
+    }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Language {
@@ -333,6 +372,15 @@ impl Language {
             XmlDocumentPosition::Unknown,
         ));
     }
+    pub fn write_element<W: std::io::Write>(
+        &self,
+        w: &mut xml::writer::EventWriter<W>,
+    ) -> anyhow::Result<()> {
+        let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        w.write(el_builder)?;
+        w.write(xml::writer::XmlEvent::end_element())?;
+        Ok(())
+    }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Copyright {
@@ -382,6 +430,15 @@ impl Copyright {
         return Err(XmlParseError::ExpectedEndElement(
             XmlDocumentPosition::Unknown,
         ));
+    }
+    pub fn write_element<W: std::io::Write>(
+        &self,
+        w: &mut xml::writer::EventWriter<W>,
+    ) -> anyhow::Result<()> {
+        let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        w.write(el_builder)?;
+        w.write(xml::writer::XmlEvent::end_element())?;
+        Ok(())
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -437,6 +494,15 @@ impl Author {
             XmlDocumentPosition::Unknown,
         ));
     }
+    pub fn write_element<W: std::io::Write>(
+        &self,
+        w: &mut xml::writer::EventWriter<W>,
+    ) -> anyhow::Result<()> {
+        let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        w.write(el_builder)?;
+        w.write(xml::writer::XmlEvent::end_element())?;
+        Ok(())
+    }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct RssChannelDescription {
@@ -486,6 +552,15 @@ impl RssChannelDescription {
         return Err(XmlParseError::ExpectedEndElement(
             XmlDocumentPosition::Unknown,
         ));
+    }
+    pub fn write_element<W: std::io::Write>(
+        &self,
+        w: &mut xml::writer::EventWriter<W>,
+    ) -> anyhow::Result<()> {
+        let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        w.write(el_builder)?;
+        w.write(xml::writer::XmlEvent::end_element())?;
+        Ok(())
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -540,6 +615,15 @@ impl Type {
         return Err(XmlParseError::ExpectedEndElement(
             XmlDocumentPosition::Unknown,
         ));
+    }
+    pub fn write_element<W: std::io::Write>(
+        &self,
+        w: &mut xml::writer::EventWriter<W>,
+    ) -> anyhow::Result<()> {
+        let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        w.write(el_builder)?;
+        w.write(xml::writer::XmlEvent::end_element())?;
+        Ok(())
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -599,6 +683,18 @@ impl RssChannelItunesImage {
         return Err(XmlParseError::ExpectedEndElement(
             XmlDocumentPosition::Unknown,
         ));
+    }
+    pub fn write_element<W: std::io::Write>(
+        &self,
+        w: &mut xml::writer::EventWriter<W>,
+    ) -> anyhow::Result<()> {
+        let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        if let Some(v) = self.r#href.as_ref() {
+            el_builder = el_builder.attr("href", v);
+        }
+        w.write(el_builder)?;
+        w.write(xml::writer::XmlEvent::end_element())?;
+        Ok(())
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -668,6 +764,18 @@ impl RssChannelItunesCategory {
             XmlDocumentPosition::Unknown,
         ));
     }
+    pub fn write_element<W: std::io::Write>(
+        &self,
+        w: &mut xml::writer::EventWriter<W>,
+    ) -> anyhow::Result<()> {
+        let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        if let Some(v) = self.r#text.as_ref() {
+            el_builder = el_builder.attr("text", v);
+        }
+        w.write(el_builder)?;
+        w.write(xml::writer::XmlEvent::end_element())?;
+        Ok(())
+    }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct RssChannelItunesCategoryItunesCategory {
@@ -727,6 +835,18 @@ impl RssChannelItunesCategoryItunesCategory {
             XmlDocumentPosition::Unknown,
         ));
     }
+    pub fn write_element<W: std::io::Write>(
+        &self,
+        w: &mut xml::writer::EventWriter<W>,
+    ) -> anyhow::Result<()> {
+        let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        if let Some(v) = self.r#text.as_ref() {
+            el_builder = el_builder.attr("text", v);
+        }
+        w.write(el_builder)?;
+        w.write(xml::writer::XmlEvent::end_element())?;
+        Ok(())
+    }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct RssChannelItunesExplicit {
@@ -780,6 +900,15 @@ impl RssChannelItunesExplicit {
         return Err(XmlParseError::ExpectedEndElement(
             XmlDocumentPosition::Unknown,
         ));
+    }
+    pub fn write_element<W: std::io::Write>(
+        &self,
+        w: &mut xml::writer::EventWriter<W>,
+    ) -> anyhow::Result<()> {
+        let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        w.write(el_builder)?;
+        w.write(xml::writer::XmlEvent::end_element())?;
+        Ok(())
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -897,6 +1026,15 @@ impl Item {
             XmlDocumentPosition::Unknown,
         ));
     }
+    pub fn write_element<W: std::io::Write>(
+        &self,
+        w: &mut xml::writer::EventWriter<W>,
+    ) -> anyhow::Result<()> {
+        let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        w.write(el_builder)?;
+        w.write(xml::writer::XmlEvent::end_element())?;
+        Ok(())
+    }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct EpisodeType {
@@ -950,6 +1088,15 @@ impl EpisodeType {
         return Err(XmlParseError::ExpectedEndElement(
             XmlDocumentPosition::Unknown,
         ));
+    }
+    pub fn write_element<W: std::io::Write>(
+        &self,
+        w: &mut xml::writer::EventWriter<W>,
+    ) -> anyhow::Result<()> {
+        let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        w.write(el_builder)?;
+        w.write(xml::writer::XmlEvent::end_element())?;
+        Ok(())
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -1005,6 +1152,15 @@ impl RssChannelItemItunesTitle {
             XmlDocumentPosition::Unknown,
         ));
     }
+    pub fn write_element<W: std::io::Write>(
+        &self,
+        w: &mut xml::writer::EventWriter<W>,
+    ) -> anyhow::Result<()> {
+        let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        w.write(el_builder)?;
+        w.write(xml::writer::XmlEvent::end_element())?;
+        Ok(())
+    }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct RssChannelItemDescription {
@@ -1054,6 +1210,15 @@ impl RssChannelItemDescription {
         return Err(XmlParseError::ExpectedEndElement(
             XmlDocumentPosition::Unknown,
         ));
+    }
+    pub fn write_element<W: std::io::Write>(
+        &self,
+        w: &mut xml::writer::EventWriter<W>,
+    ) -> anyhow::Result<()> {
+        let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        w.write(el_builder)?;
+        w.write(xml::writer::XmlEvent::end_element())?;
+        Ok(())
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -1118,6 +1283,24 @@ impl Enclosure {
             XmlDocumentPosition::Unknown,
         ));
     }
+    pub fn write_element<W: std::io::Write>(
+        &self,
+        w: &mut xml::writer::EventWriter<W>,
+    ) -> anyhow::Result<()> {
+        let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        if let Some(v) = self.r#length.as_ref() {
+            el_builder = el_builder.attr("length", v);
+        }
+        if let Some(v) = self.r#type.as_ref() {
+            el_builder = el_builder.attr("type", v);
+        }
+        if let Some(v) = self.r#url.as_ref() {
+            el_builder = el_builder.attr("url", v);
+        }
+        w.write(el_builder)?;
+        w.write(xml::writer::XmlEvent::end_element())?;
+        Ok(())
+    }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Guid {
@@ -1168,6 +1351,15 @@ impl Guid {
             XmlDocumentPosition::Unknown,
         ));
     }
+    pub fn write_element<W: std::io::Write>(
+        &self,
+        w: &mut xml::writer::EventWriter<W>,
+    ) -> anyhow::Result<()> {
+        let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        w.write(el_builder)?;
+        w.write(xml::writer::XmlEvent::end_element())?;
+        Ok(())
+    }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct PubDate {
@@ -1217,6 +1409,15 @@ impl PubDate {
         return Err(XmlParseError::ExpectedEndElement(
             XmlDocumentPosition::Unknown,
         ));
+    }
+    pub fn write_element<W: std::io::Write>(
+        &self,
+        w: &mut xml::writer::EventWriter<W>,
+    ) -> anyhow::Result<()> {
+        let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        w.write(el_builder)?;
+        w.write(xml::writer::XmlEvent::end_element())?;
+        Ok(())
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -1272,6 +1473,15 @@ impl Duration {
             XmlDocumentPosition::Unknown,
         ));
     }
+    pub fn write_element<W: std::io::Write>(
+        &self,
+        w: &mut xml::writer::EventWriter<W>,
+    ) -> anyhow::Result<()> {
+        let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        w.write(el_builder)?;
+        w.write(xml::writer::XmlEvent::end_element())?;
+        Ok(())
+    }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct RssChannelItemItunesExplicit {
@@ -1325,6 +1535,15 @@ impl RssChannelItemItunesExplicit {
         return Err(XmlParseError::ExpectedEndElement(
             XmlDocumentPosition::Unknown,
         ));
+    }
+    pub fn write_element<W: std::io::Write>(
+        &self,
+        w: &mut xml::writer::EventWriter<W>,
+    ) -> anyhow::Result<()> {
+        let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        w.write(el_builder)?;
+        w.write(xml::writer::XmlEvent::end_element())?;
+        Ok(())
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -1380,6 +1599,15 @@ impl Episode {
             XmlDocumentPosition::Unknown,
         ));
     }
+    pub fn write_element<W: std::io::Write>(
+        &self,
+        w: &mut xml::writer::EventWriter<W>,
+    ) -> anyhow::Result<()> {
+        let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        w.write(el_builder)?;
+        w.write(xml::writer::XmlEvent::end_element())?;
+        Ok(())
+    }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Season {
@@ -1434,6 +1662,15 @@ impl Season {
             XmlDocumentPosition::Unknown,
         ));
     }
+    pub fn write_element<W: std::io::Write>(
+        &self,
+        w: &mut xml::writer::EventWriter<W>,
+    ) -> anyhow::Result<()> {
+        let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        w.write(el_builder)?;
+        w.write(xml::writer::XmlEvent::end_element())?;
+        Ok(())
+    }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct RssChannelItemTitle {
@@ -1483,6 +1720,15 @@ impl RssChannelItemTitle {
         return Err(XmlParseError::ExpectedEndElement(
             XmlDocumentPosition::Unknown,
         ));
+    }
+    pub fn write_element<W: std::io::Write>(
+        &self,
+        w: &mut xml::writer::EventWriter<W>,
+    ) -> anyhow::Result<()> {
+        let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        w.write(el_builder)?;
+        w.write(xml::writer::XmlEvent::end_element())?;
+        Ok(())
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -1543,6 +1789,18 @@ impl RssChannelItemItunesImage {
             XmlDocumentPosition::Unknown,
         ));
     }
+    pub fn write_element<W: std::io::Write>(
+        &self,
+        w: &mut xml::writer::EventWriter<W>,
+    ) -> anyhow::Result<()> {
+        let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        if let Some(v) = self.r#href.as_ref() {
+            el_builder = el_builder.attr("href", v);
+        }
+        w.write(el_builder)?;
+        w.write(xml::writer::XmlEvent::end_element())?;
+        Ok(())
+    }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct RssChannelItemLink {
@@ -1592,5 +1850,14 @@ impl RssChannelItemLink {
         return Err(XmlParseError::ExpectedEndElement(
             XmlDocumentPosition::Unknown,
         ));
+    }
+    pub fn write_element<W: std::io::Write>(
+        &self,
+        w: &mut xml::writer::EventWriter<W>,
+    ) -> anyhow::Result<()> {
+        let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        w.write(el_builder)?;
+        w.write(xml::writer::XmlEvent::end_element())?;
+        Ok(())
     }
 }
