@@ -4,11 +4,11 @@ use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
 
+use crate::common::elem_props::ElemProps;
 use xml::EventReader;
 use xml::name::OwnedName;
 use xml::namespace::Namespace;
 use xml::reader::XmlEvent;
-use crate::common::elem_props::ElemProps;
 
 pub struct StructScanner {
     elem_map: IndexMap<Vec<OwnedName>, ElemProps>,

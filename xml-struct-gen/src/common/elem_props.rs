@@ -10,9 +10,8 @@ pub struct ElemProps {
     pub is_root: bool,
 }
 
-
 impl ElemProps {
-    pub fn get_attr_fields(&self)-> Vec<String> {
+    pub fn get_attr_fields(&self) -> Vec<String> {
         self.attributes
             .iter()
             .map(|x| sanitize_field_name(&x.local_name))
@@ -23,5 +22,3 @@ impl ElemProps {
 fn sanitize_field_name(name: &str) -> String {
     format!("r#{}", name.to_snake_case())
 }
-
-

@@ -1,9 +1,9 @@
+use crate::common::elem_props::ElemProps;
 use bimap::BiMap;
 use heck::ToSnakeCase;
-use proc_macro2::TokenStream;
+use proc_macro2::{Ident, TokenStream};
 use quote::{format_ident, quote};
 use xml::name::OwnedName;
-use crate::common::elem_props::ElemProps;
 
 pub fn gen_el_struct(
     k: &Vec<OwnedName>,
@@ -13,20 +13,21 @@ pub fn gen_el_struct(
     if k.is_empty() {
         return quote! {};
     }
-    
+
     let attr_fields = v.get_attr_fields();
-    let attr_field_tokens:Vec<TokenStream> = attr_fields_to_tokens(&attr_fields);
+    let attr_field_tokens: Vec<TokenStream> = attr_fields_to_tokens(&attr_fields);
 
     let elem_fields: Vec<_> = v
         .child_stacks
         .iter()
         .map(|x| {
-            let ty_name = format_ident!("{}", assigned.get_by_left(x).unwrap());
             let var_name =
                 format_ident!("{}_elems", assigned.get_by_left(x).unwrap().to_snake_case());
-            quote! {pub #var_name: Vec<#ty_name>,}
+            let ty_name = format_ident!("{}", assigned.get_by_left(x).unwrap());
+            (x.clone(), var_name, ty_name)
         })
         .collect();
+    let elem_field_tokens: Vec<TokenStream> = elem_fields_to_tokens(&elem_fields);
 
     let maybe_val_field = match v.has_text {
         true => quote! {
@@ -46,14 +47,22 @@ pub fn gen_el_struct(
         #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
         pub struct #sn {
             #(#attr_field_tokens)*
-            #(#elem_fields)*
+            #(#elem_field_tokens)*
             #maybe_val_field
         }
     }
 }
 
+fn elem_fields_to_tokens(elem_fields: &Vec<(Vec<OwnedName>, Ident, Ident)>) -> Vec<TokenStream> {
+    elem_fields
+        .iter()
+        .map(|(_, var_name, ty_name)| quote! {pub #var_name: Vec<#ty_name>,})
+        .collect()
+}
+
 fn attr_fields_to_tokens(attr_fields: &Vec<String>) -> Vec<TokenStream> {
-    attr_fields.iter()
+    attr_fields
+        .iter()
         .map(|x| {
             let field_ident = format_ident!("{x}");
             quote! {
@@ -62,4 +71,3 @@ fn attr_fields_to_tokens(attr_fields: &Vec<String>) -> Vec<TokenStream> {
         })
         .collect()
 }
-

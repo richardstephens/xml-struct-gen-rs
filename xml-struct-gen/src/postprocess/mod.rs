@@ -1,8 +1,7 @@
-
+use crate::common::elem_props::ElemProps;
 use anyhow::bail;
 use indexmap::IndexMap;
 use xml::name::OwnedName;
-use crate::common::elem_props::ElemProps;
 
 pub fn mark_root(structs: &mut IndexMap<Vec<OwnedName>, ElemProps>) -> anyhow::Result<()> {
     let root_elemprops = structs.get(&Vec::new()).unwrap();
