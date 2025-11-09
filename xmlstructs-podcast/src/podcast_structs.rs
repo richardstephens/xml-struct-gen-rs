@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+pub use xml_struct_types::v1::*;
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct RssDocument {
     pub r#version: Option<String>,
@@ -7,7 +8,7 @@ pub struct RssDocument {
     pub channel_elems: Vec<Channel>,
 }
 impl RssDocument {
-    pub fn parse_document<R: std::io::Read>(mut reader: R) -> Self {
+    pub fn parse_document<R: std::io::Read>(mut reader: R) -> Result<Self, XmlParseError> {
         let mut parser = xml::EventReader::new(reader).into_iter();
         while let Some(event) = parser.next() {
             match event {
@@ -26,10 +27,10 @@ impl RssDocument {
         }
         todo!()
     }
-    pub fn parse_children<T: std::io::Read>(
+    fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
-    ) -> Self {
+    ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
             match (
@@ -52,20 +53,21 @@ impl RssDocument {
                 }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
                     (None, "channel") => {
                         n.channel_elems
-                            .push(Channel::parse_children(attributes, iter));
+                            .push(Channel::parse_children(attributes, iter)?);
                     }
                     _ => {
                         todo!();
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
-                    return n;
+                    return Ok(n);
                 }
                 Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                Err(e) => return Err(e.into()),
                 _ => {}
             }
         }
-        n
+        return Err(XmlParseError::ExpectedEndElement);
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -84,10 +86,10 @@ pub struct Channel {
     pub item_elems: Vec<Item>,
 }
 impl Channel {
-    pub fn parse_children<T: std::io::Read>(
+    fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
-    ) -> Self {
+    ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
             match (
@@ -107,58 +109,59 @@ impl Channel {
                 }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
                     (None, "title") => {
                         n.rss_channel_title_elems
-                            .push(RssChannelTitle::parse_children(attributes, iter));
+                            .push(RssChannelTitle::parse_children(attributes, iter)?);
                     }
                     (None, "link") => {
                         n.rss_channel_link_elems
-                            .push(RssChannelLink::parse_children(attributes, iter));
+                            .push(RssChannelLink::parse_children(attributes, iter)?);
                     }
                     (None, "language") => {
                         n.language_elems
-                            .push(Language::parse_children(attributes, iter));
+                            .push(Language::parse_children(attributes, iter)?);
                     }
                     (None, "copyright") => {
                         n.copyright_elems
-                            .push(Copyright::parse_children(attributes, iter));
+                            .push(Copyright::parse_children(attributes, iter)?);
                     }
                     (Some("http://www.itunes.com/dtds/podcast-1.0.dtd"), "author") => {
                         n.author_elems
-                            .push(Author::parse_children(attributes, iter));
+                            .push(Author::parse_children(attributes, iter)?);
                     }
                     (None, "description") => {
                         n.rss_channel_description_elems
-                            .push(RssChannelDescription::parse_children(attributes, iter));
+                            .push(RssChannelDescription::parse_children(attributes, iter)?);
                     }
                     (Some("http://www.itunes.com/dtds/podcast-1.0.dtd"), "type") => {
-                        n.type_elems.push(Type::parse_children(attributes, iter));
+                        n.type_elems.push(Type::parse_children(attributes, iter)?);
                     }
                     (Some("http://www.itunes.com/dtds/podcast-1.0.dtd"), "image") => {
                         n.rss_channel_itunes_image_elems
-                            .push(RssChannelItunesImage::parse_children(attributes, iter));
+                            .push(RssChannelItunesImage::parse_children(attributes, iter)?);
                     }
                     (Some("http://www.itunes.com/dtds/podcast-1.0.dtd"), "category") => {
                         n.rss_channel_itunes_category_elems
-                            .push(RssChannelItunesCategory::parse_children(attributes, iter));
+                            .push(RssChannelItunesCategory::parse_children(attributes, iter)?);
                     }
                     (Some("http://www.itunes.com/dtds/podcast-1.0.dtd"), "explicit") => {
                         n.rss_channel_itunes_explicit_elems
-                            .push(RssChannelItunesExplicit::parse_children(attributes, iter));
+                            .push(RssChannelItunesExplicit::parse_children(attributes, iter)?);
                     }
                     (None, "item") => {
-                        n.item_elems.push(Item::parse_children(attributes, iter));
+                        n.item_elems.push(Item::parse_children(attributes, iter)?);
                     }
                     _ => {
                         todo!();
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
-                    return n;
+                    return Ok(n);
                 }
                 Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                Err(e) => return Err(e.into()),
                 _ => {}
             }
         }
-        n
+        return Err(XmlParseError::ExpectedEndElement);
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -167,10 +170,10 @@ pub struct RssChannelTitle {
     pub value: Option<String>,
 }
 impl RssChannelTitle {
-    pub fn parse_children<T: std::io::Read>(
+    fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
-    ) -> Self {
+    ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
             match (
@@ -193,15 +196,16 @@ impl RssChannelTitle {
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
-                    return n;
+                    return Ok(n);
                 }
                 Ok(xml::reader::XmlEvent::Characters(val)) => {
                     n.value = Some(val);
                 }
+                Err(e) => return Err(e.into()),
                 _ => {}
             }
         }
-        n
+        return Err(XmlParseError::ExpectedEndElement);
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -210,10 +214,10 @@ pub struct RssChannelLink {
     pub value: Option<String>,
 }
 impl RssChannelLink {
-    pub fn parse_children<T: std::io::Read>(
+    fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
-    ) -> Self {
+    ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
             match (
@@ -236,15 +240,16 @@ impl RssChannelLink {
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
-                    return n;
+                    return Ok(n);
                 }
                 Ok(xml::reader::XmlEvent::Characters(val)) => {
                     n.value = Some(val);
                 }
+                Err(e) => return Err(e.into()),
                 _ => {}
             }
         }
-        n
+        return Err(XmlParseError::ExpectedEndElement);
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -253,10 +258,10 @@ pub struct Language {
     pub value: Option<String>,
 }
 impl Language {
-    pub fn parse_children<T: std::io::Read>(
+    fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
-    ) -> Self {
+    ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
             match (
@@ -279,15 +284,16 @@ impl Language {
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
-                    return n;
+                    return Ok(n);
                 }
                 Ok(xml::reader::XmlEvent::Characters(val)) => {
                     n.value = Some(val);
                 }
+                Err(e) => return Err(e.into()),
                 _ => {}
             }
         }
-        n
+        return Err(XmlParseError::ExpectedEndElement);
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -296,10 +302,10 @@ pub struct Copyright {
     pub value: Option<String>,
 }
 impl Copyright {
-    pub fn parse_children<T: std::io::Read>(
+    fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
-    ) -> Self {
+    ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
             match (
@@ -322,15 +328,16 @@ impl Copyright {
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
-                    return n;
+                    return Ok(n);
                 }
                 Ok(xml::reader::XmlEvent::Characters(val)) => {
                     n.value = Some(val);
                 }
+                Err(e) => return Err(e.into()),
                 _ => {}
             }
         }
-        n
+        return Err(XmlParseError::ExpectedEndElement);
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -339,10 +346,10 @@ pub struct Author {
     pub value: Option<String>,
 }
 impl Author {
-    pub fn parse_children<T: std::io::Read>(
+    fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
-    ) -> Self {
+    ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
             match (
@@ -365,15 +372,16 @@ impl Author {
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
-                    return n;
+                    return Ok(n);
                 }
                 Ok(xml::reader::XmlEvent::Characters(val)) => {
                     n.value = Some(val);
                 }
+                Err(e) => return Err(e.into()),
                 _ => {}
             }
         }
-        n
+        return Err(XmlParseError::ExpectedEndElement);
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -382,10 +390,10 @@ pub struct RssChannelDescription {
     pub value: Option<String>,
 }
 impl RssChannelDescription {
-    pub fn parse_children<T: std::io::Read>(
+    fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
-    ) -> Self {
+    ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
             match (
@@ -408,15 +416,16 @@ impl RssChannelDescription {
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
-                    return n;
+                    return Ok(n);
                 }
                 Ok(xml::reader::XmlEvent::Characters(val)) => {
                     n.value = Some(val);
                 }
+                Err(e) => return Err(e.into()),
                 _ => {}
             }
         }
-        n
+        return Err(XmlParseError::ExpectedEndElement);
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -425,10 +434,10 @@ pub struct Type {
     pub value: Option<String>,
 }
 impl Type {
-    pub fn parse_children<T: std::io::Read>(
+    fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
-    ) -> Self {
+    ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
             match (
@@ -451,15 +460,16 @@ impl Type {
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
-                    return n;
+                    return Ok(n);
                 }
                 Ok(xml::reader::XmlEvent::Characters(val)) => {
                     n.value = Some(val);
                 }
+                Err(e) => return Err(e.into()),
                 _ => {}
             }
         }
-        n
+        return Err(XmlParseError::ExpectedEndElement);
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -468,10 +478,10 @@ pub struct RssChannelItunesImage {
     pub misc_attrs: HashMap<(Option<String>, String), String>,
 }
 impl RssChannelItunesImage {
-    pub fn parse_children<T: std::io::Read>(
+    fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
-    ) -> Self {
+    ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
             match (
@@ -497,13 +507,14 @@ impl RssChannelItunesImage {
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
-                    return n;
+                    return Ok(n);
                 }
                 Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                Err(e) => return Err(e.into()),
                 _ => {}
             }
         }
-        n
+        return Err(XmlParseError::ExpectedEndElement);
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -514,10 +525,10 @@ pub struct RssChannelItunesCategory {
         Vec<RssChannelItunesCategoryItunesCategory>,
 }
 impl RssChannelItunesCategory {
-    pub fn parse_children<T: std::io::Read>(
+    fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
-    ) -> Self {
+    ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
             match (
@@ -542,7 +553,7 @@ impl RssChannelItunesCategory {
                         n.rss_channel_itunes_category_itunes_category_elems.push(
                             RssChannelItunesCategoryItunesCategory::parse_children(
                                 attributes, iter,
-                            ),
+                            )?,
                         );
                     }
                     _ => {
@@ -550,13 +561,14 @@ impl RssChannelItunesCategory {
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
-                    return n;
+                    return Ok(n);
                 }
                 Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                Err(e) => return Err(e.into()),
                 _ => {}
             }
         }
-        n
+        return Err(XmlParseError::ExpectedEndElement);
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -565,10 +577,10 @@ pub struct RssChannelItunesCategoryItunesCategory {
     pub misc_attrs: HashMap<(Option<String>, String), String>,
 }
 impl RssChannelItunesCategoryItunesCategory {
-    pub fn parse_children<T: std::io::Read>(
+    fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
-    ) -> Self {
+    ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
             match (
@@ -594,13 +606,14 @@ impl RssChannelItunesCategoryItunesCategory {
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
-                    return n;
+                    return Ok(n);
                 }
                 Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                Err(e) => return Err(e.into()),
                 _ => {}
             }
         }
-        n
+        return Err(XmlParseError::ExpectedEndElement);
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -609,10 +622,10 @@ pub struct RssChannelItunesExplicit {
     pub value: Option<String>,
 }
 impl RssChannelItunesExplicit {
-    pub fn parse_children<T: std::io::Read>(
+    fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
-    ) -> Self {
+    ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
             match (
@@ -635,15 +648,16 @@ impl RssChannelItunesExplicit {
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
-                    return n;
+                    return Ok(n);
                 }
                 Ok(xml::reader::XmlEvent::Characters(val)) => {
                     n.value = Some(val);
                 }
+                Err(e) => return Err(e.into()),
                 _ => {}
             }
         }
-        n
+        return Err(XmlParseError::ExpectedEndElement);
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -664,10 +678,10 @@ pub struct Item {
     pub rss_channel_item_itunes_explicit_elems: Vec<RssChannelItemItunesExplicit>,
 }
 impl Item {
-    pub fn parse_children<T: std::io::Read>(
+    fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
-    ) -> Self {
+    ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
             match (
@@ -687,54 +701,54 @@ impl Item {
                 }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
                     (Some("http://www.itunes.com/dtds/podcast-1.0.dtd"), "title") => {
                         n.rss_channel_item_itunes_title_elems
-                            .push(RssChannelItemItunesTitle::parse_children(attributes, iter));
+                            .push(RssChannelItemItunesTitle::parse_children(attributes, iter)?);
                     }
                     (None, "link") => {
                         n.rss_channel_item_link_elems
-                            .push(RssChannelItemLink::parse_children(attributes, iter));
+                            .push(RssChannelItemLink::parse_children(attributes, iter)?);
                     }
                     (Some("http://www.itunes.com/dtds/podcast-1.0.dtd"), "image") => {
                         n.rss_channel_item_itunes_image_elems
-                            .push(RssChannelItemItunesImage::parse_children(attributes, iter));
+                            .push(RssChannelItemItunesImage::parse_children(attributes, iter)?);
                     }
                     (Some("http://www.itunes.com/dtds/podcast-1.0.dtd"), "episodeType") => {
                         n.episode_type_elems
-                            .push(EpisodeType::parse_children(attributes, iter));
+                            .push(EpisodeType::parse_children(attributes, iter)?);
                     }
                     (Some("http://www.itunes.com/dtds/podcast-1.0.dtd"), "episode") => {
                         n.episode_elems
-                            .push(Episode::parse_children(attributes, iter));
+                            .push(Episode::parse_children(attributes, iter)?);
                     }
                     (Some("http://www.itunes.com/dtds/podcast-1.0.dtd"), "season") => {
                         n.season_elems
-                            .push(Season::parse_children(attributes, iter));
+                            .push(Season::parse_children(attributes, iter)?);
                     }
                     (None, "title") => {
                         n.rss_channel_item_title_elems
-                            .push(RssChannelItemTitle::parse_children(attributes, iter));
+                            .push(RssChannelItemTitle::parse_children(attributes, iter)?);
                     }
                     (None, "description") => {
                         n.rss_channel_item_description_elems
-                            .push(RssChannelItemDescription::parse_children(attributes, iter));
+                            .push(RssChannelItemDescription::parse_children(attributes, iter)?);
                     }
                     (None, "enclosure") => {
                         n.enclosure_elems
-                            .push(Enclosure::parse_children(attributes, iter));
+                            .push(Enclosure::parse_children(attributes, iter)?);
                     }
                     (None, "guid") => {
-                        n.guid_elems.push(Guid::parse_children(attributes, iter));
+                        n.guid_elems.push(Guid::parse_children(attributes, iter)?);
                     }
                     (None, "pubDate") => {
                         n.pub_date_elems
-                            .push(PubDate::parse_children(attributes, iter));
+                            .push(PubDate::parse_children(attributes, iter)?);
                     }
                     (Some("http://www.itunes.com/dtds/podcast-1.0.dtd"), "duration") => {
                         n.duration_elems
-                            .push(Duration::parse_children(attributes, iter));
+                            .push(Duration::parse_children(attributes, iter)?);
                     }
                     (Some("http://www.itunes.com/dtds/podcast-1.0.dtd"), "explicit") => {
                         n.rss_channel_item_itunes_explicit_elems.push(
-                            RssChannelItemItunesExplicit::parse_children(attributes, iter),
+                            RssChannelItemItunesExplicit::parse_children(attributes, iter)?,
                         );
                     }
                     _ => {
@@ -742,13 +756,14 @@ impl Item {
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
-                    return n;
+                    return Ok(n);
                 }
                 Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                Err(e) => return Err(e.into()),
                 _ => {}
             }
         }
-        n
+        return Err(XmlParseError::ExpectedEndElement);
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -757,10 +772,10 @@ pub struct EpisodeType {
     pub value: Option<String>,
 }
 impl EpisodeType {
-    pub fn parse_children<T: std::io::Read>(
+    fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
-    ) -> Self {
+    ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
             match (
@@ -783,15 +798,16 @@ impl EpisodeType {
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
-                    return n;
+                    return Ok(n);
                 }
                 Ok(xml::reader::XmlEvent::Characters(val)) => {
                     n.value = Some(val);
                 }
+                Err(e) => return Err(e.into()),
                 _ => {}
             }
         }
-        n
+        return Err(XmlParseError::ExpectedEndElement);
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -800,10 +816,10 @@ pub struct RssChannelItemItunesTitle {
     pub value: Option<String>,
 }
 impl RssChannelItemItunesTitle {
-    pub fn parse_children<T: std::io::Read>(
+    fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
-    ) -> Self {
+    ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
             match (
@@ -826,15 +842,16 @@ impl RssChannelItemItunesTitle {
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
-                    return n;
+                    return Ok(n);
                 }
                 Ok(xml::reader::XmlEvent::Characters(val)) => {
                     n.value = Some(val);
                 }
+                Err(e) => return Err(e.into()),
                 _ => {}
             }
         }
-        n
+        return Err(XmlParseError::ExpectedEndElement);
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -843,10 +860,10 @@ pub struct RssChannelItemDescription {
     pub value: Option<String>,
 }
 impl RssChannelItemDescription {
-    pub fn parse_children<T: std::io::Read>(
+    fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
-    ) -> Self {
+    ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
             match (
@@ -869,15 +886,16 @@ impl RssChannelItemDescription {
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
-                    return n;
+                    return Ok(n);
                 }
                 Ok(xml::reader::XmlEvent::Characters(val)) => {
                     n.value = Some(val);
                 }
+                Err(e) => return Err(e.into()),
                 _ => {}
             }
         }
-        n
+        return Err(XmlParseError::ExpectedEndElement);
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -888,10 +906,10 @@ pub struct Enclosure {
     pub misc_attrs: HashMap<(Option<String>, String), String>,
 }
 impl Enclosure {
-    pub fn parse_children<T: std::io::Read>(
+    fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
-    ) -> Self {
+    ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
             match (
@@ -923,13 +941,14 @@ impl Enclosure {
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
-                    return n;
+                    return Ok(n);
                 }
                 Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                Err(e) => return Err(e.into()),
                 _ => {}
             }
         }
-        n
+        return Err(XmlParseError::ExpectedEndElement);
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -938,10 +957,10 @@ pub struct Guid {
     pub value: Option<String>,
 }
 impl Guid {
-    pub fn parse_children<T: std::io::Read>(
+    fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
-    ) -> Self {
+    ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
             match (
@@ -964,15 +983,16 @@ impl Guid {
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
-                    return n;
+                    return Ok(n);
                 }
                 Ok(xml::reader::XmlEvent::Characters(val)) => {
                     n.value = Some(val);
                 }
+                Err(e) => return Err(e.into()),
                 _ => {}
             }
         }
-        n
+        return Err(XmlParseError::ExpectedEndElement);
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -981,10 +1001,10 @@ pub struct PubDate {
     pub value: Option<String>,
 }
 impl PubDate {
-    pub fn parse_children<T: std::io::Read>(
+    fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
-    ) -> Self {
+    ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
             match (
@@ -1007,15 +1027,16 @@ impl PubDate {
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
-                    return n;
+                    return Ok(n);
                 }
                 Ok(xml::reader::XmlEvent::Characters(val)) => {
                     n.value = Some(val);
                 }
+                Err(e) => return Err(e.into()),
                 _ => {}
             }
         }
-        n
+        return Err(XmlParseError::ExpectedEndElement);
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -1024,10 +1045,10 @@ pub struct Duration {
     pub value: Option<String>,
 }
 impl Duration {
-    pub fn parse_children<T: std::io::Read>(
+    fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
-    ) -> Self {
+    ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
             match (
@@ -1050,15 +1071,16 @@ impl Duration {
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
-                    return n;
+                    return Ok(n);
                 }
                 Ok(xml::reader::XmlEvent::Characters(val)) => {
                     n.value = Some(val);
                 }
+                Err(e) => return Err(e.into()),
                 _ => {}
             }
         }
-        n
+        return Err(XmlParseError::ExpectedEndElement);
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -1067,10 +1089,10 @@ pub struct RssChannelItemItunesExplicit {
     pub value: Option<String>,
 }
 impl RssChannelItemItunesExplicit {
-    pub fn parse_children<T: std::io::Read>(
+    fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
-    ) -> Self {
+    ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
             match (
@@ -1093,15 +1115,16 @@ impl RssChannelItemItunesExplicit {
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
-                    return n;
+                    return Ok(n);
                 }
                 Ok(xml::reader::XmlEvent::Characters(val)) => {
                     n.value = Some(val);
                 }
+                Err(e) => return Err(e.into()),
                 _ => {}
             }
         }
-        n
+        return Err(XmlParseError::ExpectedEndElement);
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -1110,10 +1133,10 @@ pub struct Episode {
     pub value: Option<String>,
 }
 impl Episode {
-    pub fn parse_children<T: std::io::Read>(
+    fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
-    ) -> Self {
+    ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
             match (
@@ -1136,15 +1159,16 @@ impl Episode {
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
-                    return n;
+                    return Ok(n);
                 }
                 Ok(xml::reader::XmlEvent::Characters(val)) => {
                     n.value = Some(val);
                 }
+                Err(e) => return Err(e.into()),
                 _ => {}
             }
         }
-        n
+        return Err(XmlParseError::ExpectedEndElement);
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -1153,10 +1177,10 @@ pub struct Season {
     pub value: Option<String>,
 }
 impl Season {
-    pub fn parse_children<T: std::io::Read>(
+    fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
-    ) -> Self {
+    ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
             match (
@@ -1179,15 +1203,16 @@ impl Season {
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
-                    return n;
+                    return Ok(n);
                 }
                 Ok(xml::reader::XmlEvent::Characters(val)) => {
                     n.value = Some(val);
                 }
+                Err(e) => return Err(e.into()),
                 _ => {}
             }
         }
-        n
+        return Err(XmlParseError::ExpectedEndElement);
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -1196,10 +1221,10 @@ pub struct RssChannelItemTitle {
     pub value: Option<String>,
 }
 impl RssChannelItemTitle {
-    pub fn parse_children<T: std::io::Read>(
+    fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
-    ) -> Self {
+    ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
             match (
@@ -1222,15 +1247,16 @@ impl RssChannelItemTitle {
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
-                    return n;
+                    return Ok(n);
                 }
                 Ok(xml::reader::XmlEvent::Characters(val)) => {
                     n.value = Some(val);
                 }
+                Err(e) => return Err(e.into()),
                 _ => {}
             }
         }
-        n
+        return Err(XmlParseError::ExpectedEndElement);
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -1239,10 +1265,10 @@ pub struct RssChannelItemItunesImage {
     pub misc_attrs: HashMap<(Option<String>, String), String>,
 }
 impl RssChannelItemItunesImage {
-    pub fn parse_children<T: std::io::Read>(
+    fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
-    ) -> Self {
+    ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
             match (
@@ -1268,13 +1294,14 @@ impl RssChannelItemItunesImage {
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
-                    return n;
+                    return Ok(n);
                 }
                 Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                Err(e) => return Err(e.into()),
                 _ => {}
             }
         }
-        n
+        return Err(XmlParseError::ExpectedEndElement);
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -1283,10 +1310,10 @@ pub struct RssChannelItemLink {
     pub value: Option<String>,
 }
 impl RssChannelItemLink {
-    pub fn parse_children<T: std::io::Read>(
+    fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
-    ) -> Self {
+    ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
             match (
@@ -1309,14 +1336,15 @@ impl RssChannelItemLink {
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
-                    return n;
+                    return Ok(n);
                 }
                 Ok(xml::reader::XmlEvent::Characters(val)) => {
                     n.value = Some(val);
                 }
+                Err(e) => return Err(e.into()),
                 _ => {}
             }
         }
-        n
+        return Err(XmlParseError::ExpectedEndElement);
     }
 }

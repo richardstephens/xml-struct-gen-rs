@@ -117,7 +117,7 @@ fn elem_matchers(elem_fields: &Vec<(Vec<OwnedName>, Ident, Ident)>) -> Vec<Token
             let match_arm = owned_name_to_match_arm(last);
             quote! {
                 #match_arm => {
-                    n.#var_name.push(#ty_name::parse_children(attributes, iter));
+                    n.#var_name.push(#ty_name::parse_children(attributes, iter)?);
                 }
             }
         })
@@ -128,7 +128,7 @@ fn generate_parse_document(elem_props: &ElemProps) -> TokenStream {
     let root = elem_props.child_stacks.iter().next().unwrap();
     let match_arm = owned_name_to_match_arm(root.last().clone().unwrap());
     quote! {
-        pub fn parse_document<R: std::io::Read>(mut reader: R) -> Self {
+        pub fn parse_document<R: std::io::Read>(mut reader: R) -> Result<Self, XmlParseError>  {
             let mut parser = xml::EventReader::new(reader).into_iter();
             while let Some(event) = parser.next() {
                 match event {
@@ -165,10 +165,10 @@ fn generate_parse_children(
         quote! {}
     };
     quote! {
-        pub fn parse_children<T: std::io::Read>(
+        fn parse_children<T: std::io::Read>(
             attrs: Vec<xml::attribute::OwnedAttribute>,
             iter: &mut xml::reader::Events<T>
-        ) -> Self {
+        ) -> Result<Self, XmlParseError> {
             let mut n = Self::default();
 
             for attr in attrs.into_iter() {
@@ -192,15 +192,16 @@ fn generate_parse_children(
                         }
                     }
                     Ok(xml::reader::XmlEvent::EndElement { .. }) => {
-                        return n;
+                        return Ok(n);
                     }
                     Ok(xml::reader::XmlEvent::Characters(val)) => {
                         #text_handler
                     }
+                    Err(e) => {return Err(e.into())}
                     _ => {}
                 }
             }
-            n
+            return Err(XmlParseError::ExpectedEndElement);
         }
     }
 }
