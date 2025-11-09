@@ -48,6 +48,7 @@ pub fn gen_el_struct(
 
     let parse_children_impl = generate_parse_children(&attr_fields, &elem_fields, v.has_text);
 
+    let name_consts = generate_name_consts(k);
     quote! {
         #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
         pub struct #sn {
@@ -58,10 +59,34 @@ pub fn gen_el_struct(
         }
 
         impl #sn {
+            #name_consts
+
             #maybe_parse_document_impl
             #parse_children_impl
         }
 
+    }
+}
+
+fn opt_str_tokens(s: Option<&str>) -> TokenStream {
+    match s {
+        None => quote! { None },
+        Some(s) => quote! { Some(#s) },
+    }
+}
+
+fn generate_name_consts(p0: &Vec<OwnedName>) -> TokenStream {
+    let last = p0.last().unwrap();
+
+    let local_name = &last.local_name;
+
+    let ns = opt_str_tokens(last.namespace.as_deref());
+    let pfx = opt_str_tokens(last.prefix.as_deref());
+
+    quote! {
+        const XML_LOCAL_NAME: &'static str = #local_name;
+        const XML_NAMESPACE: Option<&'static str> = #ns;
+        const XML_PREFIX: Option<&'static str> = #pfx;
     }
 }
 
