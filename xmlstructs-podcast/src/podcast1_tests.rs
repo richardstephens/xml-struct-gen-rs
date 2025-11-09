@@ -1,5 +1,6 @@
-use crate::RssDocument;
-use std::io::Cursor;
+use crate::{Enclosure, RssDocument};
+use std::io::{Cursor, Read, Seek, SeekFrom};
+use xml::EmitterConfig;
 
 #[test]
 fn parse_and_check_important_values() {
@@ -52,4 +53,34 @@ fn parse_re_namespaced() {
     let expected_item0 = &podcast1.channel_elems[0].item_elems[0];
     let actual_item0 = &podcast1_rens.channel_elems[0].item_elems[0];
     assert_eq!(expected_item0, actual_item0);
+}
+
+#[test]
+fn write_attrs() {
+    //set up a sample element
+    let enclosure = Enclosure {
+        length: Some("8727310".to_string()),
+        r#type: Some("audio/x-m4a".into()),
+        url: Some("http://example.com/podcasts/everything/mthood.m4a".into()),
+        ..Default::default()
+    };
+
+    // set up a test writer
+    let mut c: Cursor<Vec<u8>> = Cursor::new(Vec::new());
+    let mut writer = EmitterConfig::new()
+        .write_document_declaration(false)
+        .perform_indent(false)
+        .create_writer(c);
+    enclosure.write_element(&mut writer).unwrap();
+
+    c = writer.into_inner();
+
+    c.seek(SeekFrom::Start(0)).unwrap();
+
+    let mut out = Vec::new();
+    c.read_to_end(&mut out).unwrap();
+    let xml_str = String::from_utf8(out).unwrap();
+
+    //TODO: is it safe to assume that xml-rs's output is stable?
+    assert_eq!(r#"<enclosure length="8727310" type="audio/x-m4a" url="http://example.com/podcasts/everything/mthood.m4a" />"#, xml_str);
 }
