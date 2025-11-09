@@ -43,13 +43,21 @@ pub fn gen_el_struct(
         format_ident!("{xml_name}")
     };
 
+    let parse_children_impl = generate_parse_children(&attr_fields);
+
     quote! {
         #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
         pub struct #sn {
             #(#attr_field_tokens)*
+            pub misc_attrs: HashMap<(Option<String>, String), String>,
             #(#elem_field_tokens)*
             #maybe_val_field
         }
+
+        impl #sn {
+            #parse_children_impl
+        }
+
     }
 }
 
@@ -70,4 +78,48 @@ fn attr_fields_to_tokens(attr_fields: &Vec<AttrField>) -> Vec<TokenStream> {
             }
         })
         .collect()
+}
+
+fn attr_field_matchers(attr_fields: &Vec<AttrField>) -> Vec<TokenStream> {
+    attr_fields
+        .iter()
+        .map(|field| {
+            let ns_m = field
+                .xml_name
+                .namespace
+                .as_ref()
+                .map(|s| quote! { Some(#s) })
+                .unwrap_or_else(|| quote! { None });
+            let local_name = &field.xml_name.local_name;
+            let target_var = format_ident!("{}", field.sanitized_name);
+            quote! {
+                (#ns_m, #local_name) => {
+                    n.#target_var = Some(attr.value);
+                }
+            }
+        })
+        .collect()
+}
+
+fn generate_parse_children(attr_fields: &Vec<AttrField>) -> TokenStream {
+    let attr_field_matchers = attr_field_matchers(attr_fields);
+
+    quote! {
+       pub fn parse_children<T: std::io::Read>(
+            attrs: Vec<xml::attribute::OwnedAttribute>,
+            iter: &mut xml::reader::Events<T>
+        ) -> Self {
+            let mut n = Self::default();
+
+            for attr in attrs.into_iter() {
+                match (attr.name.namespace.as_deref(), attr.name.local_name.as_str()) {
+                    #(#attr_field_matchers)*
+                    (ns, name) => {
+                        n.misc_attrs.insert((ns.map(|s| s.to_string()), name.to_owned()), attr.value);
+                    }
+                }
+            }
+            n
+        }
+    }
 }

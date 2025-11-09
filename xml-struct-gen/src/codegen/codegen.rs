@@ -11,6 +11,8 @@ pub fn generate_code(e: IndexMap<Vec<OwnedName>, ElemProps>) -> String {
     let assigned_names = assign_struct_names(e.keys().filter(|k| !k.is_empty()).cloned().collect());
 
     let mut s = "use serde::{Deserialize, Serialize};\n".to_string();
+    s.push_str("use std::collections::HashMap;\n");
+
     for (k, v) in e.into_iter() {
         let el_struct = gen_el_struct(&k, &v, &assigned_names);
         s.push_str(&el_struct.to_string());
