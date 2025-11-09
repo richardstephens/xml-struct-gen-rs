@@ -1,9 +1,16 @@
 use thiserror::Error;
 
+#[derive(Debug)]
+pub enum XmlDocumentPosition {
+    Unknown,
+}
+
 #[derive(Error, Debug)]
 pub enum XmlParseError {
     #[error(transparent)]
     XmlRsRead(#[from] xml::reader::Error),
     #[error("Expected EndElement")]
-    ExpectedEndElement,
+    ExpectedEndElement(XmlDocumentPosition),
+    #[error("UnexpectedCharacters")]
+    UnexpectedCharacters(XmlDocumentPosition),
 }

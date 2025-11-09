@@ -62,12 +62,18 @@ impl RssDocument {
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
                     return Ok(n);
                 }
-                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                Ok(xml::reader::XmlEvent::Characters(val)) => {
+                    return Err(XmlParseError::UnexpectedCharacters(
+                        XmlDocumentPosition::Unknown,
+                    ));
+                }
                 Err(e) => return Err(e.into()),
                 _ => {}
             }
         }
-        return Err(XmlParseError::ExpectedEndElement);
+        return Err(XmlParseError::ExpectedEndElement(
+            XmlDocumentPosition::Unknown,
+        ));
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -156,12 +162,18 @@ impl Channel {
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
                     return Ok(n);
                 }
-                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                Ok(xml::reader::XmlEvent::Characters(val)) => {
+                    return Err(XmlParseError::UnexpectedCharacters(
+                        XmlDocumentPosition::Unknown,
+                    ));
+                }
                 Err(e) => return Err(e.into()),
                 _ => {}
             }
         }
-        return Err(XmlParseError::ExpectedEndElement);
+        return Err(XmlParseError::ExpectedEndElement(
+            XmlDocumentPosition::Unknown,
+        ));
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -205,7 +217,9 @@ impl RssChannelTitle {
                 _ => {}
             }
         }
-        return Err(XmlParseError::ExpectedEndElement);
+        return Err(XmlParseError::ExpectedEndElement(
+            XmlDocumentPosition::Unknown,
+        ));
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -249,7 +263,9 @@ impl RssChannelLink {
                 _ => {}
             }
         }
-        return Err(XmlParseError::ExpectedEndElement);
+        return Err(XmlParseError::ExpectedEndElement(
+            XmlDocumentPosition::Unknown,
+        ));
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -293,7 +309,9 @@ impl Language {
                 _ => {}
             }
         }
-        return Err(XmlParseError::ExpectedEndElement);
+        return Err(XmlParseError::ExpectedEndElement(
+            XmlDocumentPosition::Unknown,
+        ));
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -337,7 +355,9 @@ impl Copyright {
                 _ => {}
             }
         }
-        return Err(XmlParseError::ExpectedEndElement);
+        return Err(XmlParseError::ExpectedEndElement(
+            XmlDocumentPosition::Unknown,
+        ));
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -381,7 +401,9 @@ impl Author {
                 _ => {}
             }
         }
-        return Err(XmlParseError::ExpectedEndElement);
+        return Err(XmlParseError::ExpectedEndElement(
+            XmlDocumentPosition::Unknown,
+        ));
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -425,7 +447,9 @@ impl RssChannelDescription {
                 _ => {}
             }
         }
-        return Err(XmlParseError::ExpectedEndElement);
+        return Err(XmlParseError::ExpectedEndElement(
+            XmlDocumentPosition::Unknown,
+        ));
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -469,7 +493,9 @@ impl Type {
                 _ => {}
             }
         }
-        return Err(XmlParseError::ExpectedEndElement);
+        return Err(XmlParseError::ExpectedEndElement(
+            XmlDocumentPosition::Unknown,
+        ));
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -509,12 +535,18 @@ impl RssChannelItunesImage {
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
                     return Ok(n);
                 }
-                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                Ok(xml::reader::XmlEvent::Characters(val)) => {
+                    return Err(XmlParseError::UnexpectedCharacters(
+                        XmlDocumentPosition::Unknown,
+                    ));
+                }
                 Err(e) => return Err(e.into()),
                 _ => {}
             }
         }
-        return Err(XmlParseError::ExpectedEndElement);
+        return Err(XmlParseError::ExpectedEndElement(
+            XmlDocumentPosition::Unknown,
+        ));
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -563,12 +595,18 @@ impl RssChannelItunesCategory {
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
                     return Ok(n);
                 }
-                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                Ok(xml::reader::XmlEvent::Characters(val)) => {
+                    return Err(XmlParseError::UnexpectedCharacters(
+                        XmlDocumentPosition::Unknown,
+                    ));
+                }
                 Err(e) => return Err(e.into()),
                 _ => {}
             }
         }
-        return Err(XmlParseError::ExpectedEndElement);
+        return Err(XmlParseError::ExpectedEndElement(
+            XmlDocumentPosition::Unknown,
+        ));
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -608,12 +646,18 @@ impl RssChannelItunesCategoryItunesCategory {
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
                     return Ok(n);
                 }
-                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                Ok(xml::reader::XmlEvent::Characters(val)) => {
+                    return Err(XmlParseError::UnexpectedCharacters(
+                        XmlDocumentPosition::Unknown,
+                    ));
+                }
                 Err(e) => return Err(e.into()),
                 _ => {}
             }
         }
-        return Err(XmlParseError::ExpectedEndElement);
+        return Err(XmlParseError::ExpectedEndElement(
+            XmlDocumentPosition::Unknown,
+        ));
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -657,7 +701,9 @@ impl RssChannelItunesExplicit {
                 _ => {}
             }
         }
-        return Err(XmlParseError::ExpectedEndElement);
+        return Err(XmlParseError::ExpectedEndElement(
+            XmlDocumentPosition::Unknown,
+        ));
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -758,12 +804,18 @@ impl Item {
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
                     return Ok(n);
                 }
-                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                Ok(xml::reader::XmlEvent::Characters(val)) => {
+                    return Err(XmlParseError::UnexpectedCharacters(
+                        XmlDocumentPosition::Unknown,
+                    ));
+                }
                 Err(e) => return Err(e.into()),
                 _ => {}
             }
         }
-        return Err(XmlParseError::ExpectedEndElement);
+        return Err(XmlParseError::ExpectedEndElement(
+            XmlDocumentPosition::Unknown,
+        ));
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -807,7 +859,9 @@ impl EpisodeType {
                 _ => {}
             }
         }
-        return Err(XmlParseError::ExpectedEndElement);
+        return Err(XmlParseError::ExpectedEndElement(
+            XmlDocumentPosition::Unknown,
+        ));
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -851,7 +905,9 @@ impl RssChannelItemItunesTitle {
                 _ => {}
             }
         }
-        return Err(XmlParseError::ExpectedEndElement);
+        return Err(XmlParseError::ExpectedEndElement(
+            XmlDocumentPosition::Unknown,
+        ));
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -895,7 +951,9 @@ impl RssChannelItemDescription {
                 _ => {}
             }
         }
-        return Err(XmlParseError::ExpectedEndElement);
+        return Err(XmlParseError::ExpectedEndElement(
+            XmlDocumentPosition::Unknown,
+        ));
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -943,12 +1001,18 @@ impl Enclosure {
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
                     return Ok(n);
                 }
-                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                Ok(xml::reader::XmlEvent::Characters(val)) => {
+                    return Err(XmlParseError::UnexpectedCharacters(
+                        XmlDocumentPosition::Unknown,
+                    ));
+                }
                 Err(e) => return Err(e.into()),
                 _ => {}
             }
         }
-        return Err(XmlParseError::ExpectedEndElement);
+        return Err(XmlParseError::ExpectedEndElement(
+            XmlDocumentPosition::Unknown,
+        ));
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -992,7 +1056,9 @@ impl Guid {
                 _ => {}
             }
         }
-        return Err(XmlParseError::ExpectedEndElement);
+        return Err(XmlParseError::ExpectedEndElement(
+            XmlDocumentPosition::Unknown,
+        ));
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -1036,7 +1102,9 @@ impl PubDate {
                 _ => {}
             }
         }
-        return Err(XmlParseError::ExpectedEndElement);
+        return Err(XmlParseError::ExpectedEndElement(
+            XmlDocumentPosition::Unknown,
+        ));
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -1080,7 +1148,9 @@ impl Duration {
                 _ => {}
             }
         }
-        return Err(XmlParseError::ExpectedEndElement);
+        return Err(XmlParseError::ExpectedEndElement(
+            XmlDocumentPosition::Unknown,
+        ));
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -1124,7 +1194,9 @@ impl RssChannelItemItunesExplicit {
                 _ => {}
             }
         }
-        return Err(XmlParseError::ExpectedEndElement);
+        return Err(XmlParseError::ExpectedEndElement(
+            XmlDocumentPosition::Unknown,
+        ));
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -1168,7 +1240,9 @@ impl Episode {
                 _ => {}
             }
         }
-        return Err(XmlParseError::ExpectedEndElement);
+        return Err(XmlParseError::ExpectedEndElement(
+            XmlDocumentPosition::Unknown,
+        ));
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -1212,7 +1286,9 @@ impl Season {
                 _ => {}
             }
         }
-        return Err(XmlParseError::ExpectedEndElement);
+        return Err(XmlParseError::ExpectedEndElement(
+            XmlDocumentPosition::Unknown,
+        ));
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -1256,7 +1332,9 @@ impl RssChannelItemTitle {
                 _ => {}
             }
         }
-        return Err(XmlParseError::ExpectedEndElement);
+        return Err(XmlParseError::ExpectedEndElement(
+            XmlDocumentPosition::Unknown,
+        ));
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -1296,12 +1374,18 @@ impl RssChannelItemItunesImage {
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
                     return Ok(n);
                 }
-                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                Ok(xml::reader::XmlEvent::Characters(val)) => {
+                    return Err(XmlParseError::UnexpectedCharacters(
+                        XmlDocumentPosition::Unknown,
+                    ));
+                }
                 Err(e) => return Err(e.into()),
                 _ => {}
             }
         }
-        return Err(XmlParseError::ExpectedEndElement);
+        return Err(XmlParseError::ExpectedEndElement(
+            XmlDocumentPosition::Unknown,
+        ));
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -1345,6 +1429,8 @@ impl RssChannelItemLink {
                 _ => {}
             }
         }
-        return Err(XmlParseError::ExpectedEndElement);
+        return Err(XmlParseError::ExpectedEndElement(
+            XmlDocumentPosition::Unknown,
+        ));
     }
 }

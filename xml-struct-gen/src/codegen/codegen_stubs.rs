@@ -161,8 +161,9 @@ fn generate_parse_children(
     let text_handler = if has_text {
         quote! {n.value = Some(val); }
     } else {
-        //TODO throw an error here
-        quote! {}
+        quote! {
+            return Err(XmlParseError::UnexpectedCharacters(XmlDocumentPosition::Unknown));
+        }
     };
     quote! {
         fn parse_children<T: std::io::Read>(
@@ -201,7 +202,7 @@ fn generate_parse_children(
                     _ => {}
                 }
             }
-            return Err(XmlParseError::ExpectedEndElement);
+            return Err(XmlParseError::ExpectedEndElement(XmlDocumentPosition::Unknown));
         }
     }
 }
