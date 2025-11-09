@@ -11,6 +11,7 @@ impl RssDocument {
     const XML_LOCAL_NAME: &'static str = "rss";
     const XML_NAMESPACE: Option<&'static str> = None;
     const XML_PREFIX: Option<&'static str> = None;
+    const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::local("rss");
     pub fn parse_document<R: std::io::Read>(mut reader: R) -> Result<Self, XmlParseError> {
         let mut parser = xml::EventReader::new(reader).into_iter();
         while let Some(event) = parser.next() {
@@ -98,6 +99,7 @@ impl Channel {
     const XML_LOCAL_NAME: &'static str = "channel";
     const XML_NAMESPACE: Option<&'static str> = None;
     const XML_PREFIX: Option<&'static str> = None;
+    const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::local("channel");
     fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
@@ -191,6 +193,7 @@ impl RssChannelTitle {
     const XML_LOCAL_NAME: &'static str = "title";
     const XML_NAMESPACE: Option<&'static str> = None;
     const XML_PREFIX: Option<&'static str> = None;
+    const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::local("title");
     fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
@@ -240,6 +243,7 @@ impl RssChannelLink {
     const XML_LOCAL_NAME: &'static str = "link";
     const XML_NAMESPACE: Option<&'static str> = None;
     const XML_PREFIX: Option<&'static str> = None;
+    const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::local("link");
     fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
@@ -289,6 +293,7 @@ impl Language {
     const XML_LOCAL_NAME: &'static str = "language";
     const XML_NAMESPACE: Option<&'static str> = None;
     const XML_PREFIX: Option<&'static str> = None;
+    const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::local("language");
     fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
@@ -338,6 +343,7 @@ impl Copyright {
     const XML_LOCAL_NAME: &'static str = "copyright";
     const XML_NAMESPACE: Option<&'static str> = None;
     const XML_PREFIX: Option<&'static str> = None;
+    const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::local("copyright");
     fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
@@ -387,6 +393,11 @@ impl Author {
     const XML_LOCAL_NAME: &'static str = "author";
     const XML_NAMESPACE: Option<&'static str> = Some("http://www.itunes.com/dtds/podcast-1.0.dtd");
     const XML_PREFIX: Option<&'static str> = Some("itunes");
+    const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::qualified(
+        "author",
+        "http://www.itunes.com/dtds/podcast-1.0.dtd",
+        Some("itunes"),
+    );
     fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
@@ -436,6 +447,7 @@ impl RssChannelDescription {
     const XML_LOCAL_NAME: &'static str = "description";
     const XML_NAMESPACE: Option<&'static str> = None;
     const XML_PREFIX: Option<&'static str> = None;
+    const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::local("description");
     fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
@@ -485,6 +497,11 @@ impl Type {
     const XML_LOCAL_NAME: &'static str = "type";
     const XML_NAMESPACE: Option<&'static str> = Some("http://www.itunes.com/dtds/podcast-1.0.dtd");
     const XML_PREFIX: Option<&'static str> = Some("itunes");
+    const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::qualified(
+        "type",
+        "http://www.itunes.com/dtds/podcast-1.0.dtd",
+        Some("itunes"),
+    );
     fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
@@ -534,6 +551,11 @@ impl RssChannelItunesImage {
     const XML_LOCAL_NAME: &'static str = "image";
     const XML_NAMESPACE: Option<&'static str> = Some("http://www.itunes.com/dtds/podcast-1.0.dtd");
     const XML_PREFIX: Option<&'static str> = Some("itunes");
+    const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::qualified(
+        "image",
+        "http://www.itunes.com/dtds/podcast-1.0.dtd",
+        Some("itunes"),
+    );
     fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
@@ -590,6 +612,11 @@ impl RssChannelItunesCategory {
     const XML_LOCAL_NAME: &'static str = "category";
     const XML_NAMESPACE: Option<&'static str> = Some("http://www.itunes.com/dtds/podcast-1.0.dtd");
     const XML_PREFIX: Option<&'static str> = Some("itunes");
+    const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::qualified(
+        "category",
+        "http://www.itunes.com/dtds/podcast-1.0.dtd",
+        Some("itunes"),
+    );
     fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
@@ -651,6 +678,11 @@ impl RssChannelItunesCategoryItunesCategory {
     const XML_LOCAL_NAME: &'static str = "category";
     const XML_NAMESPACE: Option<&'static str> = Some("http://www.itunes.com/dtds/podcast-1.0.dtd");
     const XML_PREFIX: Option<&'static str> = Some("itunes");
+    const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::qualified(
+        "category",
+        "http://www.itunes.com/dtds/podcast-1.0.dtd",
+        Some("itunes"),
+    );
     fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
@@ -705,6 +737,11 @@ impl RssChannelItunesExplicit {
     const XML_LOCAL_NAME: &'static str = "explicit";
     const XML_NAMESPACE: Option<&'static str> = Some("http://www.itunes.com/dtds/podcast-1.0.dtd");
     const XML_PREFIX: Option<&'static str> = Some("itunes");
+    const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::qualified(
+        "explicit",
+        "http://www.itunes.com/dtds/podcast-1.0.dtd",
+        Some("itunes"),
+    );
     fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
@@ -766,6 +803,7 @@ impl Item {
     const XML_LOCAL_NAME: &'static str = "item";
     const XML_NAMESPACE: Option<&'static str> = None;
     const XML_PREFIX: Option<&'static str> = None;
+    const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::local("item");
     fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
@@ -869,6 +907,11 @@ impl EpisodeType {
     const XML_LOCAL_NAME: &'static str = "episodeType";
     const XML_NAMESPACE: Option<&'static str> = Some("http://www.itunes.com/dtds/podcast-1.0.dtd");
     const XML_PREFIX: Option<&'static str> = Some("itunes");
+    const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::qualified(
+        "episodeType",
+        "http://www.itunes.com/dtds/podcast-1.0.dtd",
+        Some("itunes"),
+    );
     fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
@@ -918,6 +961,11 @@ impl RssChannelItemItunesTitle {
     const XML_LOCAL_NAME: &'static str = "title";
     const XML_NAMESPACE: Option<&'static str> = Some("http://www.itunes.com/dtds/podcast-1.0.dtd");
     const XML_PREFIX: Option<&'static str> = Some("itunes");
+    const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::qualified(
+        "title",
+        "http://www.itunes.com/dtds/podcast-1.0.dtd",
+        Some("itunes"),
+    );
     fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
@@ -967,6 +1015,7 @@ impl RssChannelItemDescription {
     const XML_LOCAL_NAME: &'static str = "description";
     const XML_NAMESPACE: Option<&'static str> = None;
     const XML_PREFIX: Option<&'static str> = None;
+    const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::local("description");
     fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
@@ -1018,6 +1067,7 @@ impl Enclosure {
     const XML_LOCAL_NAME: &'static str = "enclosure";
     const XML_NAMESPACE: Option<&'static str> = None;
     const XML_PREFIX: Option<&'static str> = None;
+    const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::local("enclosure");
     fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
@@ -1078,6 +1128,7 @@ impl Guid {
     const XML_LOCAL_NAME: &'static str = "guid";
     const XML_NAMESPACE: Option<&'static str> = None;
     const XML_PREFIX: Option<&'static str> = None;
+    const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::local("guid");
     fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
@@ -1127,6 +1178,7 @@ impl PubDate {
     const XML_LOCAL_NAME: &'static str = "pubDate";
     const XML_NAMESPACE: Option<&'static str> = None;
     const XML_PREFIX: Option<&'static str> = None;
+    const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::local("pubDate");
     fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
@@ -1176,6 +1228,11 @@ impl Duration {
     const XML_LOCAL_NAME: &'static str = "duration";
     const XML_NAMESPACE: Option<&'static str> = Some("http://www.itunes.com/dtds/podcast-1.0.dtd");
     const XML_PREFIX: Option<&'static str> = Some("itunes");
+    const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::qualified(
+        "duration",
+        "http://www.itunes.com/dtds/podcast-1.0.dtd",
+        Some("itunes"),
+    );
     fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
@@ -1225,6 +1282,11 @@ impl RssChannelItemItunesExplicit {
     const XML_LOCAL_NAME: &'static str = "explicit";
     const XML_NAMESPACE: Option<&'static str> = Some("http://www.itunes.com/dtds/podcast-1.0.dtd");
     const XML_PREFIX: Option<&'static str> = Some("itunes");
+    const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::qualified(
+        "explicit",
+        "http://www.itunes.com/dtds/podcast-1.0.dtd",
+        Some("itunes"),
+    );
     fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
@@ -1274,6 +1336,11 @@ impl Episode {
     const XML_LOCAL_NAME: &'static str = "episode";
     const XML_NAMESPACE: Option<&'static str> = Some("http://www.itunes.com/dtds/podcast-1.0.dtd");
     const XML_PREFIX: Option<&'static str> = Some("itunes");
+    const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::qualified(
+        "episode",
+        "http://www.itunes.com/dtds/podcast-1.0.dtd",
+        Some("itunes"),
+    );
     fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
@@ -1323,6 +1390,11 @@ impl Season {
     const XML_LOCAL_NAME: &'static str = "season";
     const XML_NAMESPACE: Option<&'static str> = Some("http://www.itunes.com/dtds/podcast-1.0.dtd");
     const XML_PREFIX: Option<&'static str> = Some("itunes");
+    const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::qualified(
+        "season",
+        "http://www.itunes.com/dtds/podcast-1.0.dtd",
+        Some("itunes"),
+    );
     fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
@@ -1372,6 +1444,7 @@ impl RssChannelItemTitle {
     const XML_LOCAL_NAME: &'static str = "title";
     const XML_NAMESPACE: Option<&'static str> = None;
     const XML_PREFIX: Option<&'static str> = None;
+    const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::local("title");
     fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
@@ -1421,6 +1494,11 @@ impl RssChannelItemItunesImage {
     const XML_LOCAL_NAME: &'static str = "image";
     const XML_NAMESPACE: Option<&'static str> = Some("http://www.itunes.com/dtds/podcast-1.0.dtd");
     const XML_PREFIX: Option<&'static str> = Some("itunes");
+    const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::qualified(
+        "image",
+        "http://www.itunes.com/dtds/podcast-1.0.dtd",
+        Some("itunes"),
+    );
     fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,
@@ -1475,6 +1553,7 @@ impl RssChannelItemLink {
     const XML_LOCAL_NAME: &'static str = "link";
     const XML_NAMESPACE: Option<&'static str> = None;
     const XML_PREFIX: Option<&'static str> = None;
+    const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::local("link");
     fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,

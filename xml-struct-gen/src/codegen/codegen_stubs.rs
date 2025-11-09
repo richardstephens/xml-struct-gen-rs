@@ -80,13 +80,30 @@ fn generate_name_consts(p0: &Vec<OwnedName>) -> TokenStream {
 
     let local_name = &last.local_name;
 
-    let ns = opt_str_tokens(last.namespace.as_deref());
-    let pfx = opt_str_tokens(last.prefix.as_deref());
+    let ns_const = opt_str_tokens(last.namespace.as_deref());
+    let pfx_const = opt_str_tokens(last.prefix.as_deref());
+
+    let xml_rs_name = match (last.namespace.as_deref(), last.prefix.as_deref()) {
+        (Some(ns), Some(_pfx)) => {
+            quote! {xml::name::Name::qualified(#local_name, #ns, #pfx_const)}
+        }
+        (None, Some(pfx)) => {
+            quote! {xml::name::Name::prefixed(#local_name, #pfx)}
+        }
+        (None, None) => {
+            quote! {xml::name::Name::local(#local_name) }
+        }
+        _ => {
+            panic!("unsupported ns/pfx combo");
+        }
+    };
 
     quote! {
         const XML_LOCAL_NAME: &'static str = #local_name;
-        const XML_NAMESPACE: Option<&'static str> = #ns;
-        const XML_PREFIX: Option<&'static str> = #pfx;
+        const XML_NAMESPACE: Option<&'static str> = #ns_const;
+        const XML_PREFIX: Option<&'static str> = #pfx_const;
+
+        const XML_RS_NAME: xml::name::Name<'static > = #xml_rs_name;
     }
 }
 
