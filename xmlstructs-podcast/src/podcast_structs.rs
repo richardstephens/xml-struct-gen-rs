@@ -26,6 +26,26 @@ impl RssDocument {
                 }
             }
         }
+        while let Some(e) = iter.next() {
+            match e {
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name, attributes, ..
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    (None, "channel") => {
+                        n.channel_elems
+                            .push(Channel::parse_children(attributes, iter));
+                    }
+                    _ => {
+                        todo!();
+                    }
+                },
+                Ok(xml::reader::XmlEvent::EndElement { .. }) => {
+                    return n;
+                }
+                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                _ => {}
+            }
+        }
         n
     }
 }
@@ -61,6 +81,64 @@ impl Channel {
                 }
             }
         }
+        while let Some(e) = iter.next() {
+            match e {
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name, attributes, ..
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    (None, "title") => {
+                        n.rss_channel_title_elems
+                            .push(RssChannelTitle::parse_children(attributes, iter));
+                    }
+                    (None, "link") => {
+                        n.rss_channel_link_elems
+                            .push(RssChannelLink::parse_children(attributes, iter));
+                    }
+                    (None, "language") => {
+                        n.language_elems
+                            .push(Language::parse_children(attributes, iter));
+                    }
+                    (None, "copyright") => {
+                        n.copyright_elems
+                            .push(Copyright::parse_children(attributes, iter));
+                    }
+                    (Some("http://www.itunes.com/dtds/podcast-1.0.dtd"), "author") => {
+                        n.author_elems
+                            .push(Author::parse_children(attributes, iter));
+                    }
+                    (None, "description") => {
+                        n.rss_channel_description_elems
+                            .push(RssChannelDescription::parse_children(attributes, iter));
+                    }
+                    (Some("http://www.itunes.com/dtds/podcast-1.0.dtd"), "type") => {
+                        n.type_elems.push(Type::parse_children(attributes, iter));
+                    }
+                    (Some("http://www.itunes.com/dtds/podcast-1.0.dtd"), "image") => {
+                        n.rss_channel_itunes_image_elems
+                            .push(RssChannelItunesImage::parse_children(attributes, iter));
+                    }
+                    (Some("http://www.itunes.com/dtds/podcast-1.0.dtd"), "category") => {
+                        n.rss_channel_itunes_category_elems
+                            .push(RssChannelItunesCategory::parse_children(attributes, iter));
+                    }
+                    (Some("http://www.itunes.com/dtds/podcast-1.0.dtd"), "explicit") => {
+                        n.rss_channel_itunes_explicit_elems
+                            .push(RssChannelItunesExplicit::parse_children(attributes, iter));
+                    }
+                    (None, "item") => {
+                        n.item_elems.push(Item::parse_children(attributes, iter));
+                    }
+                    _ => {
+                        todo!();
+                    }
+                },
+                Ok(xml::reader::XmlEvent::EndElement { .. }) => {
+                    return n;
+                }
+                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                _ => {}
+            }
+        }
         n
     }
 }
@@ -84,6 +162,22 @@ impl RssChannelTitle {
                     n.misc_attrs
                         .insert((ns.map(|s| s.to_string()), name.to_owned()), attr.value);
                 }
+            }
+        }
+        while let Some(e) = iter.next() {
+            match e {
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name, attributes, ..
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    _ => {
+                        todo!();
+                    }
+                },
+                Ok(xml::reader::XmlEvent::EndElement { .. }) => {
+                    return n;
+                }
+                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                _ => {}
             }
         }
         n
@@ -111,6 +205,22 @@ impl RssChannelLink {
                 }
             }
         }
+        while let Some(e) = iter.next() {
+            match e {
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name, attributes, ..
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    _ => {
+                        todo!();
+                    }
+                },
+                Ok(xml::reader::XmlEvent::EndElement { .. }) => {
+                    return n;
+                }
+                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                _ => {}
+            }
+        }
         n
     }
 }
@@ -134,6 +244,22 @@ impl Language {
                     n.misc_attrs
                         .insert((ns.map(|s| s.to_string()), name.to_owned()), attr.value);
                 }
+            }
+        }
+        while let Some(e) = iter.next() {
+            match e {
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name, attributes, ..
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    _ => {
+                        todo!();
+                    }
+                },
+                Ok(xml::reader::XmlEvent::EndElement { .. }) => {
+                    return n;
+                }
+                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                _ => {}
             }
         }
         n
@@ -161,6 +287,22 @@ impl Copyright {
                 }
             }
         }
+        while let Some(e) = iter.next() {
+            match e {
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name, attributes, ..
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    _ => {
+                        todo!();
+                    }
+                },
+                Ok(xml::reader::XmlEvent::EndElement { .. }) => {
+                    return n;
+                }
+                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                _ => {}
+            }
+        }
         n
     }
 }
@@ -184,6 +326,22 @@ impl Author {
                     n.misc_attrs
                         .insert((ns.map(|s| s.to_string()), name.to_owned()), attr.value);
                 }
+            }
+        }
+        while let Some(e) = iter.next() {
+            match e {
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name, attributes, ..
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    _ => {
+                        todo!();
+                    }
+                },
+                Ok(xml::reader::XmlEvent::EndElement { .. }) => {
+                    return n;
+                }
+                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                _ => {}
             }
         }
         n
@@ -211,6 +369,22 @@ impl RssChannelDescription {
                 }
             }
         }
+        while let Some(e) = iter.next() {
+            match e {
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name, attributes, ..
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    _ => {
+                        todo!();
+                    }
+                },
+                Ok(xml::reader::XmlEvent::EndElement { .. }) => {
+                    return n;
+                }
+                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                _ => {}
+            }
+        }
         n
     }
 }
@@ -234,6 +408,22 @@ impl Type {
                     n.misc_attrs
                         .insert((ns.map(|s| s.to_string()), name.to_owned()), attr.value);
                 }
+            }
+        }
+        while let Some(e) = iter.next() {
+            match e {
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name, attributes, ..
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    _ => {
+                        todo!();
+                    }
+                },
+                Ok(xml::reader::XmlEvent::EndElement { .. }) => {
+                    return n;
+                }
+                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                _ => {}
             }
         }
         n
@@ -262,6 +452,22 @@ impl RssChannelItunesImage {
                     n.misc_attrs
                         .insert((ns.map(|s| s.to_string()), name.to_owned()), attr.value);
                 }
+            }
+        }
+        while let Some(e) = iter.next() {
+            match e {
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name, attributes, ..
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    _ => {
+                        todo!();
+                    }
+                },
+                Ok(xml::reader::XmlEvent::EndElement { .. }) => {
+                    return n;
+                }
+                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                _ => {}
             }
         }
         n
@@ -294,6 +500,29 @@ impl RssChannelItunesCategory {
                 }
             }
         }
+        while let Some(e) = iter.next() {
+            match e {
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name, attributes, ..
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    (Some("http://www.itunes.com/dtds/podcast-1.0.dtd"), "category") => {
+                        n.rss_channel_itunes_category_itunes_category_elems.push(
+                            RssChannelItunesCategoryItunesCategory::parse_children(
+                                attributes, iter,
+                            ),
+                        );
+                    }
+                    _ => {
+                        todo!();
+                    }
+                },
+                Ok(xml::reader::XmlEvent::EndElement { .. }) => {
+                    return n;
+                }
+                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                _ => {}
+            }
+        }
         n
     }
 }
@@ -322,6 +551,22 @@ impl RssChannelItunesCategoryItunesCategory {
                 }
             }
         }
+        while let Some(e) = iter.next() {
+            match e {
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name, attributes, ..
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    _ => {
+                        todo!();
+                    }
+                },
+                Ok(xml::reader::XmlEvent::EndElement { .. }) => {
+                    return n;
+                }
+                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                _ => {}
+            }
+        }
         n
     }
 }
@@ -345,6 +590,22 @@ impl RssChannelItunesExplicit {
                     n.misc_attrs
                         .insert((ns.map(|s| s.to_string()), name.to_owned()), attr.value);
                 }
+            }
+        }
+        while let Some(e) = iter.next() {
+            match e {
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name, attributes, ..
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    _ => {
+                        todo!();
+                    }
+                },
+                Ok(xml::reader::XmlEvent::EndElement { .. }) => {
+                    return n;
+                }
+                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                _ => {}
             }
         }
         n
@@ -384,6 +645,74 @@ impl Item {
                 }
             }
         }
+        while let Some(e) = iter.next() {
+            match e {
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name, attributes, ..
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    (Some("http://www.itunes.com/dtds/podcast-1.0.dtd"), "title") => {
+                        n.rss_channel_item_itunes_title_elems
+                            .push(RssChannelItemItunesTitle::parse_children(attributes, iter));
+                    }
+                    (None, "link") => {
+                        n.rss_channel_item_link_elems
+                            .push(RssChannelItemLink::parse_children(attributes, iter));
+                    }
+                    (Some("http://www.itunes.com/dtds/podcast-1.0.dtd"), "image") => {
+                        n.rss_channel_item_itunes_image_elems
+                            .push(RssChannelItemItunesImage::parse_children(attributes, iter));
+                    }
+                    (Some("http://www.itunes.com/dtds/podcast-1.0.dtd"), "episodeType") => {
+                        n.episode_type_elems
+                            .push(EpisodeType::parse_children(attributes, iter));
+                    }
+                    (Some("http://www.itunes.com/dtds/podcast-1.0.dtd"), "episode") => {
+                        n.episode_elems
+                            .push(Episode::parse_children(attributes, iter));
+                    }
+                    (Some("http://www.itunes.com/dtds/podcast-1.0.dtd"), "season") => {
+                        n.season_elems
+                            .push(Season::parse_children(attributes, iter));
+                    }
+                    (None, "title") => {
+                        n.rss_channel_item_title_elems
+                            .push(RssChannelItemTitle::parse_children(attributes, iter));
+                    }
+                    (None, "description") => {
+                        n.rss_channel_item_description_elems
+                            .push(RssChannelItemDescription::parse_children(attributes, iter));
+                    }
+                    (None, "enclosure") => {
+                        n.enclosure_elems
+                            .push(Enclosure::parse_children(attributes, iter));
+                    }
+                    (None, "guid") => {
+                        n.guid_elems.push(Guid::parse_children(attributes, iter));
+                    }
+                    (None, "pubDate") => {
+                        n.pub_date_elems
+                            .push(PubDate::parse_children(attributes, iter));
+                    }
+                    (Some("http://www.itunes.com/dtds/podcast-1.0.dtd"), "duration") => {
+                        n.duration_elems
+                            .push(Duration::parse_children(attributes, iter));
+                    }
+                    (Some("http://www.itunes.com/dtds/podcast-1.0.dtd"), "explicit") => {
+                        n.rss_channel_item_itunes_explicit_elems.push(
+                            RssChannelItemItunesExplicit::parse_children(attributes, iter),
+                        );
+                    }
+                    _ => {
+                        todo!();
+                    }
+                },
+                Ok(xml::reader::XmlEvent::EndElement { .. }) => {
+                    return n;
+                }
+                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                _ => {}
+            }
+        }
         n
     }
 }
@@ -407,6 +736,22 @@ impl EpisodeType {
                     n.misc_attrs
                         .insert((ns.map(|s| s.to_string()), name.to_owned()), attr.value);
                 }
+            }
+        }
+        while let Some(e) = iter.next() {
+            match e {
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name, attributes, ..
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    _ => {
+                        todo!();
+                    }
+                },
+                Ok(xml::reader::XmlEvent::EndElement { .. }) => {
+                    return n;
+                }
+                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                _ => {}
             }
         }
         n
@@ -434,6 +779,22 @@ impl RssChannelItemItunesTitle {
                 }
             }
         }
+        while let Some(e) = iter.next() {
+            match e {
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name, attributes, ..
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    _ => {
+                        todo!();
+                    }
+                },
+                Ok(xml::reader::XmlEvent::EndElement { .. }) => {
+                    return n;
+                }
+                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                _ => {}
+            }
+        }
         n
     }
 }
@@ -457,6 +818,22 @@ impl RssChannelItemDescription {
                     n.misc_attrs
                         .insert((ns.map(|s| s.to_string()), name.to_owned()), attr.value);
                 }
+            }
+        }
+        while let Some(e) = iter.next() {
+            match e {
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name, attributes, ..
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    _ => {
+                        todo!();
+                    }
+                },
+                Ok(xml::reader::XmlEvent::EndElement { .. }) => {
+                    return n;
+                }
+                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                _ => {}
             }
         }
         n
@@ -495,6 +872,22 @@ impl Enclosure {
                 }
             }
         }
+        while let Some(e) = iter.next() {
+            match e {
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name, attributes, ..
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    _ => {
+                        todo!();
+                    }
+                },
+                Ok(xml::reader::XmlEvent::EndElement { .. }) => {
+                    return n;
+                }
+                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                _ => {}
+            }
+        }
         n
     }
 }
@@ -518,6 +911,22 @@ impl Guid {
                     n.misc_attrs
                         .insert((ns.map(|s| s.to_string()), name.to_owned()), attr.value);
                 }
+            }
+        }
+        while let Some(e) = iter.next() {
+            match e {
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name, attributes, ..
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    _ => {
+                        todo!();
+                    }
+                },
+                Ok(xml::reader::XmlEvent::EndElement { .. }) => {
+                    return n;
+                }
+                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                _ => {}
             }
         }
         n
@@ -545,6 +954,22 @@ impl PubDate {
                 }
             }
         }
+        while let Some(e) = iter.next() {
+            match e {
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name, attributes, ..
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    _ => {
+                        todo!();
+                    }
+                },
+                Ok(xml::reader::XmlEvent::EndElement { .. }) => {
+                    return n;
+                }
+                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                _ => {}
+            }
+        }
         n
     }
 }
@@ -568,6 +993,22 @@ impl Duration {
                     n.misc_attrs
                         .insert((ns.map(|s| s.to_string()), name.to_owned()), attr.value);
                 }
+            }
+        }
+        while let Some(e) = iter.next() {
+            match e {
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name, attributes, ..
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    _ => {
+                        todo!();
+                    }
+                },
+                Ok(xml::reader::XmlEvent::EndElement { .. }) => {
+                    return n;
+                }
+                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                _ => {}
             }
         }
         n
@@ -595,6 +1036,22 @@ impl RssChannelItemItunesExplicit {
                 }
             }
         }
+        while let Some(e) = iter.next() {
+            match e {
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name, attributes, ..
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    _ => {
+                        todo!();
+                    }
+                },
+                Ok(xml::reader::XmlEvent::EndElement { .. }) => {
+                    return n;
+                }
+                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                _ => {}
+            }
+        }
         n
     }
 }
@@ -618,6 +1075,22 @@ impl Episode {
                     n.misc_attrs
                         .insert((ns.map(|s| s.to_string()), name.to_owned()), attr.value);
                 }
+            }
+        }
+        while let Some(e) = iter.next() {
+            match e {
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name, attributes, ..
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    _ => {
+                        todo!();
+                    }
+                },
+                Ok(xml::reader::XmlEvent::EndElement { .. }) => {
+                    return n;
+                }
+                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                _ => {}
             }
         }
         n
@@ -645,6 +1118,22 @@ impl Season {
                 }
             }
         }
+        while let Some(e) = iter.next() {
+            match e {
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name, attributes, ..
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    _ => {
+                        todo!();
+                    }
+                },
+                Ok(xml::reader::XmlEvent::EndElement { .. }) => {
+                    return n;
+                }
+                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                _ => {}
+            }
+        }
         n
     }
 }
@@ -668,6 +1157,22 @@ impl RssChannelItemTitle {
                     n.misc_attrs
                         .insert((ns.map(|s| s.to_string()), name.to_owned()), attr.value);
                 }
+            }
+        }
+        while let Some(e) = iter.next() {
+            match e {
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name, attributes, ..
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    _ => {
+                        todo!();
+                    }
+                },
+                Ok(xml::reader::XmlEvent::EndElement { .. }) => {
+                    return n;
+                }
+                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                _ => {}
             }
         }
         n
@@ -698,6 +1203,22 @@ impl RssChannelItemItunesImage {
                 }
             }
         }
+        while let Some(e) = iter.next() {
+            match e {
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name, attributes, ..
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    _ => {
+                        todo!();
+                    }
+                },
+                Ok(xml::reader::XmlEvent::EndElement { .. }) => {
+                    return n;
+                }
+                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                _ => {}
+            }
+        }
         n
     }
 }
@@ -721,6 +1242,22 @@ impl RssChannelItemLink {
                     n.misc_attrs
                         .insert((ns.map(|s| s.to_string()), name.to_owned()), attr.value);
                 }
+            }
+        }
+        while let Some(e) = iter.next() {
+            match e {
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name, attributes, ..
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    _ => {
+                        todo!();
+                    }
+                },
+                Ok(xml::reader::XmlEvent::EndElement { .. }) => {
+                    return n;
+                }
+                Ok(xml::reader::XmlEvent::Characters(val)) => {}
+                _ => {}
             }
         }
         n

@@ -43,7 +43,7 @@ pub fn gen_el_struct(
         format_ident!("{xml_name}")
     };
 
-    let parse_children_impl = generate_parse_children(&attr_fields);
+    let parse_children_impl = generate_parse_children(&attr_fields, &elem_fields);
 
     quote! {
         #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -80,20 +80,24 @@ fn attr_fields_to_tokens(attr_fields: &Vec<AttrField>) -> Vec<TokenStream> {
         .collect()
 }
 
+fn owned_name_to_match_arm(n: &OwnedName) -> TokenStream {
+    let ns_m = n
+        .namespace
+        .as_ref()
+        .map(|s| quote! { Some(#s) })
+        .unwrap_or_else(|| quote! { None });
+    let local_name = &n.local_name;
+    quote! {(#ns_m, #local_name)}
+}
+
 fn attr_field_matchers(attr_fields: &Vec<AttrField>) -> Vec<TokenStream> {
     attr_fields
         .iter()
         .map(|field| {
-            let ns_m = field
-                .xml_name
-                .namespace
-                .as_ref()
-                .map(|s| quote! { Some(#s) })
-                .unwrap_or_else(|| quote! { None });
-            let local_name = &field.xml_name.local_name;
+            let match_arm = owned_name_to_match_arm(&field.xml_name);
             let target_var = format_ident!("{}", field.sanitized_name);
             quote! {
-                (#ns_m, #local_name) => {
+                #match_arm => {
                     n.#target_var = Some(attr.value);
                 }
             }
@@ -101,11 +105,29 @@ fn attr_field_matchers(attr_fields: &Vec<AttrField>) -> Vec<TokenStream> {
         .collect()
 }
 
-fn generate_parse_children(attr_fields: &Vec<AttrField>) -> TokenStream {
-    let attr_field_matchers = attr_field_matchers(attr_fields);
+fn elem_matchers(elem_fields: &Vec<(Vec<OwnedName>, Ident, Ident)>) -> Vec<TokenStream> {
+    elem_fields
+        .iter()
+        .map(|(field, var_name, ty_name)| {
+            let last = field.last().unwrap();
+            let match_arm = owned_name_to_match_arm(last);
+            quote! {
+                #match_arm => {
+                    n.#var_name.push(#ty_name::parse_children(attributes, iter));
+                }
+            }
+        })
+        .collect()
+}
 
+fn generate_parse_children(
+    attr_fields: &Vec<AttrField>,
+    elem_fields: &Vec<(Vec<OwnedName>, Ident, Ident)>,
+) -> TokenStream {
+    let attr_field_matchers = attr_field_matchers(attr_fields);
+    let elem_matchers = elem_matchers(&elem_fields);
     quote! {
-       pub fn parse_children<T: std::io::Read>(
+        pub fn parse_children<T: std::io::Read>(
             attrs: Vec<xml::attribute::OwnedAttribute>,
             iter: &mut xml::reader::Events<T>
         ) -> Self {
@@ -117,6 +139,27 @@ fn generate_parse_children(attr_fields: &Vec<AttrField>) -> TokenStream {
                     (ns, name) => {
                         n.misc_attrs.insert((ns.map(|s| s.to_string()), name.to_owned()), attr.value);
                     }
+                }
+            }
+
+            while let Some(e) = iter.next() {
+                match e {
+                    Ok(xml::reader::XmlEvent::StartElement { name, attributes, .. }) => {
+                        match (name.namespace.as_deref(), name.local_name.as_str()) {
+                            #(#elem_matchers)*
+                            _ => {//TODO: handle unrecognised elements
+                                todo!();
+                            }
+
+                        }
+                    }
+                    Ok(xml::reader::XmlEvent::EndElement { .. }) => {
+                        return n;
+                    }
+                    Ok(xml::reader::XmlEvent::Characters(val)) => {
+                        //TODO: store value
+                    }
+                    _ => {}
                 }
             }
             n
