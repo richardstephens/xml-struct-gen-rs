@@ -7,14 +7,21 @@ use indexmap::IndexMap;
 use std::collections::HashSet;
 use xml::name::OwnedName;
 
-pub fn generate_code(e: IndexMap<Vec<OwnedName>, ElemProps>) -> String {
+pub fn generate_code(mut e: IndexMap<Vec<OwnedName>, ElemProps>) -> String {
     let assigned_names = assign_struct_names(e.keys().filter(|k| !k.is_empty()).cloned().collect());
 
     let mut s = "use serde::{Deserialize, Serialize};\n".to_string();
     s.push_str("use std::collections::HashMap;\n");
 
+    let doc_struct_root_props = e.shift_remove(&vec![]).unwrap();
+
     for (k, v) in e.into_iter() {
-        let el_struct = gen_el_struct(&k, &v, &assigned_names);
+        let rp = if v.is_root {
+            Some(doc_struct_root_props.clone())
+        } else {
+            None
+        };
+        let el_struct = gen_el_struct(&k, &v, &assigned_names, rp);
         s.push_str(&el_struct.to_string());
     }
     s

@@ -7,6 +7,25 @@ pub struct RssDocument {
     pub channel_elems: Vec<Channel>,
 }
 impl RssDocument {
+    pub fn parse_document<R: std::io::Read>(mut reader: R) -> Self {
+        let mut parser = xml::EventReader::new(reader).into_iter();
+        while let Some(event) = parser.next() {
+            match event {
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    (None, "rss") => {
+                        return Self::parse_children(attributes, &mut parser);
+                    }
+                    _ => {}
+                },
+                _ => {}
+            }
+        }
+        todo!()
+    }
     pub fn parse_children<T: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
         iter: &mut xml::reader::Events<T>,

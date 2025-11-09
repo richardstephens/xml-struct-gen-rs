@@ -9,11 +9,8 @@ pub fn gen_el_struct(
     k: &Vec<OwnedName>,
     v: &ElemProps,
     assigned: &BiMap<Vec<OwnedName>, String>,
+    root_props: Option<ElemProps>,
 ) -> TokenStream {
-    if k.is_empty() {
-        return quote! {};
-    }
-
     let attr_fields = v.get_attr_fields();
     let attr_field_tokens: Vec<TokenStream> = attr_fields_to_tokens(&attr_fields);
 
@@ -43,6 +40,12 @@ pub fn gen_el_struct(
         format_ident!("{xml_name}")
     };
 
+    let maybe_parse_document_impl = if let Some(root_props) = root_props {
+        generate_parse_document(&root_props)
+    } else {
+        quote! {}
+    };
+
     let parse_children_impl = generate_parse_children(&attr_fields, &elem_fields);
 
     quote! {
@@ -55,6 +58,7 @@ pub fn gen_el_struct(
         }
 
         impl #sn {
+            #maybe_parse_document_impl
             #parse_children_impl
         }
 
@@ -118,6 +122,32 @@ fn elem_matchers(elem_fields: &Vec<(Vec<OwnedName>, Ident, Ident)>) -> Vec<Token
             }
         })
         .collect()
+}
+
+fn generate_parse_document(elem_props: &ElemProps) -> TokenStream {
+    let root = elem_props.child_stacks.iter().next().unwrap();
+    let match_arm = owned_name_to_match_arm(root.last().clone().unwrap());
+    quote! {
+        pub fn parse_document<R: std::io::Read>(mut reader: R) -> Self {
+            let mut parser = xml::EventReader::new(reader).into_iter();
+            while let Some(event) = parser.next() {
+                match event {
+                    Ok(xml::reader::XmlEvent::StartElement {
+                        name,
+                        attributes,
+                        namespace,
+                    }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                        #match_arm => {
+                            return Self::parse_children(attributes, &mut parser);
+                        }
+                        _ => {}
+                    },
+                _ => {}
+                }
+            };
+            todo!()
+        }
+    }
 }
 
 fn generate_parse_children(
