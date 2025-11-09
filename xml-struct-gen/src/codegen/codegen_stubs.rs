@@ -1,4 +1,4 @@
-use crate::common::elem_props::ElemProps;
+use crate::common::elem_props::{AttrField, ElemProps};
 use bimap::BiMap;
 use heck::ToSnakeCase;
 use proc_macro2::{Ident, TokenStream};
@@ -60,11 +60,11 @@ fn elem_fields_to_tokens(elem_fields: &Vec<(Vec<OwnedName>, Ident, Ident)>) -> V
         .collect()
 }
 
-fn attr_fields_to_tokens(attr_fields: &Vec<String>) -> Vec<TokenStream> {
+fn attr_fields_to_tokens(attr_fields: &Vec<AttrField>) -> Vec<TokenStream> {
     attr_fields
         .iter()
         .map(|x| {
-            let field_ident = format_ident!("{x}");
+            let field_ident = format_ident!("{}", &x.sanitized_name);
             quote! {
                 pub #field_ident: Option<String>,
             }
