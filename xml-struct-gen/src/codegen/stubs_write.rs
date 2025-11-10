@@ -21,7 +21,7 @@ pub fn gen_write_element(
     };
 
     quote! {
-        pub fn write_element<W: std::io::Write>(&self, w: &mut xml::writer::EventWriter<W>) -> Result<(), XmlWriteError> {
+        pub fn write_element<W: std::io::Write>(&self, w: &mut xml::writer::EventWriter<W>, include_ns: bool) -> Result<(), XmlWriteError> {
 
             let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
             #(#attr_write_tokens)*
@@ -43,7 +43,7 @@ fn elem_writers(elem_fields: &Vec<(Vec<OwnedName>, Ident, Ident)>) -> Vec<TokenS
         .map(|(_, var_name, _)| {
             quote! {
                 for child in self.#var_name.iter() {
-                    child.write_element(w)?;
+                    child.write_element(w, false)?;
                 }
             }
         })

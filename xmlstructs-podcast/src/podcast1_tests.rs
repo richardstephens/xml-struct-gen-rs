@@ -71,7 +71,7 @@ fn write_attrs() {
         .write_document_declaration(false)
         .perform_indent(false)
         .create_writer(c);
-    enclosure.write_element(&mut writer).unwrap();
+    enclosure.write_element(&mut writer, false).unwrap();
 
     c = writer.into_inner();
 

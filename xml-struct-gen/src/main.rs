@@ -29,7 +29,8 @@ fn main() -> anyhow::Result<()> {
     postprocess::validate_text_invariant(&structs)?;
     postprocess::mark_root(&mut structs)?;
 
-    let generated_code = generate_code(structs);
+    let ns = scanner.namespaces;
+    let generated_code = generate_code(ns, structs);
 
     std::fs::write(&args.output, generated_code.as_bytes()).map_err(|e| {
         anyhow::anyhow!(

@@ -1,13 +1,17 @@
 use crate::codegen::stubs::gen_el_struct;
 
+use crate::codegen::stubs_ns::generate_namespace_const;
 use crate::codegen::util::structname_for;
 use crate::common::elem_props::ElemProps;
 use bimap::BiMap;
 use indexmap::IndexMap;
-use std::collections::HashSet;
+use std::collections::{BTreeMap, HashSet};
 use xml::name::OwnedName;
 
-pub fn generate_code(mut e: IndexMap<Vec<OwnedName>, ElemProps>) -> String {
+pub fn generate_code(
+    ns: BTreeMap<String, String>,
+    mut e: IndexMap<Vec<OwnedName>, ElemProps>,
+) -> String {
     let assigned_names = assign_struct_names(e.keys().filter(|k| !k.is_empty()).cloned().collect());
 
     let mut s = "use serde::{Deserialize, Serialize};\n".to_string();
@@ -15,6 +19,8 @@ pub fn generate_code(mut e: IndexMap<Vec<OwnedName>, ElemProps>) -> String {
     s.push_str("pub use xml_struct_types::v1::*;");
 
     let doc_struct_root_props = e.shift_remove(&vec![]).unwrap();
+
+    s.push_str(&generate_namespace_const(ns).to_string());
 
     for (k, v) in e.into_iter() {
         let rp = if v.is_root {

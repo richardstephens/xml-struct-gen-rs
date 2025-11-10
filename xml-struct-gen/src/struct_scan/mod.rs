@@ -12,7 +12,7 @@ use xml::reader::XmlEvent;
 
 pub struct StructScanner {
     elem_map: IndexMap<Vec<OwnedName>, ElemProps>,
-    _namespaces: BTreeMap<String, String>,
+    pub namespaces: BTreeMap<String, String>,
 }
 
 impl StructScanner {
@@ -22,7 +22,7 @@ impl StructScanner {
 
         Self {
             elem_map,
-            _namespaces: BTreeMap::new(),
+            namespaces: BTreeMap::new(),
         }
     }
 
@@ -78,7 +78,9 @@ impl StructScanner {
         Ok(self.elem_map.clone())
     }
 
-    fn append_namespaces(&mut self, _ns: Namespace) {
-        //todo: merge with namespaces
+    fn append_namespaces(&mut self, ns: Namespace) {
+        for (pfx, url) in ns.0 {
+            self.namespaces.insert(pfx, url);
+        }
     }
 }
