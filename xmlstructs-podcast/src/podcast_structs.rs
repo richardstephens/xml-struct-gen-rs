@@ -14,26 +14,39 @@ impl RssDocument {
     const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::local("rss");
     pub fn parse_document<R: std::io::Read>(mut reader: R) -> Result<Self, XmlParseError> {
         let mut parser = xml::EventReader::new(reader).into_iter();
-        while let Some(event) = parser.next() {
-            match event {
+        let root_element = Self::parse_element(&mut parser)?;
+        match parser.next() {
+            Some(Ok(xml::reader::XmlEvent::EndDocument)) => Ok(root_element),
+            None => Ok(root_element),
+            Some(Ok(e)) => Err(XmlParseError::ExpectedEof(e)),
+            Some(Err(e)) => Err(e.into()),
+        }
+    }
+    pub fn parse_element<R: std::io::Read>(
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        while let Some(event) = iter.next() {
+            return match event {
+                Ok(xml::reader::XmlEvent::StartDocument { .. }) => {
+                    continue;
+                }
                 Ok(xml::reader::XmlEvent::StartElement {
                     name,
                     attributes,
                     namespace,
                 }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
-                    (None, "rss") => {
-                        return Self::parse_children(attributes, &mut parser);
-                    }
-                    _ => {}
+                    (None, "rss") => Self::parse_children(attributes, iter),
+                    _ => Err(XmlParseError::UnexpectedElement(name)),
                 },
-                _ => {}
-            }
+                Ok(e) => Err(XmlParseError::UnexpectedXmlEvent(e)),
+                Err(e) => Err(e.into()),
+            };
         }
-        todo!()
+        Err(XmlParseError::UnexpectedEof("rss element"))
     }
-    fn parse_children<T: std::io::Read>(
+    fn parse_children<R: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
-        iter: &mut xml::reader::Events<T>,
+        iter: &mut xml::reader::Events<R>,
     ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
@@ -68,7 +81,7 @@ impl RssDocument {
                 }
                 Ok(xml::reader::XmlEvent::Characters(val)) => {
                     return Err(XmlParseError::UnexpectedCharacters(
-                        XmlDocumentPosition::Unknown,
+                        XmlDocumentReference::Unknown,
                     ));
                 }
                 Err(e) => return Err(e.into()),
@@ -76,7 +89,7 @@ impl RssDocument {
             }
         }
         return Err(XmlParseError::ExpectedEndElement(
-            XmlDocumentPosition::Unknown,
+            XmlDocumentReference::Unknown,
         ));
     }
     pub fn write_element<W: std::io::Write>(
@@ -115,9 +128,31 @@ impl Channel {
     const XML_NAMESPACE: Option<&'static str> = None;
     const XML_PREFIX: Option<&'static str> = None;
     const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::local("channel");
-    fn parse_children<T: std::io::Read>(
+    pub fn parse_element<R: std::io::Read>(
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        while let Some(event) = iter.next() {
+            return match event {
+                Ok(xml::reader::XmlEvent::StartDocument { .. }) => {
+                    continue;
+                }
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    (None, "channel") => Self::parse_children(attributes, iter),
+                    _ => Err(XmlParseError::UnexpectedElement(name)),
+                },
+                Ok(e) => Err(XmlParseError::UnexpectedXmlEvent(e)),
+                Err(e) => Err(e.into()),
+            };
+        }
+        Err(XmlParseError::UnexpectedEof("channel element"))
+    }
+    fn parse_children<R: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
-        iter: &mut xml::reader::Events<T>,
+        iter: &mut xml::reader::Events<R>,
     ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
@@ -187,7 +222,7 @@ impl Channel {
                 }
                 Ok(xml::reader::XmlEvent::Characters(val)) => {
                     return Err(XmlParseError::UnexpectedCharacters(
-                        XmlDocumentPosition::Unknown,
+                        XmlDocumentReference::Unknown,
                     ));
                 }
                 Err(e) => return Err(e.into()),
@@ -195,7 +230,7 @@ impl Channel {
             }
         }
         return Err(XmlParseError::ExpectedEndElement(
-            XmlDocumentPosition::Unknown,
+            XmlDocumentReference::Unknown,
         ));
     }
     pub fn write_element<W: std::io::Write>(
@@ -251,9 +286,31 @@ impl RssChannelTitle {
     const XML_NAMESPACE: Option<&'static str> = None;
     const XML_PREFIX: Option<&'static str> = None;
     const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::local("title");
-    fn parse_children<T: std::io::Read>(
+    pub fn parse_element<R: std::io::Read>(
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        while let Some(event) = iter.next() {
+            return match event {
+                Ok(xml::reader::XmlEvent::StartDocument { .. }) => {
+                    continue;
+                }
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    (None, "title") => Self::parse_children(attributes, iter),
+                    _ => Err(XmlParseError::UnexpectedElement(name)),
+                },
+                Ok(e) => Err(XmlParseError::UnexpectedXmlEvent(e)),
+                Err(e) => Err(e.into()),
+            };
+        }
+        Err(XmlParseError::UnexpectedEof("title element"))
+    }
+    fn parse_children<R: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
-        iter: &mut xml::reader::Events<T>,
+        iter: &mut xml::reader::Events<R>,
     ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
@@ -287,7 +344,7 @@ impl RssChannelTitle {
             }
         }
         return Err(XmlParseError::ExpectedEndElement(
-            XmlDocumentPosition::Unknown,
+            XmlDocumentReference::Unknown,
         ));
     }
     pub fn write_element<W: std::io::Write>(
@@ -313,9 +370,31 @@ impl RssChannelLink {
     const XML_NAMESPACE: Option<&'static str> = None;
     const XML_PREFIX: Option<&'static str> = None;
     const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::local("link");
-    fn parse_children<T: std::io::Read>(
+    pub fn parse_element<R: std::io::Read>(
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        while let Some(event) = iter.next() {
+            return match event {
+                Ok(xml::reader::XmlEvent::StartDocument { .. }) => {
+                    continue;
+                }
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    (None, "link") => Self::parse_children(attributes, iter),
+                    _ => Err(XmlParseError::UnexpectedElement(name)),
+                },
+                Ok(e) => Err(XmlParseError::UnexpectedXmlEvent(e)),
+                Err(e) => Err(e.into()),
+            };
+        }
+        Err(XmlParseError::UnexpectedEof("link element"))
+    }
+    fn parse_children<R: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
-        iter: &mut xml::reader::Events<T>,
+        iter: &mut xml::reader::Events<R>,
     ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
@@ -349,7 +428,7 @@ impl RssChannelLink {
             }
         }
         return Err(XmlParseError::ExpectedEndElement(
-            XmlDocumentPosition::Unknown,
+            XmlDocumentReference::Unknown,
         ));
     }
     pub fn write_element<W: std::io::Write>(
@@ -375,9 +454,31 @@ impl Language {
     const XML_NAMESPACE: Option<&'static str> = None;
     const XML_PREFIX: Option<&'static str> = None;
     const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::local("language");
-    fn parse_children<T: std::io::Read>(
+    pub fn parse_element<R: std::io::Read>(
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        while let Some(event) = iter.next() {
+            return match event {
+                Ok(xml::reader::XmlEvent::StartDocument { .. }) => {
+                    continue;
+                }
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    (None, "language") => Self::parse_children(attributes, iter),
+                    _ => Err(XmlParseError::UnexpectedElement(name)),
+                },
+                Ok(e) => Err(XmlParseError::UnexpectedXmlEvent(e)),
+                Err(e) => Err(e.into()),
+            };
+        }
+        Err(XmlParseError::UnexpectedEof("language element"))
+    }
+    fn parse_children<R: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
-        iter: &mut xml::reader::Events<T>,
+        iter: &mut xml::reader::Events<R>,
     ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
@@ -411,7 +512,7 @@ impl Language {
             }
         }
         return Err(XmlParseError::ExpectedEndElement(
-            XmlDocumentPosition::Unknown,
+            XmlDocumentReference::Unknown,
         ));
     }
     pub fn write_element<W: std::io::Write>(
@@ -437,9 +538,31 @@ impl Copyright {
     const XML_NAMESPACE: Option<&'static str> = None;
     const XML_PREFIX: Option<&'static str> = None;
     const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::local("copyright");
-    fn parse_children<T: std::io::Read>(
+    pub fn parse_element<R: std::io::Read>(
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        while let Some(event) = iter.next() {
+            return match event {
+                Ok(xml::reader::XmlEvent::StartDocument { .. }) => {
+                    continue;
+                }
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    (None, "copyright") => Self::parse_children(attributes, iter),
+                    _ => Err(XmlParseError::UnexpectedElement(name)),
+                },
+                Ok(e) => Err(XmlParseError::UnexpectedXmlEvent(e)),
+                Err(e) => Err(e.into()),
+            };
+        }
+        Err(XmlParseError::UnexpectedEof("copyright element"))
+    }
+    fn parse_children<R: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
-        iter: &mut xml::reader::Events<T>,
+        iter: &mut xml::reader::Events<R>,
     ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
@@ -473,7 +596,7 @@ impl Copyright {
             }
         }
         return Err(XmlParseError::ExpectedEndElement(
-            XmlDocumentPosition::Unknown,
+            XmlDocumentReference::Unknown,
         ));
     }
     pub fn write_element<W: std::io::Write>(
@@ -503,9 +626,33 @@ impl Author {
         "http://www.itunes.com/dtds/podcast-1.0.dtd",
         Some("itunes"),
     );
-    fn parse_children<T: std::io::Read>(
+    pub fn parse_element<R: std::io::Read>(
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        while let Some(event) = iter.next() {
+            return match event {
+                Ok(xml::reader::XmlEvent::StartDocument { .. }) => {
+                    continue;
+                }
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    (Some("http://www.itunes.com/dtds/podcast-1.0.dtd"), "author") => {
+                        Self::parse_children(attributes, iter)
+                    }
+                    _ => Err(XmlParseError::UnexpectedElement(name)),
+                },
+                Ok(e) => Err(XmlParseError::UnexpectedXmlEvent(e)),
+                Err(e) => Err(e.into()),
+            };
+        }
+        Err(XmlParseError::UnexpectedEof("author element"))
+    }
+    fn parse_children<R: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
-        iter: &mut xml::reader::Events<T>,
+        iter: &mut xml::reader::Events<R>,
     ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
@@ -539,7 +686,7 @@ impl Author {
             }
         }
         return Err(XmlParseError::ExpectedEndElement(
-            XmlDocumentPosition::Unknown,
+            XmlDocumentReference::Unknown,
         ));
     }
     pub fn write_element<W: std::io::Write>(
@@ -565,9 +712,31 @@ impl RssChannelDescription {
     const XML_NAMESPACE: Option<&'static str> = None;
     const XML_PREFIX: Option<&'static str> = None;
     const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::local("description");
-    fn parse_children<T: std::io::Read>(
+    pub fn parse_element<R: std::io::Read>(
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        while let Some(event) = iter.next() {
+            return match event {
+                Ok(xml::reader::XmlEvent::StartDocument { .. }) => {
+                    continue;
+                }
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    (None, "description") => Self::parse_children(attributes, iter),
+                    _ => Err(XmlParseError::UnexpectedElement(name)),
+                },
+                Ok(e) => Err(XmlParseError::UnexpectedXmlEvent(e)),
+                Err(e) => Err(e.into()),
+            };
+        }
+        Err(XmlParseError::UnexpectedEof("description element"))
+    }
+    fn parse_children<R: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
-        iter: &mut xml::reader::Events<T>,
+        iter: &mut xml::reader::Events<R>,
     ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
@@ -601,7 +770,7 @@ impl RssChannelDescription {
             }
         }
         return Err(XmlParseError::ExpectedEndElement(
-            XmlDocumentPosition::Unknown,
+            XmlDocumentReference::Unknown,
         ));
     }
     pub fn write_element<W: std::io::Write>(
@@ -631,9 +800,33 @@ impl Type {
         "http://www.itunes.com/dtds/podcast-1.0.dtd",
         Some("itunes"),
     );
-    fn parse_children<T: std::io::Read>(
+    pub fn parse_element<R: std::io::Read>(
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        while let Some(event) = iter.next() {
+            return match event {
+                Ok(xml::reader::XmlEvent::StartDocument { .. }) => {
+                    continue;
+                }
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    (Some("http://www.itunes.com/dtds/podcast-1.0.dtd"), "type") => {
+                        Self::parse_children(attributes, iter)
+                    }
+                    _ => Err(XmlParseError::UnexpectedElement(name)),
+                },
+                Ok(e) => Err(XmlParseError::UnexpectedXmlEvent(e)),
+                Err(e) => Err(e.into()),
+            };
+        }
+        Err(XmlParseError::UnexpectedEof("type element"))
+    }
+    fn parse_children<R: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
-        iter: &mut xml::reader::Events<T>,
+        iter: &mut xml::reader::Events<R>,
     ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
@@ -667,7 +860,7 @@ impl Type {
             }
         }
         return Err(XmlParseError::ExpectedEndElement(
-            XmlDocumentPosition::Unknown,
+            XmlDocumentReference::Unknown,
         ));
     }
     pub fn write_element<W: std::io::Write>(
@@ -697,9 +890,33 @@ impl RssChannelItunesImage {
         "http://www.itunes.com/dtds/podcast-1.0.dtd",
         Some("itunes"),
     );
-    fn parse_children<T: std::io::Read>(
+    pub fn parse_element<R: std::io::Read>(
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        while let Some(event) = iter.next() {
+            return match event {
+                Ok(xml::reader::XmlEvent::StartDocument { .. }) => {
+                    continue;
+                }
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    (Some("http://www.itunes.com/dtds/podcast-1.0.dtd"), "image") => {
+                        Self::parse_children(attributes, iter)
+                    }
+                    _ => Err(XmlParseError::UnexpectedElement(name)),
+                },
+                Ok(e) => Err(XmlParseError::UnexpectedXmlEvent(e)),
+                Err(e) => Err(e.into()),
+            };
+        }
+        Err(XmlParseError::UnexpectedEof("image element"))
+    }
+    fn parse_children<R: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
-        iter: &mut xml::reader::Events<T>,
+        iter: &mut xml::reader::Events<R>,
     ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
@@ -730,7 +947,7 @@ impl RssChannelItunesImage {
                 }
                 Ok(xml::reader::XmlEvent::Characters(val)) => {
                     return Err(XmlParseError::UnexpectedCharacters(
-                        XmlDocumentPosition::Unknown,
+                        XmlDocumentReference::Unknown,
                     ));
                 }
                 Err(e) => return Err(e.into()),
@@ -738,7 +955,7 @@ impl RssChannelItunesImage {
             }
         }
         return Err(XmlParseError::ExpectedEndElement(
-            XmlDocumentPosition::Unknown,
+            XmlDocumentReference::Unknown,
         ));
     }
     pub fn write_element<W: std::io::Write>(
@@ -770,9 +987,33 @@ impl RssChannelItunesCategory {
         "http://www.itunes.com/dtds/podcast-1.0.dtd",
         Some("itunes"),
     );
-    fn parse_children<T: std::io::Read>(
+    pub fn parse_element<R: std::io::Read>(
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        while let Some(event) = iter.next() {
+            return match event {
+                Ok(xml::reader::XmlEvent::StartDocument { .. }) => {
+                    continue;
+                }
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    (Some("http://www.itunes.com/dtds/podcast-1.0.dtd"), "category") => {
+                        Self::parse_children(attributes, iter)
+                    }
+                    _ => Err(XmlParseError::UnexpectedElement(name)),
+                },
+                Ok(e) => Err(XmlParseError::UnexpectedXmlEvent(e)),
+                Err(e) => Err(e.into()),
+            };
+        }
+        Err(XmlParseError::UnexpectedEof("category element"))
+    }
+    fn parse_children<R: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
-        iter: &mut xml::reader::Events<T>,
+        iter: &mut xml::reader::Events<R>,
     ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
@@ -810,7 +1051,7 @@ impl RssChannelItunesCategory {
                 }
                 Ok(xml::reader::XmlEvent::Characters(val)) => {
                     return Err(XmlParseError::UnexpectedCharacters(
-                        XmlDocumentPosition::Unknown,
+                        XmlDocumentReference::Unknown,
                     ));
                 }
                 Err(e) => return Err(e.into()),
@@ -818,7 +1059,7 @@ impl RssChannelItunesCategory {
             }
         }
         return Err(XmlParseError::ExpectedEndElement(
-            XmlDocumentPosition::Unknown,
+            XmlDocumentReference::Unknown,
         ));
     }
     pub fn write_element<W: std::io::Write>(
@@ -854,9 +1095,33 @@ impl RssChannelItunesCategoryItunesCategory {
         "http://www.itunes.com/dtds/podcast-1.0.dtd",
         Some("itunes"),
     );
-    fn parse_children<T: std::io::Read>(
+    pub fn parse_element<R: std::io::Read>(
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        while let Some(event) = iter.next() {
+            return match event {
+                Ok(xml::reader::XmlEvent::StartDocument { .. }) => {
+                    continue;
+                }
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    (Some("http://www.itunes.com/dtds/podcast-1.0.dtd"), "category") => {
+                        Self::parse_children(attributes, iter)
+                    }
+                    _ => Err(XmlParseError::UnexpectedElement(name)),
+                },
+                Ok(e) => Err(XmlParseError::UnexpectedXmlEvent(e)),
+                Err(e) => Err(e.into()),
+            };
+        }
+        Err(XmlParseError::UnexpectedEof("category element"))
+    }
+    fn parse_children<R: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
-        iter: &mut xml::reader::Events<T>,
+        iter: &mut xml::reader::Events<R>,
     ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
@@ -887,7 +1152,7 @@ impl RssChannelItunesCategoryItunesCategory {
                 }
                 Ok(xml::reader::XmlEvent::Characters(val)) => {
                     return Err(XmlParseError::UnexpectedCharacters(
-                        XmlDocumentPosition::Unknown,
+                        XmlDocumentReference::Unknown,
                     ));
                 }
                 Err(e) => return Err(e.into()),
@@ -895,7 +1160,7 @@ impl RssChannelItunesCategoryItunesCategory {
             }
         }
         return Err(XmlParseError::ExpectedEndElement(
-            XmlDocumentPosition::Unknown,
+            XmlDocumentReference::Unknown,
         ));
     }
     pub fn write_element<W: std::io::Write>(
@@ -925,9 +1190,33 @@ impl RssChannelItunesExplicit {
         "http://www.itunes.com/dtds/podcast-1.0.dtd",
         Some("itunes"),
     );
-    fn parse_children<T: std::io::Read>(
+    pub fn parse_element<R: std::io::Read>(
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        while let Some(event) = iter.next() {
+            return match event {
+                Ok(xml::reader::XmlEvent::StartDocument { .. }) => {
+                    continue;
+                }
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    (Some("http://www.itunes.com/dtds/podcast-1.0.dtd"), "explicit") => {
+                        Self::parse_children(attributes, iter)
+                    }
+                    _ => Err(XmlParseError::UnexpectedElement(name)),
+                },
+                Ok(e) => Err(XmlParseError::UnexpectedXmlEvent(e)),
+                Err(e) => Err(e.into()),
+            };
+        }
+        Err(XmlParseError::UnexpectedEof("explicit element"))
+    }
+    fn parse_children<R: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
-        iter: &mut xml::reader::Events<T>,
+        iter: &mut xml::reader::Events<R>,
     ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
@@ -961,7 +1250,7 @@ impl RssChannelItunesExplicit {
             }
         }
         return Err(XmlParseError::ExpectedEndElement(
-            XmlDocumentPosition::Unknown,
+            XmlDocumentReference::Unknown,
         ));
     }
     pub fn write_element<W: std::io::Write>(
@@ -999,9 +1288,31 @@ impl Item {
     const XML_NAMESPACE: Option<&'static str> = None;
     const XML_PREFIX: Option<&'static str> = None;
     const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::local("item");
-    fn parse_children<T: std::io::Read>(
+    pub fn parse_element<R: std::io::Read>(
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        while let Some(event) = iter.next() {
+            return match event {
+                Ok(xml::reader::XmlEvent::StartDocument { .. }) => {
+                    continue;
+                }
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    (None, "item") => Self::parse_children(attributes, iter),
+                    _ => Err(XmlParseError::UnexpectedElement(name)),
+                },
+                Ok(e) => Err(XmlParseError::UnexpectedXmlEvent(e)),
+                Err(e) => Err(e.into()),
+            };
+        }
+        Err(XmlParseError::UnexpectedEof("item element"))
+    }
+    fn parse_children<R: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
-        iter: &mut xml::reader::Events<T>,
+        iter: &mut xml::reader::Events<R>,
     ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
@@ -1081,7 +1392,7 @@ impl Item {
                 }
                 Ok(xml::reader::XmlEvent::Characters(val)) => {
                     return Err(XmlParseError::UnexpectedCharacters(
-                        XmlDocumentPosition::Unknown,
+                        XmlDocumentReference::Unknown,
                     ));
                 }
                 Err(e) => return Err(e.into()),
@@ -1089,7 +1400,7 @@ impl Item {
             }
         }
         return Err(XmlParseError::ExpectedEndElement(
-            XmlDocumentPosition::Unknown,
+            XmlDocumentReference::Unknown,
         ));
     }
     pub fn write_element<W: std::io::Write>(
@@ -1155,9 +1466,33 @@ impl EpisodeType {
         "http://www.itunes.com/dtds/podcast-1.0.dtd",
         Some("itunes"),
     );
-    fn parse_children<T: std::io::Read>(
+    pub fn parse_element<R: std::io::Read>(
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        while let Some(event) = iter.next() {
+            return match event {
+                Ok(xml::reader::XmlEvent::StartDocument { .. }) => {
+                    continue;
+                }
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    (Some("http://www.itunes.com/dtds/podcast-1.0.dtd"), "episodeType") => {
+                        Self::parse_children(attributes, iter)
+                    }
+                    _ => Err(XmlParseError::UnexpectedElement(name)),
+                },
+                Ok(e) => Err(XmlParseError::UnexpectedXmlEvent(e)),
+                Err(e) => Err(e.into()),
+            };
+        }
+        Err(XmlParseError::UnexpectedEof("episodeType element"))
+    }
+    fn parse_children<R: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
-        iter: &mut xml::reader::Events<T>,
+        iter: &mut xml::reader::Events<R>,
     ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
@@ -1191,7 +1526,7 @@ impl EpisodeType {
             }
         }
         return Err(XmlParseError::ExpectedEndElement(
-            XmlDocumentPosition::Unknown,
+            XmlDocumentReference::Unknown,
         ));
     }
     pub fn write_element<W: std::io::Write>(
@@ -1221,9 +1556,33 @@ impl RssChannelItemItunesTitle {
         "http://www.itunes.com/dtds/podcast-1.0.dtd",
         Some("itunes"),
     );
-    fn parse_children<T: std::io::Read>(
+    pub fn parse_element<R: std::io::Read>(
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        while let Some(event) = iter.next() {
+            return match event {
+                Ok(xml::reader::XmlEvent::StartDocument { .. }) => {
+                    continue;
+                }
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    (Some("http://www.itunes.com/dtds/podcast-1.0.dtd"), "title") => {
+                        Self::parse_children(attributes, iter)
+                    }
+                    _ => Err(XmlParseError::UnexpectedElement(name)),
+                },
+                Ok(e) => Err(XmlParseError::UnexpectedXmlEvent(e)),
+                Err(e) => Err(e.into()),
+            };
+        }
+        Err(XmlParseError::UnexpectedEof("title element"))
+    }
+    fn parse_children<R: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
-        iter: &mut xml::reader::Events<T>,
+        iter: &mut xml::reader::Events<R>,
     ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
@@ -1257,7 +1616,7 @@ impl RssChannelItemItunesTitle {
             }
         }
         return Err(XmlParseError::ExpectedEndElement(
-            XmlDocumentPosition::Unknown,
+            XmlDocumentReference::Unknown,
         ));
     }
     pub fn write_element<W: std::io::Write>(
@@ -1283,9 +1642,31 @@ impl RssChannelItemDescription {
     const XML_NAMESPACE: Option<&'static str> = None;
     const XML_PREFIX: Option<&'static str> = None;
     const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::local("description");
-    fn parse_children<T: std::io::Read>(
+    pub fn parse_element<R: std::io::Read>(
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        while let Some(event) = iter.next() {
+            return match event {
+                Ok(xml::reader::XmlEvent::StartDocument { .. }) => {
+                    continue;
+                }
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    (None, "description") => Self::parse_children(attributes, iter),
+                    _ => Err(XmlParseError::UnexpectedElement(name)),
+                },
+                Ok(e) => Err(XmlParseError::UnexpectedXmlEvent(e)),
+                Err(e) => Err(e.into()),
+            };
+        }
+        Err(XmlParseError::UnexpectedEof("description element"))
+    }
+    fn parse_children<R: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
-        iter: &mut xml::reader::Events<T>,
+        iter: &mut xml::reader::Events<R>,
     ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
@@ -1319,7 +1700,7 @@ impl RssChannelItemDescription {
             }
         }
         return Err(XmlParseError::ExpectedEndElement(
-            XmlDocumentPosition::Unknown,
+            XmlDocumentReference::Unknown,
         ));
     }
     pub fn write_element<W: std::io::Write>(
@@ -1347,9 +1728,31 @@ impl Enclosure {
     const XML_NAMESPACE: Option<&'static str> = None;
     const XML_PREFIX: Option<&'static str> = None;
     const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::local("enclosure");
-    fn parse_children<T: std::io::Read>(
+    pub fn parse_element<R: std::io::Read>(
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        while let Some(event) = iter.next() {
+            return match event {
+                Ok(xml::reader::XmlEvent::StartDocument { .. }) => {
+                    continue;
+                }
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    (None, "enclosure") => Self::parse_children(attributes, iter),
+                    _ => Err(XmlParseError::UnexpectedElement(name)),
+                },
+                Ok(e) => Err(XmlParseError::UnexpectedXmlEvent(e)),
+                Err(e) => Err(e.into()),
+            };
+        }
+        Err(XmlParseError::UnexpectedEof("enclosure element"))
+    }
+    fn parse_children<R: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
-        iter: &mut xml::reader::Events<T>,
+        iter: &mut xml::reader::Events<R>,
     ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
@@ -1386,7 +1789,7 @@ impl Enclosure {
                 }
                 Ok(xml::reader::XmlEvent::Characters(val)) => {
                     return Err(XmlParseError::UnexpectedCharacters(
-                        XmlDocumentPosition::Unknown,
+                        XmlDocumentReference::Unknown,
                     ));
                 }
                 Err(e) => return Err(e.into()),
@@ -1394,7 +1797,7 @@ impl Enclosure {
             }
         }
         return Err(XmlParseError::ExpectedEndElement(
-            XmlDocumentPosition::Unknown,
+            XmlDocumentReference::Unknown,
         ));
     }
     pub fn write_element<W: std::io::Write>(
@@ -1426,9 +1829,31 @@ impl Guid {
     const XML_NAMESPACE: Option<&'static str> = None;
     const XML_PREFIX: Option<&'static str> = None;
     const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::local("guid");
-    fn parse_children<T: std::io::Read>(
+    pub fn parse_element<R: std::io::Read>(
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        while let Some(event) = iter.next() {
+            return match event {
+                Ok(xml::reader::XmlEvent::StartDocument { .. }) => {
+                    continue;
+                }
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    (None, "guid") => Self::parse_children(attributes, iter),
+                    _ => Err(XmlParseError::UnexpectedElement(name)),
+                },
+                Ok(e) => Err(XmlParseError::UnexpectedXmlEvent(e)),
+                Err(e) => Err(e.into()),
+            };
+        }
+        Err(XmlParseError::UnexpectedEof("guid element"))
+    }
+    fn parse_children<R: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
-        iter: &mut xml::reader::Events<T>,
+        iter: &mut xml::reader::Events<R>,
     ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
@@ -1462,7 +1887,7 @@ impl Guid {
             }
         }
         return Err(XmlParseError::ExpectedEndElement(
-            XmlDocumentPosition::Unknown,
+            XmlDocumentReference::Unknown,
         ));
     }
     pub fn write_element<W: std::io::Write>(
@@ -1488,9 +1913,31 @@ impl PubDate {
     const XML_NAMESPACE: Option<&'static str> = None;
     const XML_PREFIX: Option<&'static str> = None;
     const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::local("pubDate");
-    fn parse_children<T: std::io::Read>(
+    pub fn parse_element<R: std::io::Read>(
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        while let Some(event) = iter.next() {
+            return match event {
+                Ok(xml::reader::XmlEvent::StartDocument { .. }) => {
+                    continue;
+                }
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    (None, "pubDate") => Self::parse_children(attributes, iter),
+                    _ => Err(XmlParseError::UnexpectedElement(name)),
+                },
+                Ok(e) => Err(XmlParseError::UnexpectedXmlEvent(e)),
+                Err(e) => Err(e.into()),
+            };
+        }
+        Err(XmlParseError::UnexpectedEof("pubDate element"))
+    }
+    fn parse_children<R: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
-        iter: &mut xml::reader::Events<T>,
+        iter: &mut xml::reader::Events<R>,
     ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
@@ -1524,7 +1971,7 @@ impl PubDate {
             }
         }
         return Err(XmlParseError::ExpectedEndElement(
-            XmlDocumentPosition::Unknown,
+            XmlDocumentReference::Unknown,
         ));
     }
     pub fn write_element<W: std::io::Write>(
@@ -1554,9 +2001,33 @@ impl Duration {
         "http://www.itunes.com/dtds/podcast-1.0.dtd",
         Some("itunes"),
     );
-    fn parse_children<T: std::io::Read>(
+    pub fn parse_element<R: std::io::Read>(
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        while let Some(event) = iter.next() {
+            return match event {
+                Ok(xml::reader::XmlEvent::StartDocument { .. }) => {
+                    continue;
+                }
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    (Some("http://www.itunes.com/dtds/podcast-1.0.dtd"), "duration") => {
+                        Self::parse_children(attributes, iter)
+                    }
+                    _ => Err(XmlParseError::UnexpectedElement(name)),
+                },
+                Ok(e) => Err(XmlParseError::UnexpectedXmlEvent(e)),
+                Err(e) => Err(e.into()),
+            };
+        }
+        Err(XmlParseError::UnexpectedEof("duration element"))
+    }
+    fn parse_children<R: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
-        iter: &mut xml::reader::Events<T>,
+        iter: &mut xml::reader::Events<R>,
     ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
@@ -1590,7 +2061,7 @@ impl Duration {
             }
         }
         return Err(XmlParseError::ExpectedEndElement(
-            XmlDocumentPosition::Unknown,
+            XmlDocumentReference::Unknown,
         ));
     }
     pub fn write_element<W: std::io::Write>(
@@ -1620,9 +2091,33 @@ impl RssChannelItemItunesExplicit {
         "http://www.itunes.com/dtds/podcast-1.0.dtd",
         Some("itunes"),
     );
-    fn parse_children<T: std::io::Read>(
+    pub fn parse_element<R: std::io::Read>(
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        while let Some(event) = iter.next() {
+            return match event {
+                Ok(xml::reader::XmlEvent::StartDocument { .. }) => {
+                    continue;
+                }
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    (Some("http://www.itunes.com/dtds/podcast-1.0.dtd"), "explicit") => {
+                        Self::parse_children(attributes, iter)
+                    }
+                    _ => Err(XmlParseError::UnexpectedElement(name)),
+                },
+                Ok(e) => Err(XmlParseError::UnexpectedXmlEvent(e)),
+                Err(e) => Err(e.into()),
+            };
+        }
+        Err(XmlParseError::UnexpectedEof("explicit element"))
+    }
+    fn parse_children<R: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
-        iter: &mut xml::reader::Events<T>,
+        iter: &mut xml::reader::Events<R>,
     ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
@@ -1656,7 +2151,7 @@ impl RssChannelItemItunesExplicit {
             }
         }
         return Err(XmlParseError::ExpectedEndElement(
-            XmlDocumentPosition::Unknown,
+            XmlDocumentReference::Unknown,
         ));
     }
     pub fn write_element<W: std::io::Write>(
@@ -1686,9 +2181,33 @@ impl Episode {
         "http://www.itunes.com/dtds/podcast-1.0.dtd",
         Some("itunes"),
     );
-    fn parse_children<T: std::io::Read>(
+    pub fn parse_element<R: std::io::Read>(
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        while let Some(event) = iter.next() {
+            return match event {
+                Ok(xml::reader::XmlEvent::StartDocument { .. }) => {
+                    continue;
+                }
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    (Some("http://www.itunes.com/dtds/podcast-1.0.dtd"), "episode") => {
+                        Self::parse_children(attributes, iter)
+                    }
+                    _ => Err(XmlParseError::UnexpectedElement(name)),
+                },
+                Ok(e) => Err(XmlParseError::UnexpectedXmlEvent(e)),
+                Err(e) => Err(e.into()),
+            };
+        }
+        Err(XmlParseError::UnexpectedEof("episode element"))
+    }
+    fn parse_children<R: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
-        iter: &mut xml::reader::Events<T>,
+        iter: &mut xml::reader::Events<R>,
     ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
@@ -1722,7 +2241,7 @@ impl Episode {
             }
         }
         return Err(XmlParseError::ExpectedEndElement(
-            XmlDocumentPosition::Unknown,
+            XmlDocumentReference::Unknown,
         ));
     }
     pub fn write_element<W: std::io::Write>(
@@ -1752,9 +2271,33 @@ impl Season {
         "http://www.itunes.com/dtds/podcast-1.0.dtd",
         Some("itunes"),
     );
-    fn parse_children<T: std::io::Read>(
+    pub fn parse_element<R: std::io::Read>(
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        while let Some(event) = iter.next() {
+            return match event {
+                Ok(xml::reader::XmlEvent::StartDocument { .. }) => {
+                    continue;
+                }
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    (Some("http://www.itunes.com/dtds/podcast-1.0.dtd"), "season") => {
+                        Self::parse_children(attributes, iter)
+                    }
+                    _ => Err(XmlParseError::UnexpectedElement(name)),
+                },
+                Ok(e) => Err(XmlParseError::UnexpectedXmlEvent(e)),
+                Err(e) => Err(e.into()),
+            };
+        }
+        Err(XmlParseError::UnexpectedEof("season element"))
+    }
+    fn parse_children<R: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
-        iter: &mut xml::reader::Events<T>,
+        iter: &mut xml::reader::Events<R>,
     ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
@@ -1788,7 +2331,7 @@ impl Season {
             }
         }
         return Err(XmlParseError::ExpectedEndElement(
-            XmlDocumentPosition::Unknown,
+            XmlDocumentReference::Unknown,
         ));
     }
     pub fn write_element<W: std::io::Write>(
@@ -1814,9 +2357,31 @@ impl RssChannelItemTitle {
     const XML_NAMESPACE: Option<&'static str> = None;
     const XML_PREFIX: Option<&'static str> = None;
     const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::local("title");
-    fn parse_children<T: std::io::Read>(
+    pub fn parse_element<R: std::io::Read>(
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        while let Some(event) = iter.next() {
+            return match event {
+                Ok(xml::reader::XmlEvent::StartDocument { .. }) => {
+                    continue;
+                }
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    (None, "title") => Self::parse_children(attributes, iter),
+                    _ => Err(XmlParseError::UnexpectedElement(name)),
+                },
+                Ok(e) => Err(XmlParseError::UnexpectedXmlEvent(e)),
+                Err(e) => Err(e.into()),
+            };
+        }
+        Err(XmlParseError::UnexpectedEof("title element"))
+    }
+    fn parse_children<R: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
-        iter: &mut xml::reader::Events<T>,
+        iter: &mut xml::reader::Events<R>,
     ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
@@ -1850,7 +2415,7 @@ impl RssChannelItemTitle {
             }
         }
         return Err(XmlParseError::ExpectedEndElement(
-            XmlDocumentPosition::Unknown,
+            XmlDocumentReference::Unknown,
         ));
     }
     pub fn write_element<W: std::io::Write>(
@@ -1880,9 +2445,33 @@ impl RssChannelItemItunesImage {
         "http://www.itunes.com/dtds/podcast-1.0.dtd",
         Some("itunes"),
     );
-    fn parse_children<T: std::io::Read>(
+    pub fn parse_element<R: std::io::Read>(
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        while let Some(event) = iter.next() {
+            return match event {
+                Ok(xml::reader::XmlEvent::StartDocument { .. }) => {
+                    continue;
+                }
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    (Some("http://www.itunes.com/dtds/podcast-1.0.dtd"), "image") => {
+                        Self::parse_children(attributes, iter)
+                    }
+                    _ => Err(XmlParseError::UnexpectedElement(name)),
+                },
+                Ok(e) => Err(XmlParseError::UnexpectedXmlEvent(e)),
+                Err(e) => Err(e.into()),
+            };
+        }
+        Err(XmlParseError::UnexpectedEof("image element"))
+    }
+    fn parse_children<R: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
-        iter: &mut xml::reader::Events<T>,
+        iter: &mut xml::reader::Events<R>,
     ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
@@ -1913,7 +2502,7 @@ impl RssChannelItemItunesImage {
                 }
                 Ok(xml::reader::XmlEvent::Characters(val)) => {
                     return Err(XmlParseError::UnexpectedCharacters(
-                        XmlDocumentPosition::Unknown,
+                        XmlDocumentReference::Unknown,
                     ));
                 }
                 Err(e) => return Err(e.into()),
@@ -1921,7 +2510,7 @@ impl RssChannelItemItunesImage {
             }
         }
         return Err(XmlParseError::ExpectedEndElement(
-            XmlDocumentPosition::Unknown,
+            XmlDocumentReference::Unknown,
         ));
     }
     pub fn write_element<W: std::io::Write>(
@@ -1947,9 +2536,31 @@ impl RssChannelItemLink {
     const XML_NAMESPACE: Option<&'static str> = None;
     const XML_PREFIX: Option<&'static str> = None;
     const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::local("link");
-    fn parse_children<T: std::io::Read>(
+    pub fn parse_element<R: std::io::Read>(
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        while let Some(event) = iter.next() {
+            return match event {
+                Ok(xml::reader::XmlEvent::StartDocument { .. }) => {
+                    continue;
+                }
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    (None, "link") => Self::parse_children(attributes, iter),
+                    _ => Err(XmlParseError::UnexpectedElement(name)),
+                },
+                Ok(e) => Err(XmlParseError::UnexpectedXmlEvent(e)),
+                Err(e) => Err(e.into()),
+            };
+        }
+        Err(XmlParseError::UnexpectedEof("link element"))
+    }
+    fn parse_children<R: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
-        iter: &mut xml::reader::Events<T>,
+        iter: &mut xml::reader::Events<R>,
     ) -> Result<Self, XmlParseError> {
         let mut n = Self::default();
         for attr in attrs.into_iter() {
@@ -1983,7 +2594,7 @@ impl RssChannelItemLink {
             }
         }
         return Err(XmlParseError::ExpectedEndElement(
-            XmlDocumentPosition::Unknown,
+            XmlDocumentReference::Unknown,
         ));
     }
     pub fn write_element<W: std::io::Write>(

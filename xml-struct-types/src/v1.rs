@@ -1,7 +1,9 @@
 use thiserror::Error;
+use xml::name::OwnedName;
 
-#[derive(Debug)]
-pub enum XmlDocumentPosition {
+#[derive(Debug, Error)]
+pub enum XmlDocumentReference {
+    #[error("Unknown reference")]
     Unknown,
 }
 
@@ -10,9 +12,17 @@ pub enum XmlParseError {
     #[error(transparent)]
     XmlRsRead(#[from] xml::reader::Error),
     #[error("Expected EndElement")]
-    ExpectedEndElement(XmlDocumentPosition),
+    ExpectedEndElement(XmlDocumentReference),
     #[error("UnexpectedCharacters")]
-    UnexpectedCharacters(XmlDocumentPosition),
+    UnexpectedCharacters(XmlDocumentReference),
+    #[error("Encountered unexpected Element: {0}")]
+    UnexpectedElement(OwnedName),
+    #[error("Encountered unexpected XMLEvent: {0:?}")]
+    UnexpectedXmlEvent(xml::reader::XmlEvent),
+    #[error("Encountered unexpected EOF. Expecting: {0}")]
+    UnexpectedEof(&'static str),
+    #[error("Expected EOF, encountered: {0:?}")]
+    ExpectedEof(xml::reader::XmlEvent),
 }
 
 #[derive(Error, Debug)]

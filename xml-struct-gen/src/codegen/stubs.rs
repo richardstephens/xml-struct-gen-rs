@@ -47,6 +47,8 @@ pub fn gen_el_struct(
         quote! {}
     };
 
+    let parse_elem_impl = generate_parse_elem(k);
+
     let parse_children_impl = generate_parse_children(&attr_fields, &elem_fields, v.has_text);
 
     let name_consts = generate_name_consts(k);
@@ -66,6 +68,7 @@ pub fn gen_el_struct(
             #name_consts
 
             #maybe_parse_document_impl
+            #parse_elem_impl
             #parse_children_impl
 
             #write_element_impl
@@ -172,28 +175,54 @@ fn elem_matchers(elem_fields: &Vec<(Vec<OwnedName>, Ident, Ident)>) -> Vec<Token
         .collect()
 }
 
-fn generate_parse_document(elem_props: &ElemProps) -> TokenStream {
-    let root = elem_props.child_stacks.iter().next().unwrap();
-    let match_arm = owned_name_to_match_arm(root.last().clone().unwrap());
+fn generate_parse_document(_elem_props: &ElemProps) -> TokenStream {
     quote! {
         pub fn parse_document<R: std::io::Read>(mut reader: R) -> Result<Self, XmlParseError>  {
             let mut parser = xml::EventReader::new(reader).into_iter();
-            while let Some(event) = parser.next() {
-                match event {
+            let root_element = Self::parse_element(&mut parser)?;
+            match parser.next() {
+                Some(Ok(xml::reader::XmlEvent::EndDocument)) => {
+                    Ok(root_element)
+                }
+                None => {
+                    //should this be an error? might mean something has unexpectedly consumed the EndElement
+                    Ok(root_element)
+                }
+                Some(Ok(e)) => Err(XmlParseError::ExpectedEof(e)),
+                Some(Err(e)) => Err(e.into()),
+            }
+        }
+    }
+}
+
+fn generate_parse_elem(elem_path: &Vec<OwnedName>) -> TokenStream {
+    let elem = elem_path.last().clone().unwrap();
+    let match_arm = owned_name_to_match_arm(elem);
+    let err_text = format!("{} element", elem.local_name);
+    quote! {
+        pub fn parse_element<R: std::io::Read>(iter: &mut xml::reader::Events<R>) -> Result<Self, XmlParseError>  {
+            while let Some(event) = iter.next() {
+                return match event {
+                    Ok(xml::reader::XmlEvent::StartDocument { .. }) => {
+                        //TODO: should we capture the contents of the event?
+                        continue;
+                    }
                     Ok(xml::reader::XmlEvent::StartElement {
                         name,
                         attributes,
                         namespace,
-                    }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
-                        #match_arm => {
-                            return Self::parse_children(attributes, &mut parser);
+                    }) => {
+                        match (name.namespace.as_deref(), name.local_name.as_str()) {
+                            #match_arm => Self::parse_children(attributes, iter),
+                            _ => Err(XmlParseError::UnexpectedElement(name)),
                         }
-                        _ => {}
-                    },
-                _ => {}
-                }
+                    }
+                    Ok(e) => Err(XmlParseError::UnexpectedXmlEvent(e)),
+                    Err(e) => Err(e.into()),
+                };
             };
-            todo!()
+
+            Err(XmlParseError::UnexpectedEof(#err_text))
         }
     }
 }
@@ -210,13 +239,13 @@ fn generate_parse_children(
         quote! {n.value = Some(val); }
     } else {
         quote! {
-            return Err(XmlParseError::UnexpectedCharacters(XmlDocumentPosition::Unknown));
+            return Err(XmlParseError::UnexpectedCharacters(XmlDocumentReference::Unknown));
         }
     };
     quote! {
-        fn parse_children<T: std::io::Read>(
+        fn parse_children<R: std::io::Read>(
             attrs: Vec<xml::attribute::OwnedAttribute>,
-            iter: &mut xml::reader::Events<T>
+            iter: &mut xml::reader::Events<R>
         ) -> Result<Self, XmlParseError> {
             let mut n = Self::default();
 
@@ -250,7 +279,7 @@ fn generate_parse_children(
                     _ => {}
                 }
             }
-            return Err(XmlParseError::ExpectedEndElement(XmlDocumentPosition::Unknown));
+            return Err(XmlParseError::ExpectedEndElement(XmlDocumentReference::Unknown));
         }
     }
 }
