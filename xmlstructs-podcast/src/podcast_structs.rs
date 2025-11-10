@@ -9,6 +9,8 @@ const DOCUMENT_NAMESPACES: &[(&str, &str)] = &[
 pub struct RssDocument {
     pub r#version: Option<String>,
     pub misc_attrs: HashMap<(Option<String>, String), String>,
+    #[serde(skip)]
+    pub misc_content: Vec<xml::reader::XmlEvent>,
     pub channel_elems: Vec<Channel>,
 }
 impl RssDocument {
@@ -70,14 +72,49 @@ impl RssDocument {
         while let Some(e) = iter.next() {
             match e {
                 Ok(xml::reader::XmlEvent::StartElement {
-                    name, attributes, ..
+                    name,
+                    attributes,
+                    namespace,
                 }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
                     (None, "channel") => {
                         n.channel_elems
                             .push(Channel::parse_children(attributes, iter)?);
                     }
                     _ => {
-                        todo!();
+                        let mut depth: usize = 1;
+                        n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                            name,
+                            attributes,
+                            namespace,
+                        });
+                        while let Some(e) = iter.next() {
+                            match e {
+                                Ok(xml::reader::XmlEvent::StartElement {
+                                    name,
+                                    attributes,
+                                    namespace,
+                                }) => {
+                                    n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                                        name,
+                                        attributes,
+                                        namespace,
+                                    });
+                                    depth += 1;
+                                }
+                                Ok(xml::reader::XmlEvent::EndElement { name }) => {
+                                    n.misc_content
+                                        .push(xml::reader::XmlEvent::EndElement { name });
+                                    depth -= 1;
+                                    if depth == 0 {
+                                        break;
+                                    }
+                                }
+                                Ok(evt) => {
+                                    n.misc_content.push(evt);
+                                }
+                                Err(e) => return Err(e.into()),
+                            }
+                        }
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
@@ -121,6 +158,8 @@ impl RssDocument {
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Channel {
     pub misc_attrs: HashMap<(Option<String>, String), String>,
+    #[serde(skip)]
+    pub misc_content: Vec<xml::reader::XmlEvent>,
     pub rss_channel_title_elems: Vec<RssChannelTitle>,
     pub rss_channel_link_elems: Vec<RssChannelLink>,
     pub language_elems: Vec<Language>,
@@ -179,7 +218,9 @@ impl Channel {
         while let Some(e) = iter.next() {
             match e {
                 Ok(xml::reader::XmlEvent::StartElement {
-                    name, attributes, ..
+                    name,
+                    attributes,
+                    namespace,
                 }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
                     (None, "title") => {
                         n.rss_channel_title_elems
@@ -224,7 +265,40 @@ impl Channel {
                         n.item_elems.push(Item::parse_children(attributes, iter)?);
                     }
                     _ => {
-                        todo!();
+                        let mut depth: usize = 1;
+                        n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                            name,
+                            attributes,
+                            namespace,
+                        });
+                        while let Some(e) = iter.next() {
+                            match e {
+                                Ok(xml::reader::XmlEvent::StartElement {
+                                    name,
+                                    attributes,
+                                    namespace,
+                                }) => {
+                                    n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                                        name,
+                                        attributes,
+                                        namespace,
+                                    });
+                                    depth += 1;
+                                }
+                                Ok(xml::reader::XmlEvent::EndElement { name }) => {
+                                    n.misc_content
+                                        .push(xml::reader::XmlEvent::EndElement { name });
+                                    depth -= 1;
+                                    if depth == 0 {
+                                        break;
+                                    }
+                                }
+                                Ok(evt) => {
+                                    n.misc_content.push(evt);
+                                }
+                                Err(e) => return Err(e.into()),
+                            }
+                        }
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
@@ -295,6 +369,8 @@ impl Channel {
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct RssChannelTitle {
     pub misc_attrs: HashMap<(Option<String>, String), String>,
+    #[serde(skip)]
+    pub misc_content: Vec<xml::reader::XmlEvent>,
     pub value: Option<String>,
 }
 impl RssChannelTitle {
@@ -343,10 +419,45 @@ impl RssChannelTitle {
         while let Some(e) = iter.next() {
             match e {
                 Ok(xml::reader::XmlEvent::StartElement {
-                    name, attributes, ..
+                    name,
+                    attributes,
+                    namespace,
                 }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
                     _ => {
-                        todo!();
+                        let mut depth: usize = 1;
+                        n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                            name,
+                            attributes,
+                            namespace,
+                        });
+                        while let Some(e) = iter.next() {
+                            match e {
+                                Ok(xml::reader::XmlEvent::StartElement {
+                                    name,
+                                    attributes,
+                                    namespace,
+                                }) => {
+                                    n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                                        name,
+                                        attributes,
+                                        namespace,
+                                    });
+                                    depth += 1;
+                                }
+                                Ok(xml::reader::XmlEvent::EndElement { name }) => {
+                                    n.misc_content
+                                        .push(xml::reader::XmlEvent::EndElement { name });
+                                    depth -= 1;
+                                    if depth == 0 {
+                                        break;
+                                    }
+                                }
+                                Ok(evt) => {
+                                    n.misc_content.push(evt);
+                                }
+                                Err(e) => return Err(e.into()),
+                            }
+                        }
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
@@ -385,6 +496,8 @@ impl RssChannelTitle {
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct RssChannelLink {
     pub misc_attrs: HashMap<(Option<String>, String), String>,
+    #[serde(skip)]
+    pub misc_content: Vec<xml::reader::XmlEvent>,
     pub value: Option<String>,
 }
 impl RssChannelLink {
@@ -433,10 +546,45 @@ impl RssChannelLink {
         while let Some(e) = iter.next() {
             match e {
                 Ok(xml::reader::XmlEvent::StartElement {
-                    name, attributes, ..
+                    name,
+                    attributes,
+                    namespace,
                 }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
                     _ => {
-                        todo!();
+                        let mut depth: usize = 1;
+                        n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                            name,
+                            attributes,
+                            namespace,
+                        });
+                        while let Some(e) = iter.next() {
+                            match e {
+                                Ok(xml::reader::XmlEvent::StartElement {
+                                    name,
+                                    attributes,
+                                    namespace,
+                                }) => {
+                                    n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                                        name,
+                                        attributes,
+                                        namespace,
+                                    });
+                                    depth += 1;
+                                }
+                                Ok(xml::reader::XmlEvent::EndElement { name }) => {
+                                    n.misc_content
+                                        .push(xml::reader::XmlEvent::EndElement { name });
+                                    depth -= 1;
+                                    if depth == 0 {
+                                        break;
+                                    }
+                                }
+                                Ok(evt) => {
+                                    n.misc_content.push(evt);
+                                }
+                                Err(e) => return Err(e.into()),
+                            }
+                        }
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
@@ -475,6 +623,8 @@ impl RssChannelLink {
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Language {
     pub misc_attrs: HashMap<(Option<String>, String), String>,
+    #[serde(skip)]
+    pub misc_content: Vec<xml::reader::XmlEvent>,
     pub value: Option<String>,
 }
 impl Language {
@@ -523,10 +673,45 @@ impl Language {
         while let Some(e) = iter.next() {
             match e {
                 Ok(xml::reader::XmlEvent::StartElement {
-                    name, attributes, ..
+                    name,
+                    attributes,
+                    namespace,
                 }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
                     _ => {
-                        todo!();
+                        let mut depth: usize = 1;
+                        n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                            name,
+                            attributes,
+                            namespace,
+                        });
+                        while let Some(e) = iter.next() {
+                            match e {
+                                Ok(xml::reader::XmlEvent::StartElement {
+                                    name,
+                                    attributes,
+                                    namespace,
+                                }) => {
+                                    n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                                        name,
+                                        attributes,
+                                        namespace,
+                                    });
+                                    depth += 1;
+                                }
+                                Ok(xml::reader::XmlEvent::EndElement { name }) => {
+                                    n.misc_content
+                                        .push(xml::reader::XmlEvent::EndElement { name });
+                                    depth -= 1;
+                                    if depth == 0 {
+                                        break;
+                                    }
+                                }
+                                Ok(evt) => {
+                                    n.misc_content.push(evt);
+                                }
+                                Err(e) => return Err(e.into()),
+                            }
+                        }
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
@@ -565,6 +750,8 @@ impl Language {
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Copyright {
     pub misc_attrs: HashMap<(Option<String>, String), String>,
+    #[serde(skip)]
+    pub misc_content: Vec<xml::reader::XmlEvent>,
     pub value: Option<String>,
 }
 impl Copyright {
@@ -613,10 +800,45 @@ impl Copyright {
         while let Some(e) = iter.next() {
             match e {
                 Ok(xml::reader::XmlEvent::StartElement {
-                    name, attributes, ..
+                    name,
+                    attributes,
+                    namespace,
                 }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
                     _ => {
-                        todo!();
+                        let mut depth: usize = 1;
+                        n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                            name,
+                            attributes,
+                            namespace,
+                        });
+                        while let Some(e) = iter.next() {
+                            match e {
+                                Ok(xml::reader::XmlEvent::StartElement {
+                                    name,
+                                    attributes,
+                                    namespace,
+                                }) => {
+                                    n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                                        name,
+                                        attributes,
+                                        namespace,
+                                    });
+                                    depth += 1;
+                                }
+                                Ok(xml::reader::XmlEvent::EndElement { name }) => {
+                                    n.misc_content
+                                        .push(xml::reader::XmlEvent::EndElement { name });
+                                    depth -= 1;
+                                    if depth == 0 {
+                                        break;
+                                    }
+                                }
+                                Ok(evt) => {
+                                    n.misc_content.push(evt);
+                                }
+                                Err(e) => return Err(e.into()),
+                            }
+                        }
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
@@ -655,6 +877,8 @@ impl Copyright {
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Author {
     pub misc_attrs: HashMap<(Option<String>, String), String>,
+    #[serde(skip)]
+    pub misc_content: Vec<xml::reader::XmlEvent>,
     pub value: Option<String>,
 }
 impl Author {
@@ -709,10 +933,45 @@ impl Author {
         while let Some(e) = iter.next() {
             match e {
                 Ok(xml::reader::XmlEvent::StartElement {
-                    name, attributes, ..
+                    name,
+                    attributes,
+                    namespace,
                 }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
                     _ => {
-                        todo!();
+                        let mut depth: usize = 1;
+                        n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                            name,
+                            attributes,
+                            namespace,
+                        });
+                        while let Some(e) = iter.next() {
+                            match e {
+                                Ok(xml::reader::XmlEvent::StartElement {
+                                    name,
+                                    attributes,
+                                    namespace,
+                                }) => {
+                                    n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                                        name,
+                                        attributes,
+                                        namespace,
+                                    });
+                                    depth += 1;
+                                }
+                                Ok(xml::reader::XmlEvent::EndElement { name }) => {
+                                    n.misc_content
+                                        .push(xml::reader::XmlEvent::EndElement { name });
+                                    depth -= 1;
+                                    if depth == 0 {
+                                        break;
+                                    }
+                                }
+                                Ok(evt) => {
+                                    n.misc_content.push(evt);
+                                }
+                                Err(e) => return Err(e.into()),
+                            }
+                        }
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
@@ -751,6 +1010,8 @@ impl Author {
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct RssChannelDescription {
     pub misc_attrs: HashMap<(Option<String>, String), String>,
+    #[serde(skip)]
+    pub misc_content: Vec<xml::reader::XmlEvent>,
     pub value: Option<String>,
 }
 impl RssChannelDescription {
@@ -799,10 +1060,45 @@ impl RssChannelDescription {
         while let Some(e) = iter.next() {
             match e {
                 Ok(xml::reader::XmlEvent::StartElement {
-                    name, attributes, ..
+                    name,
+                    attributes,
+                    namespace,
                 }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
                     _ => {
-                        todo!();
+                        let mut depth: usize = 1;
+                        n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                            name,
+                            attributes,
+                            namespace,
+                        });
+                        while let Some(e) = iter.next() {
+                            match e {
+                                Ok(xml::reader::XmlEvent::StartElement {
+                                    name,
+                                    attributes,
+                                    namespace,
+                                }) => {
+                                    n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                                        name,
+                                        attributes,
+                                        namespace,
+                                    });
+                                    depth += 1;
+                                }
+                                Ok(xml::reader::XmlEvent::EndElement { name }) => {
+                                    n.misc_content
+                                        .push(xml::reader::XmlEvent::EndElement { name });
+                                    depth -= 1;
+                                    if depth == 0 {
+                                        break;
+                                    }
+                                }
+                                Ok(evt) => {
+                                    n.misc_content.push(evt);
+                                }
+                                Err(e) => return Err(e.into()),
+                            }
+                        }
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
@@ -841,6 +1137,8 @@ impl RssChannelDescription {
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Type {
     pub misc_attrs: HashMap<(Option<String>, String), String>,
+    #[serde(skip)]
+    pub misc_content: Vec<xml::reader::XmlEvent>,
     pub value: Option<String>,
 }
 impl Type {
@@ -895,10 +1193,45 @@ impl Type {
         while let Some(e) = iter.next() {
             match e {
                 Ok(xml::reader::XmlEvent::StartElement {
-                    name, attributes, ..
+                    name,
+                    attributes,
+                    namespace,
                 }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
                     _ => {
-                        todo!();
+                        let mut depth: usize = 1;
+                        n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                            name,
+                            attributes,
+                            namespace,
+                        });
+                        while let Some(e) = iter.next() {
+                            match e {
+                                Ok(xml::reader::XmlEvent::StartElement {
+                                    name,
+                                    attributes,
+                                    namespace,
+                                }) => {
+                                    n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                                        name,
+                                        attributes,
+                                        namespace,
+                                    });
+                                    depth += 1;
+                                }
+                                Ok(xml::reader::XmlEvent::EndElement { name }) => {
+                                    n.misc_content
+                                        .push(xml::reader::XmlEvent::EndElement { name });
+                                    depth -= 1;
+                                    if depth == 0 {
+                                        break;
+                                    }
+                                }
+                                Ok(evt) => {
+                                    n.misc_content.push(evt);
+                                }
+                                Err(e) => return Err(e.into()),
+                            }
+                        }
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
@@ -938,6 +1271,8 @@ impl Type {
 pub struct RssChannelItunesImage {
     pub r#href: Option<String>,
     pub misc_attrs: HashMap<(Option<String>, String), String>,
+    #[serde(skip)]
+    pub misc_content: Vec<xml::reader::XmlEvent>,
 }
 impl RssChannelItunesImage {
     const XML_LOCAL_NAME: &'static str = "image";
@@ -994,10 +1329,45 @@ impl RssChannelItunesImage {
         while let Some(e) = iter.next() {
             match e {
                 Ok(xml::reader::XmlEvent::StartElement {
-                    name, attributes, ..
+                    name,
+                    attributes,
+                    namespace,
                 }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
                     _ => {
-                        todo!();
+                        let mut depth: usize = 1;
+                        n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                            name,
+                            attributes,
+                            namespace,
+                        });
+                        while let Some(e) = iter.next() {
+                            match e {
+                                Ok(xml::reader::XmlEvent::StartElement {
+                                    name,
+                                    attributes,
+                                    namespace,
+                                }) => {
+                                    n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                                        name,
+                                        attributes,
+                                        namespace,
+                                    });
+                                    depth += 1;
+                                }
+                                Ok(xml::reader::XmlEvent::EndElement { name }) => {
+                                    n.misc_content
+                                        .push(xml::reader::XmlEvent::EndElement { name });
+                                    depth -= 1;
+                                    if depth == 0 {
+                                        break;
+                                    }
+                                }
+                                Ok(evt) => {
+                                    n.misc_content.push(evt);
+                                }
+                                Err(e) => return Err(e.into()),
+                            }
+                        }
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
@@ -1039,6 +1409,8 @@ impl RssChannelItunesImage {
 pub struct RssChannelItunesCategory {
     pub r#text: Option<String>,
     pub misc_attrs: HashMap<(Option<String>, String), String>,
+    #[serde(skip)]
+    pub misc_content: Vec<xml::reader::XmlEvent>,
     pub rss_channel_itunes_category_itunes_category_elems:
         Vec<RssChannelItunesCategoryItunesCategory>,
 }
@@ -1097,7 +1469,9 @@ impl RssChannelItunesCategory {
         while let Some(e) = iter.next() {
             match e {
                 Ok(xml::reader::XmlEvent::StartElement {
-                    name, attributes, ..
+                    name,
+                    attributes,
+                    namespace,
                 }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
                     (Some("http://www.itunes.com/dtds/podcast-1.0.dtd"), "category") => {
                         n.rss_channel_itunes_category_itunes_category_elems.push(
@@ -1107,7 +1481,40 @@ impl RssChannelItunesCategory {
                         );
                     }
                     _ => {
-                        todo!();
+                        let mut depth: usize = 1;
+                        n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                            name,
+                            attributes,
+                            namespace,
+                        });
+                        while let Some(e) = iter.next() {
+                            match e {
+                                Ok(xml::reader::XmlEvent::StartElement {
+                                    name,
+                                    attributes,
+                                    namespace,
+                                }) => {
+                                    n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                                        name,
+                                        attributes,
+                                        namespace,
+                                    });
+                                    depth += 1;
+                                }
+                                Ok(xml::reader::XmlEvent::EndElement { name }) => {
+                                    n.misc_content
+                                        .push(xml::reader::XmlEvent::EndElement { name });
+                                    depth -= 1;
+                                    if depth == 0 {
+                                        break;
+                                    }
+                                }
+                                Ok(evt) => {
+                                    n.misc_content.push(evt);
+                                }
+                                Err(e) => return Err(e.into()),
+                            }
+                        }
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
@@ -1155,6 +1562,8 @@ impl RssChannelItunesCategory {
 pub struct RssChannelItunesCategoryItunesCategory {
     pub r#text: Option<String>,
     pub misc_attrs: HashMap<(Option<String>, String), String>,
+    #[serde(skip)]
+    pub misc_content: Vec<xml::reader::XmlEvent>,
 }
 impl RssChannelItunesCategoryItunesCategory {
     const XML_LOCAL_NAME: &'static str = "category";
@@ -1211,10 +1620,45 @@ impl RssChannelItunesCategoryItunesCategory {
         while let Some(e) = iter.next() {
             match e {
                 Ok(xml::reader::XmlEvent::StartElement {
-                    name, attributes, ..
+                    name,
+                    attributes,
+                    namespace,
                 }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
                     _ => {
-                        todo!();
+                        let mut depth: usize = 1;
+                        n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                            name,
+                            attributes,
+                            namespace,
+                        });
+                        while let Some(e) = iter.next() {
+                            match e {
+                                Ok(xml::reader::XmlEvent::StartElement {
+                                    name,
+                                    attributes,
+                                    namespace,
+                                }) => {
+                                    n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                                        name,
+                                        attributes,
+                                        namespace,
+                                    });
+                                    depth += 1;
+                                }
+                                Ok(xml::reader::XmlEvent::EndElement { name }) => {
+                                    n.misc_content
+                                        .push(xml::reader::XmlEvent::EndElement { name });
+                                    depth -= 1;
+                                    if depth == 0 {
+                                        break;
+                                    }
+                                }
+                                Ok(evt) => {
+                                    n.misc_content.push(evt);
+                                }
+                                Err(e) => return Err(e.into()),
+                            }
+                        }
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
@@ -1255,6 +1699,8 @@ impl RssChannelItunesCategoryItunesCategory {
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct RssChannelItunesExplicit {
     pub misc_attrs: HashMap<(Option<String>, String), String>,
+    #[serde(skip)]
+    pub misc_content: Vec<xml::reader::XmlEvent>,
     pub value: Option<String>,
 }
 impl RssChannelItunesExplicit {
@@ -1309,10 +1755,45 @@ impl RssChannelItunesExplicit {
         while let Some(e) = iter.next() {
             match e {
                 Ok(xml::reader::XmlEvent::StartElement {
-                    name, attributes, ..
+                    name,
+                    attributes,
+                    namespace,
                 }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
                     _ => {
-                        todo!();
+                        let mut depth: usize = 1;
+                        n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                            name,
+                            attributes,
+                            namespace,
+                        });
+                        while let Some(e) = iter.next() {
+                            match e {
+                                Ok(xml::reader::XmlEvent::StartElement {
+                                    name,
+                                    attributes,
+                                    namespace,
+                                }) => {
+                                    n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                                        name,
+                                        attributes,
+                                        namespace,
+                                    });
+                                    depth += 1;
+                                }
+                                Ok(xml::reader::XmlEvent::EndElement { name }) => {
+                                    n.misc_content
+                                        .push(xml::reader::XmlEvent::EndElement { name });
+                                    depth -= 1;
+                                    if depth == 0 {
+                                        break;
+                                    }
+                                }
+                                Ok(evt) => {
+                                    n.misc_content.push(evt);
+                                }
+                                Err(e) => return Err(e.into()),
+                            }
+                        }
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
@@ -1351,6 +1832,8 @@ impl RssChannelItunesExplicit {
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Item {
     pub misc_attrs: HashMap<(Option<String>, String), String>,
+    #[serde(skip)]
+    pub misc_content: Vec<xml::reader::XmlEvent>,
     pub rss_channel_item_itunes_title_elems: Vec<RssChannelItemItunesTitle>,
     pub rss_channel_item_link_elems: Vec<RssChannelItemLink>,
     pub rss_channel_item_itunes_image_elems: Vec<RssChannelItemItunesImage>,
@@ -1411,7 +1894,9 @@ impl Item {
         while let Some(e) = iter.next() {
             match e {
                 Ok(xml::reader::XmlEvent::StartElement {
-                    name, attributes, ..
+                    name,
+                    attributes,
+                    namespace,
                 }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
                     (Some("http://www.itunes.com/dtds/podcast-1.0.dtd"), "title") => {
                         n.rss_channel_item_itunes_title_elems
@@ -1466,7 +1951,40 @@ impl Item {
                         );
                     }
                     _ => {
-                        todo!();
+                        let mut depth: usize = 1;
+                        n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                            name,
+                            attributes,
+                            namespace,
+                        });
+                        while let Some(e) = iter.next() {
+                            match e {
+                                Ok(xml::reader::XmlEvent::StartElement {
+                                    name,
+                                    attributes,
+                                    namespace,
+                                }) => {
+                                    n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                                        name,
+                                        attributes,
+                                        namespace,
+                                    });
+                                    depth += 1;
+                                }
+                                Ok(xml::reader::XmlEvent::EndElement { name }) => {
+                                    n.misc_content
+                                        .push(xml::reader::XmlEvent::EndElement { name });
+                                    depth -= 1;
+                                    if depth == 0 {
+                                        break;
+                                    }
+                                }
+                                Ok(evt) => {
+                                    n.misc_content.push(evt);
+                                }
+                                Err(e) => return Err(e.into()),
+                            }
+                        }
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
@@ -1543,6 +2061,8 @@ impl Item {
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct EpisodeType {
     pub misc_attrs: HashMap<(Option<String>, String), String>,
+    #[serde(skip)]
+    pub misc_content: Vec<xml::reader::XmlEvent>,
     pub value: Option<String>,
 }
 impl EpisodeType {
@@ -1597,10 +2117,45 @@ impl EpisodeType {
         while let Some(e) = iter.next() {
             match e {
                 Ok(xml::reader::XmlEvent::StartElement {
-                    name, attributes, ..
+                    name,
+                    attributes,
+                    namespace,
                 }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
                     _ => {
-                        todo!();
+                        let mut depth: usize = 1;
+                        n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                            name,
+                            attributes,
+                            namespace,
+                        });
+                        while let Some(e) = iter.next() {
+                            match e {
+                                Ok(xml::reader::XmlEvent::StartElement {
+                                    name,
+                                    attributes,
+                                    namespace,
+                                }) => {
+                                    n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                                        name,
+                                        attributes,
+                                        namespace,
+                                    });
+                                    depth += 1;
+                                }
+                                Ok(xml::reader::XmlEvent::EndElement { name }) => {
+                                    n.misc_content
+                                        .push(xml::reader::XmlEvent::EndElement { name });
+                                    depth -= 1;
+                                    if depth == 0 {
+                                        break;
+                                    }
+                                }
+                                Ok(evt) => {
+                                    n.misc_content.push(evt);
+                                }
+                                Err(e) => return Err(e.into()),
+                            }
+                        }
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
@@ -1639,6 +2194,8 @@ impl EpisodeType {
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct RssChannelItemItunesTitle {
     pub misc_attrs: HashMap<(Option<String>, String), String>,
+    #[serde(skip)]
+    pub misc_content: Vec<xml::reader::XmlEvent>,
     pub value: Option<String>,
 }
 impl RssChannelItemItunesTitle {
@@ -1693,10 +2250,45 @@ impl RssChannelItemItunesTitle {
         while let Some(e) = iter.next() {
             match e {
                 Ok(xml::reader::XmlEvent::StartElement {
-                    name, attributes, ..
+                    name,
+                    attributes,
+                    namespace,
                 }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
                     _ => {
-                        todo!();
+                        let mut depth: usize = 1;
+                        n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                            name,
+                            attributes,
+                            namespace,
+                        });
+                        while let Some(e) = iter.next() {
+                            match e {
+                                Ok(xml::reader::XmlEvent::StartElement {
+                                    name,
+                                    attributes,
+                                    namespace,
+                                }) => {
+                                    n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                                        name,
+                                        attributes,
+                                        namespace,
+                                    });
+                                    depth += 1;
+                                }
+                                Ok(xml::reader::XmlEvent::EndElement { name }) => {
+                                    n.misc_content
+                                        .push(xml::reader::XmlEvent::EndElement { name });
+                                    depth -= 1;
+                                    if depth == 0 {
+                                        break;
+                                    }
+                                }
+                                Ok(evt) => {
+                                    n.misc_content.push(evt);
+                                }
+                                Err(e) => return Err(e.into()),
+                            }
+                        }
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
@@ -1735,6 +2327,8 @@ impl RssChannelItemItunesTitle {
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct RssChannelItemDescription {
     pub misc_attrs: HashMap<(Option<String>, String), String>,
+    #[serde(skip)]
+    pub misc_content: Vec<xml::reader::XmlEvent>,
     pub value: Option<String>,
 }
 impl RssChannelItemDescription {
@@ -1783,10 +2377,45 @@ impl RssChannelItemDescription {
         while let Some(e) = iter.next() {
             match e {
                 Ok(xml::reader::XmlEvent::StartElement {
-                    name, attributes, ..
+                    name,
+                    attributes,
+                    namespace,
                 }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
                     _ => {
-                        todo!();
+                        let mut depth: usize = 1;
+                        n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                            name,
+                            attributes,
+                            namespace,
+                        });
+                        while let Some(e) = iter.next() {
+                            match e {
+                                Ok(xml::reader::XmlEvent::StartElement {
+                                    name,
+                                    attributes,
+                                    namespace,
+                                }) => {
+                                    n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                                        name,
+                                        attributes,
+                                        namespace,
+                                    });
+                                    depth += 1;
+                                }
+                                Ok(xml::reader::XmlEvent::EndElement { name }) => {
+                                    n.misc_content
+                                        .push(xml::reader::XmlEvent::EndElement { name });
+                                    depth -= 1;
+                                    if depth == 0 {
+                                        break;
+                                    }
+                                }
+                                Ok(evt) => {
+                                    n.misc_content.push(evt);
+                                }
+                                Err(e) => return Err(e.into()),
+                            }
+                        }
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
@@ -1828,6 +2457,8 @@ pub struct Enclosure {
     pub r#type: Option<String>,
     pub r#url: Option<String>,
     pub misc_attrs: HashMap<(Option<String>, String), String>,
+    #[serde(skip)]
+    pub misc_content: Vec<xml::reader::XmlEvent>,
 }
 impl Enclosure {
     const XML_LOCAL_NAME: &'static str = "enclosure";
@@ -1884,10 +2515,45 @@ impl Enclosure {
         while let Some(e) = iter.next() {
             match e {
                 Ok(xml::reader::XmlEvent::StartElement {
-                    name, attributes, ..
+                    name,
+                    attributes,
+                    namespace,
                 }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
                     _ => {
-                        todo!();
+                        let mut depth: usize = 1;
+                        n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                            name,
+                            attributes,
+                            namespace,
+                        });
+                        while let Some(e) = iter.next() {
+                            match e {
+                                Ok(xml::reader::XmlEvent::StartElement {
+                                    name,
+                                    attributes,
+                                    namespace,
+                                }) => {
+                                    n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                                        name,
+                                        attributes,
+                                        namespace,
+                                    });
+                                    depth += 1;
+                                }
+                                Ok(xml::reader::XmlEvent::EndElement { name }) => {
+                                    n.misc_content
+                                        .push(xml::reader::XmlEvent::EndElement { name });
+                                    depth -= 1;
+                                    if depth == 0 {
+                                        break;
+                                    }
+                                }
+                                Ok(evt) => {
+                                    n.misc_content.push(evt);
+                                }
+                                Err(e) => return Err(e.into()),
+                            }
+                        }
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
@@ -1934,6 +2600,8 @@ impl Enclosure {
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Guid {
     pub misc_attrs: HashMap<(Option<String>, String), String>,
+    #[serde(skip)]
+    pub misc_content: Vec<xml::reader::XmlEvent>,
     pub value: Option<String>,
 }
 impl Guid {
@@ -1982,10 +2650,45 @@ impl Guid {
         while let Some(e) = iter.next() {
             match e {
                 Ok(xml::reader::XmlEvent::StartElement {
-                    name, attributes, ..
+                    name,
+                    attributes,
+                    namespace,
                 }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
                     _ => {
-                        todo!();
+                        let mut depth: usize = 1;
+                        n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                            name,
+                            attributes,
+                            namespace,
+                        });
+                        while let Some(e) = iter.next() {
+                            match e {
+                                Ok(xml::reader::XmlEvent::StartElement {
+                                    name,
+                                    attributes,
+                                    namespace,
+                                }) => {
+                                    n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                                        name,
+                                        attributes,
+                                        namespace,
+                                    });
+                                    depth += 1;
+                                }
+                                Ok(xml::reader::XmlEvent::EndElement { name }) => {
+                                    n.misc_content
+                                        .push(xml::reader::XmlEvent::EndElement { name });
+                                    depth -= 1;
+                                    if depth == 0 {
+                                        break;
+                                    }
+                                }
+                                Ok(evt) => {
+                                    n.misc_content.push(evt);
+                                }
+                                Err(e) => return Err(e.into()),
+                            }
+                        }
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
@@ -2024,6 +2727,8 @@ impl Guid {
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct PubDate {
     pub misc_attrs: HashMap<(Option<String>, String), String>,
+    #[serde(skip)]
+    pub misc_content: Vec<xml::reader::XmlEvent>,
     pub value: Option<String>,
 }
 impl PubDate {
@@ -2072,10 +2777,45 @@ impl PubDate {
         while let Some(e) = iter.next() {
             match e {
                 Ok(xml::reader::XmlEvent::StartElement {
-                    name, attributes, ..
+                    name,
+                    attributes,
+                    namespace,
                 }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
                     _ => {
-                        todo!();
+                        let mut depth: usize = 1;
+                        n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                            name,
+                            attributes,
+                            namespace,
+                        });
+                        while let Some(e) = iter.next() {
+                            match e {
+                                Ok(xml::reader::XmlEvent::StartElement {
+                                    name,
+                                    attributes,
+                                    namespace,
+                                }) => {
+                                    n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                                        name,
+                                        attributes,
+                                        namespace,
+                                    });
+                                    depth += 1;
+                                }
+                                Ok(xml::reader::XmlEvent::EndElement { name }) => {
+                                    n.misc_content
+                                        .push(xml::reader::XmlEvent::EndElement { name });
+                                    depth -= 1;
+                                    if depth == 0 {
+                                        break;
+                                    }
+                                }
+                                Ok(evt) => {
+                                    n.misc_content.push(evt);
+                                }
+                                Err(e) => return Err(e.into()),
+                            }
+                        }
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
@@ -2114,6 +2854,8 @@ impl PubDate {
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Duration {
     pub misc_attrs: HashMap<(Option<String>, String), String>,
+    #[serde(skip)]
+    pub misc_content: Vec<xml::reader::XmlEvent>,
     pub value: Option<String>,
 }
 impl Duration {
@@ -2168,10 +2910,45 @@ impl Duration {
         while let Some(e) = iter.next() {
             match e {
                 Ok(xml::reader::XmlEvent::StartElement {
-                    name, attributes, ..
+                    name,
+                    attributes,
+                    namespace,
                 }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
                     _ => {
-                        todo!();
+                        let mut depth: usize = 1;
+                        n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                            name,
+                            attributes,
+                            namespace,
+                        });
+                        while let Some(e) = iter.next() {
+                            match e {
+                                Ok(xml::reader::XmlEvent::StartElement {
+                                    name,
+                                    attributes,
+                                    namespace,
+                                }) => {
+                                    n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                                        name,
+                                        attributes,
+                                        namespace,
+                                    });
+                                    depth += 1;
+                                }
+                                Ok(xml::reader::XmlEvent::EndElement { name }) => {
+                                    n.misc_content
+                                        .push(xml::reader::XmlEvent::EndElement { name });
+                                    depth -= 1;
+                                    if depth == 0 {
+                                        break;
+                                    }
+                                }
+                                Ok(evt) => {
+                                    n.misc_content.push(evt);
+                                }
+                                Err(e) => return Err(e.into()),
+                            }
+                        }
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
@@ -2210,6 +2987,8 @@ impl Duration {
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct RssChannelItemItunesExplicit {
     pub misc_attrs: HashMap<(Option<String>, String), String>,
+    #[serde(skip)]
+    pub misc_content: Vec<xml::reader::XmlEvent>,
     pub value: Option<String>,
 }
 impl RssChannelItemItunesExplicit {
@@ -2264,10 +3043,45 @@ impl RssChannelItemItunesExplicit {
         while let Some(e) = iter.next() {
             match e {
                 Ok(xml::reader::XmlEvent::StartElement {
-                    name, attributes, ..
+                    name,
+                    attributes,
+                    namespace,
                 }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
                     _ => {
-                        todo!();
+                        let mut depth: usize = 1;
+                        n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                            name,
+                            attributes,
+                            namespace,
+                        });
+                        while let Some(e) = iter.next() {
+                            match e {
+                                Ok(xml::reader::XmlEvent::StartElement {
+                                    name,
+                                    attributes,
+                                    namespace,
+                                }) => {
+                                    n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                                        name,
+                                        attributes,
+                                        namespace,
+                                    });
+                                    depth += 1;
+                                }
+                                Ok(xml::reader::XmlEvent::EndElement { name }) => {
+                                    n.misc_content
+                                        .push(xml::reader::XmlEvent::EndElement { name });
+                                    depth -= 1;
+                                    if depth == 0 {
+                                        break;
+                                    }
+                                }
+                                Ok(evt) => {
+                                    n.misc_content.push(evt);
+                                }
+                                Err(e) => return Err(e.into()),
+                            }
+                        }
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
@@ -2306,6 +3120,8 @@ impl RssChannelItemItunesExplicit {
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Episode {
     pub misc_attrs: HashMap<(Option<String>, String), String>,
+    #[serde(skip)]
+    pub misc_content: Vec<xml::reader::XmlEvent>,
     pub value: Option<String>,
 }
 impl Episode {
@@ -2360,10 +3176,45 @@ impl Episode {
         while let Some(e) = iter.next() {
             match e {
                 Ok(xml::reader::XmlEvent::StartElement {
-                    name, attributes, ..
+                    name,
+                    attributes,
+                    namespace,
                 }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
                     _ => {
-                        todo!();
+                        let mut depth: usize = 1;
+                        n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                            name,
+                            attributes,
+                            namespace,
+                        });
+                        while let Some(e) = iter.next() {
+                            match e {
+                                Ok(xml::reader::XmlEvent::StartElement {
+                                    name,
+                                    attributes,
+                                    namespace,
+                                }) => {
+                                    n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                                        name,
+                                        attributes,
+                                        namespace,
+                                    });
+                                    depth += 1;
+                                }
+                                Ok(xml::reader::XmlEvent::EndElement { name }) => {
+                                    n.misc_content
+                                        .push(xml::reader::XmlEvent::EndElement { name });
+                                    depth -= 1;
+                                    if depth == 0 {
+                                        break;
+                                    }
+                                }
+                                Ok(evt) => {
+                                    n.misc_content.push(evt);
+                                }
+                                Err(e) => return Err(e.into()),
+                            }
+                        }
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
@@ -2402,6 +3253,8 @@ impl Episode {
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Season {
     pub misc_attrs: HashMap<(Option<String>, String), String>,
+    #[serde(skip)]
+    pub misc_content: Vec<xml::reader::XmlEvent>,
     pub value: Option<String>,
 }
 impl Season {
@@ -2456,10 +3309,45 @@ impl Season {
         while let Some(e) = iter.next() {
             match e {
                 Ok(xml::reader::XmlEvent::StartElement {
-                    name, attributes, ..
+                    name,
+                    attributes,
+                    namespace,
                 }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
                     _ => {
-                        todo!();
+                        let mut depth: usize = 1;
+                        n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                            name,
+                            attributes,
+                            namespace,
+                        });
+                        while let Some(e) = iter.next() {
+                            match e {
+                                Ok(xml::reader::XmlEvent::StartElement {
+                                    name,
+                                    attributes,
+                                    namespace,
+                                }) => {
+                                    n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                                        name,
+                                        attributes,
+                                        namespace,
+                                    });
+                                    depth += 1;
+                                }
+                                Ok(xml::reader::XmlEvent::EndElement { name }) => {
+                                    n.misc_content
+                                        .push(xml::reader::XmlEvent::EndElement { name });
+                                    depth -= 1;
+                                    if depth == 0 {
+                                        break;
+                                    }
+                                }
+                                Ok(evt) => {
+                                    n.misc_content.push(evt);
+                                }
+                                Err(e) => return Err(e.into()),
+                            }
+                        }
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
@@ -2498,6 +3386,8 @@ impl Season {
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct RssChannelItemTitle {
     pub misc_attrs: HashMap<(Option<String>, String), String>,
+    #[serde(skip)]
+    pub misc_content: Vec<xml::reader::XmlEvent>,
     pub value: Option<String>,
 }
 impl RssChannelItemTitle {
@@ -2546,10 +3436,45 @@ impl RssChannelItemTitle {
         while let Some(e) = iter.next() {
             match e {
                 Ok(xml::reader::XmlEvent::StartElement {
-                    name, attributes, ..
+                    name,
+                    attributes,
+                    namespace,
                 }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
                     _ => {
-                        todo!();
+                        let mut depth: usize = 1;
+                        n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                            name,
+                            attributes,
+                            namespace,
+                        });
+                        while let Some(e) = iter.next() {
+                            match e {
+                                Ok(xml::reader::XmlEvent::StartElement {
+                                    name,
+                                    attributes,
+                                    namespace,
+                                }) => {
+                                    n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                                        name,
+                                        attributes,
+                                        namespace,
+                                    });
+                                    depth += 1;
+                                }
+                                Ok(xml::reader::XmlEvent::EndElement { name }) => {
+                                    n.misc_content
+                                        .push(xml::reader::XmlEvent::EndElement { name });
+                                    depth -= 1;
+                                    if depth == 0 {
+                                        break;
+                                    }
+                                }
+                                Ok(evt) => {
+                                    n.misc_content.push(evt);
+                                }
+                                Err(e) => return Err(e.into()),
+                            }
+                        }
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
@@ -2589,6 +3514,8 @@ impl RssChannelItemTitle {
 pub struct RssChannelItemItunesImage {
     pub r#href: Option<String>,
     pub misc_attrs: HashMap<(Option<String>, String), String>,
+    #[serde(skip)]
+    pub misc_content: Vec<xml::reader::XmlEvent>,
 }
 impl RssChannelItemItunesImage {
     const XML_LOCAL_NAME: &'static str = "image";
@@ -2645,10 +3572,45 @@ impl RssChannelItemItunesImage {
         while let Some(e) = iter.next() {
             match e {
                 Ok(xml::reader::XmlEvent::StartElement {
-                    name, attributes, ..
+                    name,
+                    attributes,
+                    namespace,
                 }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
                     _ => {
-                        todo!();
+                        let mut depth: usize = 1;
+                        n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                            name,
+                            attributes,
+                            namespace,
+                        });
+                        while let Some(e) = iter.next() {
+                            match e {
+                                Ok(xml::reader::XmlEvent::StartElement {
+                                    name,
+                                    attributes,
+                                    namespace,
+                                }) => {
+                                    n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                                        name,
+                                        attributes,
+                                        namespace,
+                                    });
+                                    depth += 1;
+                                }
+                                Ok(xml::reader::XmlEvent::EndElement { name }) => {
+                                    n.misc_content
+                                        .push(xml::reader::XmlEvent::EndElement { name });
+                                    depth -= 1;
+                                    if depth == 0 {
+                                        break;
+                                    }
+                                }
+                                Ok(evt) => {
+                                    n.misc_content.push(evt);
+                                }
+                                Err(e) => return Err(e.into()),
+                            }
+                        }
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {
@@ -2689,6 +3651,8 @@ impl RssChannelItemItunesImage {
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct RssChannelItemLink {
     pub misc_attrs: HashMap<(Option<String>, String), String>,
+    #[serde(skip)]
+    pub misc_content: Vec<xml::reader::XmlEvent>,
     pub value: Option<String>,
 }
 impl RssChannelItemLink {
@@ -2737,10 +3701,45 @@ impl RssChannelItemLink {
         while let Some(e) = iter.next() {
             match e {
                 Ok(xml::reader::XmlEvent::StartElement {
-                    name, attributes, ..
+                    name,
+                    attributes,
+                    namespace,
                 }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
                     _ => {
-                        todo!();
+                        let mut depth: usize = 1;
+                        n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                            name,
+                            attributes,
+                            namespace,
+                        });
+                        while let Some(e) = iter.next() {
+                            match e {
+                                Ok(xml::reader::XmlEvent::StartElement {
+                                    name,
+                                    attributes,
+                                    namespace,
+                                }) => {
+                                    n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                                        name,
+                                        attributes,
+                                        namespace,
+                                    });
+                                    depth += 1;
+                                }
+                                Ok(xml::reader::XmlEvent::EndElement { name }) => {
+                                    n.misc_content
+                                        .push(xml::reader::XmlEvent::EndElement { name });
+                                    depth -= 1;
+                                    if depth == 0 {
+                                        break;
+                                    }
+                                }
+                                Ok(evt) => {
+                                    n.misc_content.push(evt);
+                                }
+                                Err(e) => return Err(e.into()),
+                            }
+                        }
                     }
                 },
                 Ok(xml::reader::XmlEvent::EndElement { .. }) => {

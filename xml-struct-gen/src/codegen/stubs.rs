@@ -60,6 +60,8 @@ pub fn gen_el_struct(
         pub struct #sn {
             #(#attr_field_tokens)*
             pub misc_attrs: HashMap<(Option<String>, String), String>,
+            #[serde(skip)]
+            pub misc_content: Vec<xml::reader::XmlEvent>,
             #(#elem_field_tokens)*
             #maybe_val_field
         }
@@ -260,13 +262,32 @@ fn generate_parse_children(
 
             while let Some(e) = iter.next() {
                 match e {
-                    Ok(xml::reader::XmlEvent::StartElement { name, attributes, .. }) => {
+                    Ok(xml::reader::XmlEvent::StartElement { name, attributes, namespace }) => {
                         match (name.namespace.as_deref(), name.local_name.as_str()) {
                             #(#elem_matchers)*
-                            _ => {//TODO: handle unrecognised elements
-                                todo!();
+                            _ => {
+                                let mut depth: usize = 1;
+                                n.misc_content.push(xml::reader::XmlEvent::StartElement { name, attributes, namespace });
+                                while let Some(e) = iter.next() {
+                                    match e {
+                                        Ok(xml::reader::XmlEvent::StartElement { name, attributes, namespace }) => {
+                                            n.misc_content.push(xml::reader::XmlEvent::StartElement { name, attributes, namespace });
+                                            depth += 1;
+                                        }
+                                        Ok(xml::reader::XmlEvent::EndElement { name }) => {
+                                            n.misc_content.push(xml::reader::XmlEvent::EndElement { name });
+                                            depth -= 1;
+                                            if depth == 0 {
+                                                break;
+                                            }
+                                        }
+                                        Ok(evt) => {
+                                            n.misc_content.push(evt);
+                                        }
+                                        Err(e) => return Err(e.into()),
+                                    }
+                                };
                             }
-
                         }
                     }
                     Ok(xml::reader::XmlEvent::EndElement { .. }) => {
