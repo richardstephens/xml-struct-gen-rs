@@ -1,6 +1,6 @@
 use crate::{Enclosure, RssDocument};
 use std::io::{Cursor, Read, Seek, SeekFrom};
-use xml::EmitterConfig;
+use xml::{EmitterConfig, EventWriter};
 
 #[test]
 fn parse_and_check_important_values() {
@@ -55,6 +55,14 @@ fn parse_re_namespaced() {
     assert_eq!(expected_item0, actual_item0);
 }
 
+fn test_writer_to_string(writer: EventWriter<Cursor<Vec<u8>>>) -> String {
+    let mut c = writer.into_inner();
+    c.seek(SeekFrom::Start(0)).unwrap();
+    let mut out = Vec::new();
+    c.read_to_end(&mut out).unwrap();
+    String::from_utf8(out).unwrap()
+}
+
 #[test]
 fn write_attrs() {
     //set up a sample element
@@ -65,25 +73,36 @@ fn write_attrs() {
         ..Default::default()
     };
 
-    // set up a test writer
-    let mut c: Cursor<Vec<u8>> = Cursor::new(Vec::new());
     let mut writer = EmitterConfig::new()
         .write_document_declaration(false)
         .perform_indent(false)
-        .create_writer(c);
+        .create_writer(Cursor::new(Vec::new()));
     enclosure.write_element(&mut writer, false).unwrap();
-
-    c = writer.into_inner();
-
-    c.seek(SeekFrom::Start(0)).unwrap();
-
-    let mut out = Vec::new();
-    c.read_to_end(&mut out).unwrap();
-    let xml_str = String::from_utf8(out).unwrap();
+    let xml_str = test_writer_to_string(writer);
 
     //TODO: is it safe to assume that xml-rs's output is stable?
     assert_eq!(
         r#"<enclosure length="8727310" type="audio/x-m4a" url="http://example.com/podcasts/everything/mthood.m4a" />"#,
         xml_str
     );
+}
+
+#[test]
+fn test_write_namespaces() {
+    let podcast1_xml = include_bytes!("podcast1.xml");
+    let podcast1_xml_cursor = Cursor::new(podcast1_xml);
+
+    let podcast1 = RssDocument::parse_document(podcast1_xml_cursor).unwrap();
+
+    let mut writer = EmitterConfig::new()
+        .write_document_declaration(false)
+        .perform_indent(true)
+        .create_writer(Cursor::new(Vec::new()));
+    podcast1.write_element(&mut writer, true).unwrap();
+    let xml_str = test_writer_to_string(writer);
+
+    //assert that the first line contains the prefix decl
+    let line1 = xml_str.lines().nth(0).unwrap();
+    assert!(line1.starts_with("<rss"));
+    assert!(line1.contains(r#"xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd""#));
 }
