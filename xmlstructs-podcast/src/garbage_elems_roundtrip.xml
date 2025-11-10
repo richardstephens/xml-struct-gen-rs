@@ -1,0 +1,13 @@
+<rss xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" version="2.0">
+    <channel>
+        <blah>
+            <nested attr="d" />
+        </blah>
+    </channel>
+    <blah>abcd</blah>
+    <blah2>
+        <inner>
+            <deep />
+        </inner>
+    </blah2>
+</rss>

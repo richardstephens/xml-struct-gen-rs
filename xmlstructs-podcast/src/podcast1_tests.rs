@@ -105,3 +105,23 @@ fn test_write_namespaces() {
     assert!(line1.starts_with("<rss"));
     assert!(line1.contains(r#"xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd""#));
 }
+
+#[test]
+fn test_roundtrip_unrecognised_elems() {
+    let xml_in = include_str!("garbage_elems_roundtrip.xml");
+    let xml_c = Cursor::new(xml_in);
+    let p = RssDocument::parse_document(xml_c).unwrap();
+
+    let mut writer = EmitterConfig::new()
+        .write_document_declaration(false)
+        .perform_indent(true)
+        .create_writer(Cursor::new(Vec::new()));
+    p.write_element(&mut writer, true).unwrap();
+    let xml_out = test_writer_to_string(writer);
+
+    // hack to normalise indentation between documents
+    assert_eq!(
+        xml_in.trim().replace("  ", ""),
+        xml_out.trim().replace("  ", "")
+    );
+}
