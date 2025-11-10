@@ -105,6 +105,11 @@ impl RssDocument {
         if let Some(v) = self.r#version.as_ref() {
             el_builder = el_builder.attr("version", v);
         }
+        if include_ns {
+            for (k, v) in DOCUMENT_NAMESPACES {
+                el_builder = el_builder.ns(*k, *v);
+            }
+        }
         w.write(el_builder)?;
         for child in self.channel_elems.iter() {
             child.write_element(w, false)?;
@@ -244,6 +249,11 @@ impl Channel {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        if include_ns {
+            for (k, v) in DOCUMENT_NAMESPACES {
+                el_builder = el_builder.ns(*k, *v);
+            }
+        }
         w.write(el_builder)?;
         for child in self.rss_channel_title_elems.iter() {
             child.write_element(w, false)?;
@@ -359,6 +369,11 @@ impl RssChannelTitle {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        if include_ns {
+            for (k, v) in DOCUMENT_NAMESPACES {
+                el_builder = el_builder.ns(*k, *v);
+            }
+        }
         w.write(el_builder)?;
         if let Some(val) = self.value.as_deref() {
             w.write(xml::writer::XmlEvent::characters(val))?;
@@ -444,6 +459,11 @@ impl RssChannelLink {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        if include_ns {
+            for (k, v) in DOCUMENT_NAMESPACES {
+                el_builder = el_builder.ns(*k, *v);
+            }
+        }
         w.write(el_builder)?;
         if let Some(val) = self.value.as_deref() {
             w.write(xml::writer::XmlEvent::characters(val))?;
@@ -529,6 +549,11 @@ impl Language {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        if include_ns {
+            for (k, v) in DOCUMENT_NAMESPACES {
+                el_builder = el_builder.ns(*k, *v);
+            }
+        }
         w.write(el_builder)?;
         if let Some(val) = self.value.as_deref() {
             w.write(xml::writer::XmlEvent::characters(val))?;
@@ -614,6 +639,11 @@ impl Copyright {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        if include_ns {
+            for (k, v) in DOCUMENT_NAMESPACES {
+                el_builder = el_builder.ns(*k, *v);
+            }
+        }
         w.write(el_builder)?;
         if let Some(val) = self.value.as_deref() {
             w.write(xml::writer::XmlEvent::characters(val))?;
@@ -705,6 +735,11 @@ impl Author {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        if include_ns {
+            for (k, v) in DOCUMENT_NAMESPACES {
+                el_builder = el_builder.ns(*k, *v);
+            }
+        }
         w.write(el_builder)?;
         if let Some(val) = self.value.as_deref() {
             w.write(xml::writer::XmlEvent::characters(val))?;
@@ -790,6 +825,11 @@ impl RssChannelDescription {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        if include_ns {
+            for (k, v) in DOCUMENT_NAMESPACES {
+                el_builder = el_builder.ns(*k, *v);
+            }
+        }
         w.write(el_builder)?;
         if let Some(val) = self.value.as_deref() {
             w.write(xml::writer::XmlEvent::characters(val))?;
@@ -881,6 +921,11 @@ impl Type {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        if include_ns {
+            for (k, v) in DOCUMENT_NAMESPACES {
+                el_builder = el_builder.ns(*k, *v);
+            }
+        }
         w.write(el_builder)?;
         if let Some(val) = self.value.as_deref() {
             w.write(xml::writer::XmlEvent::characters(val))?;
@@ -979,6 +1024,11 @@ impl RssChannelItunesImage {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         if let Some(v) = self.r#href.as_ref() {
             el_builder = el_builder.attr("href", v);
+        }
+        if include_ns {
+            for (k, v) in DOCUMENT_NAMESPACES {
+                el_builder = el_builder.ns(*k, *v);
+            }
         }
         w.write(el_builder)?;
         w.write(xml::writer::XmlEvent::end_element())?;
@@ -1085,6 +1135,11 @@ impl RssChannelItunesCategory {
         if let Some(v) = self.r#text.as_ref() {
             el_builder = el_builder.attr("text", v);
         }
+        if include_ns {
+            for (k, v) in DOCUMENT_NAMESPACES {
+                el_builder = el_builder.ns(*k, *v);
+            }
+        }
         w.write(el_builder)?;
         for child in self
             .rss_channel_itunes_category_itunes_category_elems
@@ -1187,6 +1242,11 @@ impl RssChannelItunesCategoryItunesCategory {
         if let Some(v) = self.r#text.as_ref() {
             el_builder = el_builder.attr("text", v);
         }
+        if include_ns {
+            for (k, v) in DOCUMENT_NAMESPACES {
+                el_builder = el_builder.ns(*k, *v);
+            }
+        }
         w.write(el_builder)?;
         w.write(xml::writer::XmlEvent::end_element())?;
         Ok(())
@@ -1275,6 +1335,11 @@ impl RssChannelItunesExplicit {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        if include_ns {
+            for (k, v) in DOCUMENT_NAMESPACES {
+                el_builder = el_builder.ns(*k, *v);
+            }
+        }
         w.write(el_builder)?;
         if let Some(val) = self.value.as_deref() {
             w.write(xml::writer::XmlEvent::characters(val))?;
@@ -1426,6 +1491,11 @@ impl Item {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        if include_ns {
+            for (k, v) in DOCUMENT_NAMESPACES {
+                el_builder = el_builder.ns(*k, *v);
+            }
+        }
         w.write(el_builder)?;
         for child in self.rss_channel_item_itunes_title_elems.iter() {
             child.write_element(w, false)?;
@@ -1553,6 +1623,11 @@ impl EpisodeType {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        if include_ns {
+            for (k, v) in DOCUMENT_NAMESPACES {
+                el_builder = el_builder.ns(*k, *v);
+            }
+        }
         w.write(el_builder)?;
         if let Some(val) = self.value.as_deref() {
             w.write(xml::writer::XmlEvent::characters(val))?;
@@ -1644,6 +1719,11 @@ impl RssChannelItemItunesTitle {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        if include_ns {
+            for (k, v) in DOCUMENT_NAMESPACES {
+                el_builder = el_builder.ns(*k, *v);
+            }
+        }
         w.write(el_builder)?;
         if let Some(val) = self.value.as_deref() {
             w.write(xml::writer::XmlEvent::characters(val))?;
@@ -1729,6 +1809,11 @@ impl RssChannelItemDescription {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        if include_ns {
+            for (k, v) in DOCUMENT_NAMESPACES {
+                el_builder = el_builder.ns(*k, *v);
+            }
+        }
         w.write(el_builder)?;
         if let Some(val) = self.value.as_deref() {
             w.write(xml::writer::XmlEvent::characters(val))?;
@@ -1836,6 +1921,11 @@ impl Enclosure {
         if let Some(v) = self.r#url.as_ref() {
             el_builder = el_builder.attr("url", v);
         }
+        if include_ns {
+            for (k, v) in DOCUMENT_NAMESPACES {
+                el_builder = el_builder.ns(*k, *v);
+            }
+        }
         w.write(el_builder)?;
         w.write(xml::writer::XmlEvent::end_element())?;
         Ok(())
@@ -1918,6 +2008,11 @@ impl Guid {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        if include_ns {
+            for (k, v) in DOCUMENT_NAMESPACES {
+                el_builder = el_builder.ns(*k, *v);
+            }
+        }
         w.write(el_builder)?;
         if let Some(val) = self.value.as_deref() {
             w.write(xml::writer::XmlEvent::characters(val))?;
@@ -2003,6 +2098,11 @@ impl PubDate {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        if include_ns {
+            for (k, v) in DOCUMENT_NAMESPACES {
+                el_builder = el_builder.ns(*k, *v);
+            }
+        }
         w.write(el_builder)?;
         if let Some(val) = self.value.as_deref() {
             w.write(xml::writer::XmlEvent::characters(val))?;
@@ -2094,6 +2194,11 @@ impl Duration {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        if include_ns {
+            for (k, v) in DOCUMENT_NAMESPACES {
+                el_builder = el_builder.ns(*k, *v);
+            }
+        }
         w.write(el_builder)?;
         if let Some(val) = self.value.as_deref() {
             w.write(xml::writer::XmlEvent::characters(val))?;
@@ -2185,6 +2290,11 @@ impl RssChannelItemItunesExplicit {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        if include_ns {
+            for (k, v) in DOCUMENT_NAMESPACES {
+                el_builder = el_builder.ns(*k, *v);
+            }
+        }
         w.write(el_builder)?;
         if let Some(val) = self.value.as_deref() {
             w.write(xml::writer::XmlEvent::characters(val))?;
@@ -2276,6 +2386,11 @@ impl Episode {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        if include_ns {
+            for (k, v) in DOCUMENT_NAMESPACES {
+                el_builder = el_builder.ns(*k, *v);
+            }
+        }
         w.write(el_builder)?;
         if let Some(val) = self.value.as_deref() {
             w.write(xml::writer::XmlEvent::characters(val))?;
@@ -2367,6 +2482,11 @@ impl Season {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        if include_ns {
+            for (k, v) in DOCUMENT_NAMESPACES {
+                el_builder = el_builder.ns(*k, *v);
+            }
+        }
         w.write(el_builder)?;
         if let Some(val) = self.value.as_deref() {
             w.write(xml::writer::XmlEvent::characters(val))?;
@@ -2452,6 +2572,11 @@ impl RssChannelItemTitle {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        if include_ns {
+            for (k, v) in DOCUMENT_NAMESPACES {
+                el_builder = el_builder.ns(*k, *v);
+            }
+        }
         w.write(el_builder)?;
         if let Some(val) = self.value.as_deref() {
             w.write(xml::writer::XmlEvent::characters(val))?;
@@ -2551,6 +2676,11 @@ impl RssChannelItemItunesImage {
         if let Some(v) = self.r#href.as_ref() {
             el_builder = el_builder.attr("href", v);
         }
+        if include_ns {
+            for (k, v) in DOCUMENT_NAMESPACES {
+                el_builder = el_builder.ns(*k, *v);
+            }
+        }
         w.write(el_builder)?;
         w.write(xml::writer::XmlEvent::end_element())?;
         Ok(())
@@ -2633,6 +2763,11 @@ impl RssChannelItemLink {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        if include_ns {
+            for (k, v) in DOCUMENT_NAMESPACES {
+                el_builder = el_builder.ns(*k, *v);
+            }
+        }
         w.write(el_builder)?;
         if let Some(val) = self.value.as_deref() {
             w.write(xml::writer::XmlEvent::characters(val))?;

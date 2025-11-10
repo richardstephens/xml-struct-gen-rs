@@ -20,11 +20,20 @@ pub fn gen_write_element(
         quote! {}
     };
 
+    let include_ns_block = quote! {
+        if include_ns {
+            for (k,v) in DOCUMENT_NAMESPACES {
+                el_builder = el_builder.ns(*k, *v);
+            }
+        }
+    };
+
     quote! {
         pub fn write_element<W: std::io::Write>(&self, w: &mut xml::writer::EventWriter<W>, include_ns: bool) -> Result<(), XmlWriteError> {
 
             let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
             #(#attr_write_tokens)*
+            #include_ns_block
             w.write(el_builder)?;
 
             #(#elem_write_tokens)*
