@@ -28,6 +28,14 @@ pub fn gen_write_element(
         }
     };
 
+    let write_other_content_block = quote! {
+        for elem in self.misc_content.iter() {
+            if let Some(writer_event) = elem.as_writer_event() {
+                w.write(writer_event)?;
+            }
+        }
+    };
+
     quote! {
         pub fn write_element<W: std::io::Write>(&self, w: &mut xml::writer::EventWriter<W>, include_ns: bool) -> Result<(), XmlWriteError> {
 
@@ -39,6 +47,8 @@ pub fn gen_write_element(
             #(#elem_write_tokens)*
 
             #text_write_tokens
+
+            #write_other_content_block
 
             w.write(xml::writer::XmlEvent::end_element())?;
             Ok(())
