@@ -2,7 +2,6 @@ use crate::codegen::stubs::gen_el_struct;
 
 use crate::codegen::AssignedTypeMap;
 use crate::codegen::stubs_ns::generate_namespace_const;
-use crate::codegen::util::structname_for;
 use crate::common::elem_props::ElemProps;
 use bimap::BiMap;
 use indexmap::IndexMap;
@@ -51,7 +50,10 @@ fn assign_struct_names(stacks: Vec<Vec<OwnedName>>) -> anyhow::Result<AssignedTy
         let proposed_name = if dup_names.contains(&stack.last().unwrap().local_name) {
             fully_qualified_name(&stack)
         } else {
-            structname_for(&stack.last().unwrap().local_name)
+            format!(
+                "{}",
+                heck::AsUpperCamelCase(&stack.last().unwrap().local_name)
+            )
         };
 
         result.insert(
