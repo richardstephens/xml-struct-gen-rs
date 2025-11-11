@@ -29,4 +29,8 @@ pub enum XmlParseError {
 pub enum XmlWriteError {
     #[error(transparent)]
     XmlRsWrite(#[from] xml::writer::Error),
+    #[error(transparent)]
+    IoError(#[from] std::io::Error),
+    #[error("UTF8 Error")]
+    Utf8(#[from] std::str::Utf8Error),
 }
