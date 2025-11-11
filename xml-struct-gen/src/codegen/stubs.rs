@@ -43,9 +43,11 @@ pub fn gen_el_struct(
 
     let maybe_document_trait = if let Some(root_props) = root_props {
         let parse_doc = generate_parse_document(&root_props);
+        let write_doc = generate_write_document();
         quote! {
             impl xml_struct_types::v1::XmlStructDocument for #sn {
                 #parse_doc
+                #write_doc
             }
         }
     } else {
@@ -202,6 +204,14 @@ fn generate_parse_document(_elem_props: &ElemProps) -> TokenStream {
     }
 }
 
+fn generate_write_document() -> TokenStream {
+    quote! {
+        fn write_document<W: std::io::Write>(&self,
+            w: &mut xml::writer::EventWriter<W>,) -> Result<(), XmlWriteError> {
+            self.write_element(w, true)
+        }
+    }
+}
 fn generate_parse_elem(elem_path: &Vec<OwnedName>) -> TokenStream {
     let elem = elem_path.last().clone().unwrap();
     let match_arm = owned_name_to_match_arm(elem);

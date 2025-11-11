@@ -280,6 +280,12 @@ impl xml_struct_types::v1::XmlStructDocument for DomainDocument {
             Some(Err(e)) => Err(e.into()),
         }
     }
+    fn write_document<W: std::io::Write>(
+        &self,
+        w: &mut xml::writer::EventWriter<W>,
+    ) -> Result<(), XmlWriteError> {
+        self.write_element(w, true)
+    }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Name {
