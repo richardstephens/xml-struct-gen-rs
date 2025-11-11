@@ -1,6 +1,6 @@
+use crate::codegen::AssignedTypeMap;
 use crate::codegen::stubs_write::gen_write_element;
 use crate::common::elem_props::{AttrField, ElemProps};
-use bimap::BiMap;
 use heck::ToSnakeCase;
 use proc_macro2::{Ident, TokenStream};
 use quote::{format_ident, quote};
@@ -9,7 +9,7 @@ use xml::name::OwnedName;
 pub fn gen_el_struct(
     k: &Vec<OwnedName>,
     v: &ElemProps,
-    assigned: &BiMap<Vec<OwnedName>, String>,
+    assigned: &AssignedTypeMap,
     root_props: Option<ElemProps>,
 ) -> TokenStream {
     let attr_fields = v.get_attr_fields();

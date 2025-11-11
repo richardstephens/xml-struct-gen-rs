@@ -1,5 +1,6 @@
 use crate::codegen::stubs::gen_el_struct;
 
+use crate::codegen::AssignedTypeMap;
 use crate::codegen::stubs_ns::generate_namespace_const;
 use crate::codegen::util::structname_for;
 use crate::common::elem_props::ElemProps;
@@ -11,8 +12,9 @@ use xml::name::OwnedName;
 pub fn generate_code(
     ns: BTreeMap<String, String>,
     mut e: IndexMap<Vec<OwnedName>, ElemProps>,
-) -> String {
-    let assigned_names = assign_struct_names(e.keys().filter(|k| !k.is_empty()).cloned().collect());
+) -> anyhow::Result<String> {
+    let assigned_names =
+        assign_struct_names(e.keys().filter(|k| !k.is_empty()).cloned().collect())?;
 
     let mut s = "use serde::{Deserialize, Serialize};\n".to_string();
     s.push_str("use std::collections::HashMap;\n");
@@ -31,10 +33,10 @@ pub fn generate_code(
         let el_struct = gen_el_struct(&k, &v, &assigned_names, rp);
         s.push_str(&el_struct.to_string());
     }
-    s
+    Ok(s)
 }
 
-fn assign_struct_names(stacks: Vec<Vec<OwnedName>>) -> BiMap<Vec<OwnedName>, String> {
+fn assign_struct_names(stacks: Vec<Vec<OwnedName>>) -> anyhow::Result<AssignedTypeMap> {
     let mut result = BiMap::new();
 
     let mut seen_names = HashSet::new();
@@ -58,7 +60,7 @@ fn assign_struct_names(stacks: Vec<Vec<OwnedName>>) -> BiMap<Vec<OwnedName>, Str
         );
     }
 
-    result
+    Ok(result)
 }
 
 fn fully_qualified_name(stack: &Vec<OwnedName>) -> String {
