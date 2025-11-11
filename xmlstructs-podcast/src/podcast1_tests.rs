@@ -6,8 +6,7 @@ use xml_struct_types::v1::XmlStructDocument;
 #[test]
 fn parse_and_check_important_values() {
     let podcast1_xml = include_bytes!("podcast1.xml");
-    let podcast1_xml_cursor = Cursor::new(podcast1_xml);
-    let podcast1 = RssDocument::parse_document(podcast1_xml_cursor).unwrap();
+    let podcast1 = RssDocument::parse_document(&mut Cursor::new(podcast1_xml)).unwrap();
 
     assert_eq!(1, podcast1.channel_elems.len());
 
@@ -42,12 +41,12 @@ fn parse_and_check_important_values() {
 fn parse_re_namespaced() {
     let podcast1_rens_xml = include_bytes!("podcast1.re-ns.xml");
     let podcast1_rens_xml_cursor = Cursor::new(podcast1_rens_xml);
-    let podcast1_rens = RssDocument::parse_document(podcast1_rens_xml_cursor).unwrap();
+    let podcast1_rens = RssDocument::parse_document(&mut podcast1_rens_xml_cursor.clone()).unwrap();
 
     // grab the unaltered version for comparison
     let podcast1_xml = include_bytes!("podcast1.xml");
     let podcast1_xml_cursor = Cursor::new(podcast1_xml);
-    let podcast1 = RssDocument::parse_document(podcast1_xml_cursor).unwrap();
+    let podcast1 = RssDocument::parse_document(&mut podcast1_xml_cursor.clone()).unwrap();
 
     // assert the first two episodes are equal
     let expected_item0 = &podcast1.channel_elems[0].item_elems[0];
@@ -90,9 +89,7 @@ fn write_attrs() {
 #[test]
 fn test_write_namespaces() {
     let podcast1_xml = include_bytes!("podcast1.xml");
-    let podcast1_xml_cursor = Cursor::new(podcast1_xml);
-
-    let podcast1 = RssDocument::parse_document(podcast1_xml_cursor).unwrap();
+    let podcast1 = RssDocument::parse_document(&mut Cursor::new(podcast1_xml)).unwrap();
 
     let mut writer = EmitterConfig::new()
         .write_document_declaration(false)
@@ -110,8 +107,7 @@ fn test_write_namespaces() {
 #[test]
 fn test_roundtrip_unrecognised_elems() {
     let xml_in = include_str!("garbage_elems_roundtrip.xml");
-    let xml_c = Cursor::new(xml_in);
-    let p = RssDocument::parse_document(xml_c).unwrap();
+    let p = RssDocument::parse_document(&mut Cursor::new(xml_in)).unwrap();
 
     let mut writer = EmitterConfig::new()
         .write_document_declaration(false)

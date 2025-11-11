@@ -270,7 +270,7 @@ impl DomainDocument {
     }
 }
 impl xml_struct_types::v1::XmlStructDocument for DomainDocument {
-    fn parse_document<R: std::io::Read>(mut reader: R) -> Result<Self, XmlParseError> {
+    fn parse_document<R: std::io::Read>(reader: &mut R) -> Result<Self, XmlParseError> {
         let mut parser = xml::EventReader::new(reader).into_iter();
         let root_element = Self::parse_element(&mut parser)?;
         match parser.next() {
@@ -280,11 +280,12 @@ impl xml_struct_types::v1::XmlStructDocument for DomainDocument {
             Some(Err(e)) => Err(e.into()),
         }
     }
-    fn write_document<W: std::io::Write>(
-        &self,
-        w: &mut xml::writer::EventWriter<W>,
-    ) -> Result<(), XmlWriteError> {
-        self.write_element(w, true)
+    fn write_document<W: std::io::Write>(&self, w: &mut W) -> Result<(), XmlWriteError> {
+        let mut writer = xml::EmitterConfig::new()
+            .write_document_declaration(false)
+            .perform_indent(false)
+            .create_writer(w);
+        self.write_element(&mut writer, true)
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
