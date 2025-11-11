@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-pub use xml_struct_types::v1::*;
+pub use xml_struct_types::v1::error::*;
 const DOCUMENT_NAMESPACES: &[(&str, &str)] = &[
     ("content", "http://purl.org/rss/1.0/modules/content/"),
     ("itunes", "http://www.itunes.com/dtds/podcast-1.0.dtd"),
@@ -18,16 +18,6 @@ impl RssDocument {
     const XML_NAMESPACE: Option<&'static str> = None;
     const XML_PREFIX: Option<&'static str> = None;
     const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::local("rss");
-    pub fn parse_document<R: std::io::Read>(mut reader: R) -> Result<Self, XmlParseError> {
-        let mut parser = xml::EventReader::new(reader).into_iter();
-        let root_element = Self::parse_element(&mut parser)?;
-        match parser.next() {
-            Some(Ok(xml::reader::XmlEvent::EndDocument)) => Ok(root_element),
-            None => Ok(root_element),
-            Some(Ok(e)) => Err(XmlParseError::ExpectedEof(e)),
-            Some(Err(e)) => Err(e.into()),
-        }
-    }
     pub fn parse_element<R: std::io::Read>(
         iter: &mut xml::reader::Events<R>,
     ) -> Result<Self, XmlParseError> {
@@ -158,6 +148,25 @@ impl RssDocument {
         }
         w.write(xml::writer::XmlEvent::end_element())?;
         Ok(())
+    }
+}
+impl xml_struct_types::v1::XmlStructDocument for RssDocument {
+    fn parse_document<R: std::io::Read>(reader: &mut R) -> Result<Self, XmlParseError> {
+        let mut parser = xml::EventReader::new(reader).into_iter();
+        let root_element = Self::parse_element(&mut parser)?;
+        match parser.next() {
+            Some(Ok(xml::reader::XmlEvent::EndDocument)) => Ok(root_element),
+            None => Ok(root_element),
+            Some(Ok(e)) => Err(XmlParseError::ExpectedEof(e)),
+            Some(Err(e)) => Err(e.into()),
+        }
+    }
+    fn write_document<W: std::io::Write>(&self, w: &mut W) -> Result<(), XmlWriteError> {
+        let mut writer = xml::EmitterConfig::new()
+            .write_document_declaration(false)
+            .perform_indent(false)
+            .create_writer(w);
+        self.write_element(&mut writer, true)
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]

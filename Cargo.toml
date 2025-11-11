@@ -2,6 +2,7 @@
 members = [
     "xml-struct-gen",
     "xml-struct-types",
+    "xmlstructs-libvirt",
     "xmlstructs-podcast",
 ]
 

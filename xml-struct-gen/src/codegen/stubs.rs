@@ -1,6 +1,6 @@
+use crate::codegen::AssignedTypeMap;
 use crate::codegen::stubs_write::gen_write_element;
 use crate::common::elem_props::{AttrField, ElemProps};
-use bimap::BiMap;
 use heck::ToSnakeCase;
 use proc_macro2::{Ident, TokenStream};
 use quote::{format_ident, quote};
@@ -9,7 +9,7 @@ use xml::name::OwnedName;
 pub fn gen_el_struct(
     k: &Vec<OwnedName>,
     v: &ElemProps,
-    assigned: &BiMap<Vec<OwnedName>, String>,
+    assigned: &AssignedTypeMap,
     root_props: Option<ElemProps>,
 ) -> TokenStream {
     let attr_fields = v.get_attr_fields();
@@ -41,8 +41,15 @@ pub fn gen_el_struct(
         format_ident!("{xml_name}")
     };
 
-    let maybe_parse_document_impl = if let Some(root_props) = root_props {
-        generate_parse_document(&root_props)
+    let maybe_document_trait = if let Some(root_props) = root_props {
+        let parse_doc = generate_parse_document(&root_props);
+        let write_doc = generate_write_document();
+        quote! {
+            impl xml_struct_types::v1::XmlStructDocument for #sn {
+                #parse_doc
+                #write_doc
+            }
+        }
     } else {
         quote! {}
     };
@@ -69,13 +76,13 @@ pub fn gen_el_struct(
         impl #sn {
             #name_consts
 
-            #maybe_parse_document_impl
             #parse_elem_impl
             #parse_children_impl
 
             #write_element_impl
         }
 
+        #maybe_document_trait
     }
 }
 
@@ -179,7 +186,7 @@ fn elem_matchers(elem_fields: &Vec<(Vec<OwnedName>, Ident, Ident)>) -> Vec<Token
 
 fn generate_parse_document(_elem_props: &ElemProps) -> TokenStream {
     quote! {
-        pub fn parse_document<R: std::io::Read>(mut reader: R) -> Result<Self, XmlParseError>  {
+        fn parse_document<R: std::io::Read>(reader: &mut R) -> Result<Self, XmlParseError>  {
             let mut parser = xml::EventReader::new(reader).into_iter();
             let root_element = Self::parse_element(&mut parser)?;
             match parser.next() {
@@ -197,6 +204,18 @@ fn generate_parse_document(_elem_props: &ElemProps) -> TokenStream {
     }
 }
 
+fn generate_write_document() -> TokenStream {
+    quote! {
+        fn write_document<W: std::io::Write>(&self,
+            w: &mut W,) -> Result<(), XmlWriteError> {
+            let mut writer = xml::EmitterConfig::new()
+                .write_document_declaration(false)
+                .perform_indent(false)
+                .create_writer(w);
+            self.write_element(&mut writer, true)
+        }
+    }
+}
 fn generate_parse_elem(elem_path: &Vec<OwnedName>) -> TokenStream {
     let elem = elem_path.last().clone().unwrap();
     let match_arm = owned_name_to_match_arm(elem);

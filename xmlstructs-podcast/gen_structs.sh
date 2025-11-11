@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+cd $(git rev-parse --show-toplevel)
+
 cargo build -p xml-struct-gen
 
 ./target/debug/xml-struct-gen \

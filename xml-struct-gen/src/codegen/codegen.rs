@@ -1,7 +1,7 @@
 use crate::codegen::stubs::gen_el_struct;
 
+use crate::codegen::AssignedTypeMap;
 use crate::codegen::stubs_ns::generate_namespace_const;
-use crate::codegen::util::structname_for;
 use crate::common::elem_props::ElemProps;
 use bimap::BiMap;
 use indexmap::IndexMap;
@@ -11,12 +11,13 @@ use xml::name::OwnedName;
 pub fn generate_code(
     ns: BTreeMap<String, String>,
     mut e: IndexMap<Vec<OwnedName>, ElemProps>,
-) -> String {
-    let assigned_names = assign_struct_names(e.keys().filter(|k| !k.is_empty()).cloned().collect());
+) -> anyhow::Result<String> {
+    let assigned_names =
+        assign_struct_names(e.keys().filter(|k| !k.is_empty()).cloned().collect())?;
 
     let mut s = "use serde::{Deserialize, Serialize};\n".to_string();
     s.push_str("use std::collections::HashMap;\n");
-    s.push_str("pub use xml_struct_types::v1::*;");
+    s.push_str("pub use xml_struct_types::v1::error::*;");
 
     let doc_struct_root_props = e.shift_remove(&vec![]).unwrap();
 
@@ -31,10 +32,10 @@ pub fn generate_code(
         let el_struct = gen_el_struct(&k, &v, &assigned_names, rp);
         s.push_str(&el_struct.to_string());
     }
-    s
+    Ok(s)
 }
 
-fn assign_struct_names(stacks: Vec<Vec<OwnedName>>) -> BiMap<Vec<OwnedName>, String> {
+fn assign_struct_names(stacks: Vec<Vec<OwnedName>>) -> anyhow::Result<AssignedTypeMap> {
     let mut result = BiMap::new();
 
     let mut seen_names = HashSet::new();
@@ -49,7 +50,10 @@ fn assign_struct_names(stacks: Vec<Vec<OwnedName>>) -> BiMap<Vec<OwnedName>, Str
         let proposed_name = if dup_names.contains(&stack.last().unwrap().local_name) {
             fully_qualified_name(&stack)
         } else {
-            structname_for(&stack.last().unwrap().local_name)
+            format!(
+                "{}",
+                heck::AsUpperCamelCase(&stack.last().unwrap().local_name)
+            )
         };
 
         result.insert(
@@ -58,7 +62,7 @@ fn assign_struct_names(stacks: Vec<Vec<OwnedName>>) -> BiMap<Vec<OwnedName>, Str
         );
     }
 
-    result
+    Ok(result)
 }
 
 fn fully_qualified_name(stack: &Vec<OwnedName>) -> String {
