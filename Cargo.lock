@@ -401,6 +401,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "xmlstructs-libvirt"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "serde",
+ "serde_json",
+ "xml-rs",
+ "xml-struct-types",
+]
+
+[[package]]
 name = "xmlstructs-podcast"
 version = "0.1.0"
 dependencies = [
