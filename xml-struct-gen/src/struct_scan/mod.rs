@@ -26,10 +26,7 @@ impl StructScanner {
         }
     }
 
-    pub fn scan_structs(
-        &mut self,
-        path: &Path,
-    ) -> anyhow::Result<IndexMap<Vec<OwnedName>, ElemProps>> {
+    pub fn scan_structs(&mut self, path: &Path) -> anyhow::Result<()> {
         let file = BufReader::new(File::open(path)?);
         let parser = EventReader::new(file);
 
@@ -75,12 +72,16 @@ impl StructScanner {
                 _ => {}
             }
         }
-        Ok(self.elem_map.clone())
+        Ok(())
     }
 
     fn append_namespaces(&mut self, ns: Namespace) {
         for (pfx, url) in ns.0 {
             self.namespaces.insert(pfx, url);
         }
+    }
+
+    pub fn get(&self) -> IndexMap<Vec<OwnedName>, ElemProps> {
+        self.elem_map.clone()
     }
 }

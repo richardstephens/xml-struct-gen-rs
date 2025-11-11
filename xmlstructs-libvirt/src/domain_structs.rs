@@ -9,21 +9,22 @@ pub struct DomainDocument {
     pub misc_attrs: HashMap<(Option<String>, String), String>,
     #[serde(skip)]
     pub misc_content: Vec<xml::reader::XmlEvent>,
-    pub name_elems: Vec<Name>,
     pub uuid_elems: Vec<Uuid>,
     pub title_elems: Vec<Title>,
     pub description_elems: Vec<Description>,
     pub metadata_elems: Vec<Metadata>,
+    pub on_poweroff_elems: Vec<OnPoweroff>,
+    pub on_reboot_elems: Vec<OnReboot>,
+    pub on_crash_elems: Vec<OnCrash>,
+    pub name_elems: Vec<Name>,
     pub memory_elems: Vec<Memory>,
     pub current_memory_elems: Vec<CurrentMemory>,
     pub vcpu_elems: Vec<Vcpu>,
     pub domain_os_elems: Vec<DomainOs>,
+    pub sysinfo_elems: Vec<Sysinfo>,
     pub features_elems: Vec<Features>,
-    pub cpu_elems: Vec<Cpu>,
     pub clock_elems: Vec<Clock>,
-    pub on_poweroff_elems: Vec<OnPoweroff>,
-    pub on_reboot_elems: Vec<OnReboot>,
-    pub on_crash_elems: Vec<OnCrash>,
+    pub cpu_elems: Vec<Cpu>,
     pub pm_elems: Vec<Pm>,
     pub devices_elems: Vec<Devices>,
 }
@@ -80,9 +81,6 @@ impl DomainDocument {
                     attributes,
                     namespace,
                 }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
-                    (None, "name") => {
-                        n.name_elems.push(Name::parse_children(attributes, iter)?);
-                    }
                     (None, "uuid") => {
                         n.uuid_elems.push(Uuid::parse_children(attributes, iter)?);
                     }
@@ -96,6 +94,21 @@ impl DomainDocument {
                     (None, "metadata") => {
                         n.metadata_elems
                             .push(Metadata::parse_children(attributes, iter)?);
+                    }
+                    (None, "on_poweroff") => {
+                        n.on_poweroff_elems
+                            .push(OnPoweroff::parse_children(attributes, iter)?);
+                    }
+                    (None, "on_reboot") => {
+                        n.on_reboot_elems
+                            .push(OnReboot::parse_children(attributes, iter)?);
+                    }
+                    (None, "on_crash") => {
+                        n.on_crash_elems
+                            .push(OnCrash::parse_children(attributes, iter)?);
+                    }
+                    (None, "name") => {
+                        n.name_elems.push(Name::parse_children(attributes, iter)?);
                     }
                     (None, "memory") => {
                         n.memory_elems
@@ -112,27 +125,19 @@ impl DomainDocument {
                         n.domain_os_elems
                             .push(DomainOs::parse_children(attributes, iter)?);
                     }
+                    (None, "sysinfo") => {
+                        n.sysinfo_elems
+                            .push(Sysinfo::parse_children(attributes, iter)?);
+                    }
                     (None, "features") => {
                         n.features_elems
                             .push(Features::parse_children(attributes, iter)?);
                     }
-                    (None, "cpu") => {
-                        n.cpu_elems.push(Cpu::parse_children(attributes, iter)?);
-                    }
                     (None, "clock") => {
                         n.clock_elems.push(Clock::parse_children(attributes, iter)?);
                     }
-                    (None, "on_poweroff") => {
-                        n.on_poweroff_elems
-                            .push(OnPoweroff::parse_children(attributes, iter)?);
-                    }
-                    (None, "on_reboot") => {
-                        n.on_reboot_elems
-                            .push(OnReboot::parse_children(attributes, iter)?);
-                    }
-                    (None, "on_crash") => {
-                        n.on_crash_elems
-                            .push(OnCrash::parse_children(attributes, iter)?);
+                    (None, "cpu") => {
+                        n.cpu_elems.push(Cpu::parse_children(attributes, iter)?);
                     }
                     (None, "pm") => {
                         n.pm_elems.push(Pm::parse_children(attributes, iter)?);
@@ -209,9 +214,6 @@ impl DomainDocument {
             }
         }
         w.write(el_builder)?;
-        for child in self.name_elems.iter() {
-            child.write_element(w, false)?;
-        }
         for child in self.uuid_elems.iter() {
             child.write_element(w, false)?;
         }
@@ -222,6 +224,18 @@ impl DomainDocument {
             child.write_element(w, false)?;
         }
         for child in self.metadata_elems.iter() {
+            child.write_element(w, false)?;
+        }
+        for child in self.on_poweroff_elems.iter() {
+            child.write_element(w, false)?;
+        }
+        for child in self.on_reboot_elems.iter() {
+            child.write_element(w, false)?;
+        }
+        for child in self.on_crash_elems.iter() {
+            child.write_element(w, false)?;
+        }
+        for child in self.name_elems.iter() {
             child.write_element(w, false)?;
         }
         for child in self.memory_elems.iter() {
@@ -236,22 +250,16 @@ impl DomainDocument {
         for child in self.domain_os_elems.iter() {
             child.write_element(w, false)?;
         }
-        for child in self.features_elems.iter() {
+        for child in self.sysinfo_elems.iter() {
             child.write_element(w, false)?;
         }
-        for child in self.cpu_elems.iter() {
+        for child in self.features_elems.iter() {
             child.write_element(w, false)?;
         }
         for child in self.clock_elems.iter() {
             child.write_element(w, false)?;
         }
-        for child in self.on_poweroff_elems.iter() {
-            child.write_element(w, false)?;
-        }
-        for child in self.on_reboot_elems.iter() {
-            child.write_element(w, false)?;
-        }
-        for child in self.on_crash_elems.iter() {
+        for child in self.cpu_elems.iter() {
             child.write_element(w, false)?;
         }
         for child in self.pm_elems.iter() {
@@ -1672,11 +1680,12 @@ pub struct DomainOs {
     pub misc_attrs: HashMap<(Option<String>, String), String>,
     #[serde(skip)]
     pub misc_content: Vec<xml::reader::XmlEvent>,
-    pub type_elems: Vec<Type>,
     pub firmware_elems: Vec<Firmware>,
+    pub type_elems: Vec<Type>,
     pub loader_elems: Vec<Loader>,
     pub nvram_elems: Vec<Nvram>,
     pub boot_elems: Vec<Boot>,
+    pub smbios_elems: Vec<Smbios>,
 }
 impl DomainOs {
     const XML_LOCAL_NAME: &'static str = "os";
@@ -1731,12 +1740,12 @@ impl DomainOs {
                     attributes,
                     namespace,
                 }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
-                    (None, "type") => {
-                        n.type_elems.push(Type::parse_children(attributes, iter)?);
-                    }
                     (None, "firmware") => {
                         n.firmware_elems
                             .push(Firmware::parse_children(attributes, iter)?);
+                    }
+                    (None, "type") => {
+                        n.type_elems.push(Type::parse_children(attributes, iter)?);
                     }
                     (None, "loader") => {
                         n.loader_elems
@@ -1747,6 +1756,10 @@ impl DomainOs {
                     }
                     (None, "boot") => {
                         n.boot_elems.push(Boot::parse_children(attributes, iter)?);
+                    }
+                    (None, "smbios") => {
+                        n.smbios_elems
+                            .push(Smbios::parse_children(attributes, iter)?);
                     }
                     _ => {
                         let mut depth: usize = 1;
@@ -1816,10 +1829,10 @@ impl DomainOs {
             }
         }
         w.write(el_builder)?;
-        for child in self.type_elems.iter() {
+        for child in self.firmware_elems.iter() {
             child.write_element(w, false)?;
         }
-        for child in self.firmware_elems.iter() {
+        for child in self.type_elems.iter() {
             child.write_element(w, false)?;
         }
         for child in self.loader_elems.iter() {
@@ -1829,6 +1842,9 @@ impl DomainOs {
             child.write_element(w, false)?;
         }
         for child in self.boot_elems.iter() {
+            child.write_element(w, false)?;
+        }
+        for child in self.smbios_elems.iter() {
             child.write_element(w, false)?;
         }
         for elem in self.misc_content.iter() {
@@ -2273,6 +2289,7 @@ pub struct Loader {
     pub r#readonly: Option<String>,
     pub r#type: Option<String>,
     pub r#format: Option<String>,
+    pub r#secure: Option<String>,
     pub misc_attrs: HashMap<(Option<String>, String), String>,
     #[serde(skip)]
     pub misc_content: Vec<xml::reader::XmlEvent>,
@@ -2323,6 +2340,9 @@ impl Loader {
                 }
                 (None, "format") => {
                     n.r#format = Some(attr.value);
+                }
+                (None, "secure") => {
+                    n.r#secure = Some(attr.value);
                 }
                 (ns, name) => {
                     n.misc_attrs
@@ -2402,6 +2422,9 @@ impl Loader {
         }
         if let Some(v) = self.r#format.as_ref() {
             el_builder = el_builder.attr("format", v);
+        }
+        if let Some(v) = self.r#secure.as_ref() {
+            el_builder = el_builder.attr("secure", v);
         }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
@@ -2719,6 +2742,7 @@ pub struct Features {
     pub acpi_elems: Vec<Acpi>,
     pub apic_elems: Vec<Apic>,
     pub vmport_elems: Vec<Vmport>,
+    pub smm_elems: Vec<Smm>,
 }
 impl Features {
     const XML_LOCAL_NAME: &'static str = "features";
@@ -2779,6 +2803,9 @@ impl Features {
                     (None, "vmport") => {
                         n.vmport_elems
                             .push(Vmport::parse_children(attributes, iter)?);
+                    }
+                    (None, "smm") => {
+                        n.smm_elems.push(Smm::parse_children(attributes, iter)?);
                     }
                     _ => {
                         let mut depth: usize = 1;
@@ -2852,6 +2879,9 @@ impl Features {
             child.write_element(w, false)?;
         }
         for child in self.vmport_elems.iter() {
+            child.write_element(w, false)?;
+        }
+        for child in self.smm_elems.iter() {
             child.write_element(w, false)?;
         }
         for elem in self.misc_content.iter() {
@@ -4280,8 +4310,8 @@ pub struct Pm {
     pub misc_attrs: HashMap<(Option<String>, String), String>,
     #[serde(skip)]
     pub misc_content: Vec<xml::reader::XmlEvent>,
-    pub suspend_to_mem_elems: Vec<SuspendToMem>,
     pub suspend_to_disk_elems: Vec<SuspendToDisk>,
+    pub suspend_to_mem_elems: Vec<SuspendToMem>,
 }
 impl Pm {
     const XML_LOCAL_NAME: &'static str = "pm";
@@ -4333,13 +4363,13 @@ impl Pm {
                     attributes,
                     namespace,
                 }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
-                    (None, "suspend-to-mem") => {
-                        n.suspend_to_mem_elems
-                            .push(SuspendToMem::parse_children(attributes, iter)?);
-                    }
                     (None, "suspend-to-disk") => {
                         n.suspend_to_disk_elems
                             .push(SuspendToDisk::parse_children(attributes, iter)?);
+                    }
+                    (None, "suspend-to-mem") => {
+                        n.suspend_to_mem_elems
+                            .push(SuspendToMem::parse_children(attributes, iter)?);
                     }
                     _ => {
                         let mut depth: usize = 1;
@@ -4406,10 +4436,10 @@ impl Pm {
             }
         }
         w.write(el_builder)?;
-        for child in self.suspend_to_mem_elems.iter() {
+        for child in self.suspend_to_disk_elems.iter() {
             child.write_element(w, false)?;
         }
-        for child in self.suspend_to_disk_elems.iter() {
+        for child in self.suspend_to_mem_elems.iter() {
             child.write_element(w, false)?;
         }
         for elem in self.misc_content.iter() {
@@ -4700,22 +4730,22 @@ pub struct Devices {
     pub misc_attrs: HashMap<(Option<String>, String), String>,
     #[serde(skip)]
     pub misc_content: Vec<xml::reader::XmlEvent>,
-    pub emulator_elems: Vec<Emulator>,
-    pub disk_elems: Vec<Disk>,
     pub controller_elems: Vec<Controller>,
     pub interface_elems: Vec<Interface>,
     pub serial_elems: Vec<Serial>,
-    pub console_elems: Vec<Console>,
     pub channel_elems: Vec<Channel>,
-    pub input_elems: Vec<Input>,
-    pub graphics_elems: Vec<Graphics>,
     pub sound_elems: Vec<Sound>,
     pub audio_elems: Vec<Audio>,
-    pub video_elems: Vec<Video>,
     pub redirdev_elems: Vec<Redirdev>,
     pub watchdog_elems: Vec<Watchdog>,
     pub memballoon_elems: Vec<Memballoon>,
     pub rng_elems: Vec<Rng>,
+    pub input_elems: Vec<Input>,
+    pub emulator_elems: Vec<Emulator>,
+    pub disk_elems: Vec<Disk>,
+    pub graphics_elems: Vec<Graphics>,
+    pub video_elems: Vec<Video>,
+    pub console_elems: Vec<Console>,
 }
 impl Devices {
     const XML_LOCAL_NAME: &'static str = "devices";
@@ -4767,13 +4797,6 @@ impl Devices {
                     attributes,
                     namespace,
                 }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
-                    (None, "emulator") => {
-                        n.emulator_elems
-                            .push(Emulator::parse_children(attributes, iter)?);
-                    }
-                    (None, "disk") => {
-                        n.disk_elems.push(Disk::parse_children(attributes, iter)?);
-                    }
                     (None, "controller") => {
                         n.controller_elems
                             .push(Controller::parse_children(attributes, iter)?);
@@ -4786,29 +4809,15 @@ impl Devices {
                         n.serial_elems
                             .push(Serial::parse_children(attributes, iter)?);
                     }
-                    (None, "console") => {
-                        n.console_elems
-                            .push(Console::parse_children(attributes, iter)?);
-                    }
                     (None, "channel") => {
                         n.channel_elems
                             .push(Channel::parse_children(attributes, iter)?);
-                    }
-                    (None, "input") => {
-                        n.input_elems.push(Input::parse_children(attributes, iter)?);
-                    }
-                    (None, "graphics") => {
-                        n.graphics_elems
-                            .push(Graphics::parse_children(attributes, iter)?);
                     }
                     (None, "sound") => {
                         n.sound_elems.push(Sound::parse_children(attributes, iter)?);
                     }
                     (None, "audio") => {
                         n.audio_elems.push(Audio::parse_children(attributes, iter)?);
-                    }
-                    (None, "video") => {
-                        n.video_elems.push(Video::parse_children(attributes, iter)?);
                     }
                     (None, "redirdev") => {
                         n.redirdev_elems
@@ -4824,6 +4833,27 @@ impl Devices {
                     }
                     (None, "rng") => {
                         n.rng_elems.push(Rng::parse_children(attributes, iter)?);
+                    }
+                    (None, "input") => {
+                        n.input_elems.push(Input::parse_children(attributes, iter)?);
+                    }
+                    (None, "emulator") => {
+                        n.emulator_elems
+                            .push(Emulator::parse_children(attributes, iter)?);
+                    }
+                    (None, "disk") => {
+                        n.disk_elems.push(Disk::parse_children(attributes, iter)?);
+                    }
+                    (None, "graphics") => {
+                        n.graphics_elems
+                            .push(Graphics::parse_children(attributes, iter)?);
+                    }
+                    (None, "video") => {
+                        n.video_elems.push(Video::parse_children(attributes, iter)?);
+                    }
+                    (None, "console") => {
+                        n.console_elems
+                            .push(Console::parse_children(attributes, iter)?);
                     }
                     _ => {
                         let mut depth: usize = 1;
@@ -4890,12 +4920,6 @@ impl Devices {
             }
         }
         w.write(el_builder)?;
-        for child in self.emulator_elems.iter() {
-            child.write_element(w, false)?;
-        }
-        for child in self.disk_elems.iter() {
-            child.write_element(w, false)?;
-        }
         for child in self.controller_elems.iter() {
             child.write_element(w, false)?;
         }
@@ -4905,25 +4929,13 @@ impl Devices {
         for child in self.serial_elems.iter() {
             child.write_element(w, false)?;
         }
-        for child in self.console_elems.iter() {
-            child.write_element(w, false)?;
-        }
         for child in self.channel_elems.iter() {
-            child.write_element(w, false)?;
-        }
-        for child in self.input_elems.iter() {
-            child.write_element(w, false)?;
-        }
-        for child in self.graphics_elems.iter() {
             child.write_element(w, false)?;
         }
         for child in self.sound_elems.iter() {
             child.write_element(w, false)?;
         }
         for child in self.audio_elems.iter() {
-            child.write_element(w, false)?;
-        }
-        for child in self.video_elems.iter() {
             child.write_element(w, false)?;
         }
         for child in self.redirdev_elems.iter() {
@@ -4936,6 +4948,24 @@ impl Devices {
             child.write_element(w, false)?;
         }
         for child in self.rng_elems.iter() {
+            child.write_element(w, false)?;
+        }
+        for child in self.input_elems.iter() {
+            child.write_element(w, false)?;
+        }
+        for child in self.emulator_elems.iter() {
+            child.write_element(w, false)?;
+        }
+        for child in self.disk_elems.iter() {
+            child.write_element(w, false)?;
+        }
+        for child in self.graphics_elems.iter() {
+            child.write_element(w, false)?;
+        }
+        for child in self.video_elems.iter() {
+            child.write_element(w, false)?;
+        }
+        for child in self.console_elems.iter() {
             child.write_element(w, false)?;
         }
         for elem in self.misc_content.iter() {
@@ -5086,10 +5116,12 @@ pub struct Disk {
     pub misc_attrs: HashMap<(Option<String>, String), String>,
     #[serde(skip)]
     pub misc_content: Vec<xml::reader::XmlEvent>,
-    pub domain_devices_disk_source_elems: Vec<DomainDevicesDiskSource>,
     pub driver_elems: Vec<Driver>,
+    pub domain_devices_disk_source_elems: Vec<DomainDevicesDiskSource>,
+    pub backing_store_elems: Vec<BackingStore>,
     pub domain_devices_disk_target_elems: Vec<DomainDevicesDiskTarget>,
     pub readonly_elems: Vec<Readonly>,
+    pub domain_devices_disk_alias_elems: Vec<DomainDevicesDiskAlias>,
     pub domain_devices_disk_address_elems: Vec<DomainDevicesDiskAddress>,
 }
 impl Disk {
@@ -5148,13 +5180,17 @@ impl Disk {
                     attributes,
                     namespace,
                 }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    (None, "driver") => {
+                        n.driver_elems
+                            .push(Driver::parse_children(attributes, iter)?);
+                    }
                     (None, "source") => {
                         n.domain_devices_disk_source_elems
                             .push(DomainDevicesDiskSource::parse_children(attributes, iter)?);
                     }
-                    (None, "driver") => {
-                        n.driver_elems
-                            .push(Driver::parse_children(attributes, iter)?);
+                    (None, "backingStore") => {
+                        n.backing_store_elems
+                            .push(BackingStore::parse_children(attributes, iter)?);
                     }
                     (None, "target") => {
                         n.domain_devices_disk_target_elems
@@ -5163,6 +5199,10 @@ impl Disk {
                     (None, "readonly") => {
                         n.readonly_elems
                             .push(Readonly::parse_children(attributes, iter)?);
+                    }
+                    (None, "alias") => {
+                        n.domain_devices_disk_alias_elems
+                            .push(DomainDevicesDiskAlias::parse_children(attributes, iter)?);
                     }
                     (None, "address") => {
                         n.domain_devices_disk_address_elems
@@ -5239,16 +5279,22 @@ impl Disk {
             }
         }
         w.write(el_builder)?;
+        for child in self.driver_elems.iter() {
+            child.write_element(w, false)?;
+        }
         for child in self.domain_devices_disk_source_elems.iter() {
             child.write_element(w, false)?;
         }
-        for child in self.driver_elems.iter() {
+        for child in self.backing_store_elems.iter() {
             child.write_element(w, false)?;
         }
         for child in self.domain_devices_disk_target_elems.iter() {
             child.write_element(w, false)?;
         }
         for child in self.readonly_elems.iter() {
+            child.write_element(w, false)?;
+        }
+        for child in self.domain_devices_disk_alias_elems.iter() {
             child.write_element(w, false)?;
         }
         for child in self.domain_devices_disk_address_elems.iter() {
@@ -8878,11 +8924,12 @@ impl DomainDevicesInputAddress {
 pub struct Graphics {
     pub r#type: Option<String>,
     pub r#autoport: Option<String>,
+    pub r#listen: Option<String>,
     pub misc_attrs: HashMap<(Option<String>, String), String>,
     #[serde(skip)]
     pub misc_content: Vec<xml::reader::XmlEvent>,
-    pub listen_elems: Vec<Listen>,
     pub image_elems: Vec<Image>,
+    pub listen_elems: Vec<Listen>,
 }
 impl Graphics {
     const XML_LOCAL_NAME: &'static str = "graphics";
@@ -8927,6 +8974,9 @@ impl Graphics {
                 (None, "autoport") => {
                     n.r#autoport = Some(attr.value);
                 }
+                (None, "listen") => {
+                    n.r#listen = Some(attr.value);
+                }
                 (ns, name) => {
                     n.misc_attrs
                         .insert((ns.map(|s| s.to_string()), name.to_owned()), attr.value);
@@ -8940,12 +8990,12 @@ impl Graphics {
                     attributes,
                     namespace,
                 }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    (None, "image") => {
+                        n.image_elems.push(Image::parse_children(attributes, iter)?);
+                    }
                     (None, "listen") => {
                         n.listen_elems
                             .push(Listen::parse_children(attributes, iter)?);
-                    }
-                    (None, "image") => {
-                        n.image_elems.push(Image::parse_children(attributes, iter)?);
                     }
                     _ => {
                         let mut depth: usize = 1;
@@ -9012,16 +9062,19 @@ impl Graphics {
         if let Some(v) = self.r#autoport.as_ref() {
             el_builder = el_builder.attr("autoport", v);
         }
+        if let Some(v) = self.r#listen.as_ref() {
+            el_builder = el_builder.attr("listen", v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
             }
         }
         w.write(el_builder)?;
-        for child in self.listen_elems.iter() {
+        for child in self.image_elems.iter() {
             child.write_element(w, false)?;
         }
-        for child in self.image_elems.iter() {
+        for child in self.listen_elems.iter() {
             child.write_element(w, false)?;
         }
         for elem in self.misc_content.iter() {
@@ -9036,6 +9089,7 @@ impl Graphics {
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Listen {
     pub r#type: Option<String>,
+    pub r#address: Option<String>,
     pub misc_attrs: HashMap<(Option<String>, String), String>,
     #[serde(skip)]
     pub misc_content: Vec<xml::reader::XmlEvent>,
@@ -9079,6 +9133,9 @@ impl Listen {
             ) {
                 (None, "type") => {
                     n.r#type = Some(attr.value);
+                }
+                (None, "address") => {
+                    n.r#address = Some(attr.value);
                 }
                 (ns, name) => {
                     n.misc_attrs
@@ -9154,6 +9211,9 @@ impl Listen {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         if let Some(v) = self.r#type.as_ref() {
             el_builder = el_builder.attr("type", v);
+        }
+        if let Some(v) = self.r#address.as_ref() {
+            el_builder = el_builder.attr("address", v);
         }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
@@ -9767,6 +9827,7 @@ pub struct Video {
     #[serde(skip)]
     pub misc_content: Vec<xml::reader::XmlEvent>,
     pub domain_devices_video_model_elems: Vec<DomainDevicesVideoModel>,
+    pub domain_devices_video_alias_elems: Vec<DomainDevicesVideoAlias>,
     pub domain_devices_video_address_elems: Vec<DomainDevicesVideoAddress>,
 }
 impl Video {
@@ -9822,6 +9883,10 @@ impl Video {
                     (None, "model") => {
                         n.domain_devices_video_model_elems
                             .push(DomainDevicesVideoModel::parse_children(attributes, iter)?);
+                    }
+                    (None, "alias") => {
+                        n.domain_devices_video_alias_elems
+                            .push(DomainDevicesVideoAlias::parse_children(attributes, iter)?);
                     }
                     (None, "address") => {
                         n.domain_devices_video_address_elems
@@ -9895,6 +9960,9 @@ impl Video {
         for child in self.domain_devices_video_model_elems.iter() {
             child.write_element(w, false)?;
         }
+        for child in self.domain_devices_video_alias_elems.iter() {
+            child.write_element(w, false)?;
+        }
         for child in self.domain_devices_video_address_elems.iter() {
             child.write_element(w, false)?;
         }
@@ -9912,9 +9980,13 @@ pub struct DomainDevicesVideoModel {
     pub r#type: Option<String>,
     pub r#heads: Option<String>,
     pub r#primary: Option<String>,
+    pub r#ram: Option<String>,
+    pub r#vram: Option<String>,
+    pub r#vgamem: Option<String>,
     pub misc_attrs: HashMap<(Option<String>, String), String>,
     #[serde(skip)]
     pub misc_content: Vec<xml::reader::XmlEvent>,
+    pub resolution_elems: Vec<Resolution>,
 }
 impl DomainDevicesVideoModel {
     const XML_LOCAL_NAME: &'static str = "model";
@@ -9962,6 +10034,15 @@ impl DomainDevicesVideoModel {
                 (None, "primary") => {
                     n.r#primary = Some(attr.value);
                 }
+                (None, "ram") => {
+                    n.r#ram = Some(attr.value);
+                }
+                (None, "vram") => {
+                    n.r#vram = Some(attr.value);
+                }
+                (None, "vgamem") => {
+                    n.r#vgamem = Some(attr.value);
+                }
                 (ns, name) => {
                     n.misc_attrs
                         .insert((ns.map(|s| s.to_string()), name.to_owned()), attr.value);
@@ -9975,6 +10056,10 @@ impl DomainDevicesVideoModel {
                     attributes,
                     namespace,
                 }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    (None, "resolution") => {
+                        n.resolution_elems
+                            .push(Resolution::parse_children(attributes, iter)?);
+                    }
                     _ => {
                         let mut depth: usize = 1;
                         n.misc_content.push(xml::reader::XmlEvent::StartElement {
@@ -10043,12 +10128,24 @@ impl DomainDevicesVideoModel {
         if let Some(v) = self.r#primary.as_ref() {
             el_builder = el_builder.attr("primary", v);
         }
+        if let Some(v) = self.r#ram.as_ref() {
+            el_builder = el_builder.attr("ram", v);
+        }
+        if let Some(v) = self.r#vram.as_ref() {
+            el_builder = el_builder.attr("vram", v);
+        }
+        if let Some(v) = self.r#vgamem.as_ref() {
+            el_builder = el_builder.attr("vgamem", v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
             }
         }
         w.write(el_builder)?;
+        for child in self.resolution_elems.iter() {
+            child.write_element(w, false)?;
+        }
         for elem in self.misc_content.iter() {
             if let Some(writer_event) = elem.as_writer_event() {
                 w.write(writer_event)?;
@@ -11423,6 +11520,1249 @@ impl DomainDevicesRngAddress {
         }
         if let Some(v) = self.r#function.as_ref() {
             el_builder = el_builder.attr("function", v);
+        }
+        if include_ns {
+            for (k, v) in DOCUMENT_NAMESPACES {
+                el_builder = el_builder.ns(*k, *v);
+            }
+        }
+        w.write(el_builder)?;
+        for elem in self.misc_content.iter() {
+            if let Some(writer_event) = elem.as_writer_event() {
+                w.write(writer_event)?;
+            }
+        }
+        w.write(xml::writer::XmlEvent::end_element())?;
+        Ok(())
+    }
+}
+#[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct Smbios {
+    pub r#mode: Option<String>,
+    pub misc_attrs: HashMap<(Option<String>, String), String>,
+    #[serde(skip)]
+    pub misc_content: Vec<xml::reader::XmlEvent>,
+}
+impl Smbios {
+    const XML_LOCAL_NAME: &'static str = "smbios";
+    const XML_NAMESPACE: Option<&'static str> = None;
+    const XML_PREFIX: Option<&'static str> = None;
+    const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::local("smbios");
+    pub fn parse_element<R: std::io::Read>(
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        while let Some(event) = iter.next() {
+            return match event {
+                Ok(xml::reader::XmlEvent::StartDocument { .. }) => {
+                    continue;
+                }
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    (None, "smbios") => Self::parse_children(attributes, iter),
+                    _ => Err(XmlParseError::UnexpectedElement(name)),
+                },
+                Ok(e) => Err(XmlParseError::UnexpectedXmlEvent(e)),
+                Err(e) => Err(e.into()),
+            };
+        }
+        Err(XmlParseError::UnexpectedEof("smbios element"))
+    }
+    fn parse_children<R: std::io::Read>(
+        attrs: Vec<xml::attribute::OwnedAttribute>,
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        let mut n = Self::default();
+        for attr in attrs.into_iter() {
+            match (
+                attr.name.namespace.as_deref(),
+                attr.name.local_name.as_str(),
+            ) {
+                (None, "mode") => {
+                    n.r#mode = Some(attr.value);
+                }
+                (ns, name) => {
+                    n.misc_attrs
+                        .insert((ns.map(|s| s.to_string()), name.to_owned()), attr.value);
+                }
+            }
+        }
+        while let Some(e) = iter.next() {
+            match e {
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    _ => {
+                        let mut depth: usize = 1;
+                        n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                            name,
+                            attributes,
+                            namespace,
+                        });
+                        while let Some(e) = iter.next() {
+                            match e {
+                                Ok(xml::reader::XmlEvent::StartElement {
+                                    name,
+                                    attributes,
+                                    namespace,
+                                }) => {
+                                    n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                                        name,
+                                        attributes,
+                                        namespace,
+                                    });
+                                    depth += 1;
+                                }
+                                Ok(xml::reader::XmlEvent::EndElement { name }) => {
+                                    n.misc_content
+                                        .push(xml::reader::XmlEvent::EndElement { name });
+                                    depth -= 1;
+                                    if depth == 0 {
+                                        break;
+                                    }
+                                }
+                                Ok(evt) => {
+                                    n.misc_content.push(evt);
+                                }
+                                Err(e) => return Err(e.into()),
+                            }
+                        }
+                    }
+                },
+                Ok(xml::reader::XmlEvent::EndElement { .. }) => {
+                    return Ok(n);
+                }
+                Ok(xml::reader::XmlEvent::Characters(val)) => {
+                    return Err(XmlParseError::UnexpectedCharacters(
+                        XmlDocumentReference::Unknown,
+                    ));
+                }
+                Err(e) => return Err(e.into()),
+                _ => {}
+            }
+        }
+        return Err(XmlParseError::ExpectedEndElement(
+            XmlDocumentReference::Unknown,
+        ));
+    }
+    pub fn write_element<W: std::io::Write>(
+        &self,
+        w: &mut xml::writer::EventWriter<W>,
+        include_ns: bool,
+    ) -> Result<(), XmlWriteError> {
+        let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        if let Some(v) = self.r#mode.as_ref() {
+            el_builder = el_builder.attr("mode", v);
+        }
+        if include_ns {
+            for (k, v) in DOCUMENT_NAMESPACES {
+                el_builder = el_builder.ns(*k, *v);
+            }
+        }
+        w.write(el_builder)?;
+        for elem in self.misc_content.iter() {
+            if let Some(writer_event) = elem.as_writer_event() {
+                w.write(writer_event)?;
+            }
+        }
+        w.write(xml::writer::XmlEvent::end_element())?;
+        Ok(())
+    }
+}
+#[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct Sysinfo {
+    pub r#type: Option<String>,
+    pub misc_attrs: HashMap<(Option<String>, String), String>,
+    #[serde(skip)]
+    pub misc_content: Vec<xml::reader::XmlEvent>,
+    pub system_elems: Vec<System>,
+}
+impl Sysinfo {
+    const XML_LOCAL_NAME: &'static str = "sysinfo";
+    const XML_NAMESPACE: Option<&'static str> = None;
+    const XML_PREFIX: Option<&'static str> = None;
+    const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::local("sysinfo");
+    pub fn parse_element<R: std::io::Read>(
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        while let Some(event) = iter.next() {
+            return match event {
+                Ok(xml::reader::XmlEvent::StartDocument { .. }) => {
+                    continue;
+                }
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    (None, "sysinfo") => Self::parse_children(attributes, iter),
+                    _ => Err(XmlParseError::UnexpectedElement(name)),
+                },
+                Ok(e) => Err(XmlParseError::UnexpectedXmlEvent(e)),
+                Err(e) => Err(e.into()),
+            };
+        }
+        Err(XmlParseError::UnexpectedEof("sysinfo element"))
+    }
+    fn parse_children<R: std::io::Read>(
+        attrs: Vec<xml::attribute::OwnedAttribute>,
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        let mut n = Self::default();
+        for attr in attrs.into_iter() {
+            match (
+                attr.name.namespace.as_deref(),
+                attr.name.local_name.as_str(),
+            ) {
+                (None, "type") => {
+                    n.r#type = Some(attr.value);
+                }
+                (ns, name) => {
+                    n.misc_attrs
+                        .insert((ns.map(|s| s.to_string()), name.to_owned()), attr.value);
+                }
+            }
+        }
+        while let Some(e) = iter.next() {
+            match e {
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    (None, "system") => {
+                        n.system_elems
+                            .push(System::parse_children(attributes, iter)?);
+                    }
+                    _ => {
+                        let mut depth: usize = 1;
+                        n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                            name,
+                            attributes,
+                            namespace,
+                        });
+                        while let Some(e) = iter.next() {
+                            match e {
+                                Ok(xml::reader::XmlEvent::StartElement {
+                                    name,
+                                    attributes,
+                                    namespace,
+                                }) => {
+                                    n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                                        name,
+                                        attributes,
+                                        namespace,
+                                    });
+                                    depth += 1;
+                                }
+                                Ok(xml::reader::XmlEvent::EndElement { name }) => {
+                                    n.misc_content
+                                        .push(xml::reader::XmlEvent::EndElement { name });
+                                    depth -= 1;
+                                    if depth == 0 {
+                                        break;
+                                    }
+                                }
+                                Ok(evt) => {
+                                    n.misc_content.push(evt);
+                                }
+                                Err(e) => return Err(e.into()),
+                            }
+                        }
+                    }
+                },
+                Ok(xml::reader::XmlEvent::EndElement { .. }) => {
+                    return Ok(n);
+                }
+                Ok(xml::reader::XmlEvent::Characters(val)) => {
+                    return Err(XmlParseError::UnexpectedCharacters(
+                        XmlDocumentReference::Unknown,
+                    ));
+                }
+                Err(e) => return Err(e.into()),
+                _ => {}
+            }
+        }
+        return Err(XmlParseError::ExpectedEndElement(
+            XmlDocumentReference::Unknown,
+        ));
+    }
+    pub fn write_element<W: std::io::Write>(
+        &self,
+        w: &mut xml::writer::EventWriter<W>,
+        include_ns: bool,
+    ) -> Result<(), XmlWriteError> {
+        let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        if let Some(v) = self.r#type.as_ref() {
+            el_builder = el_builder.attr("type", v);
+        }
+        if include_ns {
+            for (k, v) in DOCUMENT_NAMESPACES {
+                el_builder = el_builder.ns(*k, *v);
+            }
+        }
+        w.write(el_builder)?;
+        for child in self.system_elems.iter() {
+            child.write_element(w, false)?;
+        }
+        for elem in self.misc_content.iter() {
+            if let Some(writer_event) = elem.as_writer_event() {
+                w.write(writer_event)?;
+            }
+        }
+        w.write(xml::writer::XmlEvent::end_element())?;
+        Ok(())
+    }
+}
+#[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct System {
+    pub misc_attrs: HashMap<(Option<String>, String), String>,
+    #[serde(skip)]
+    pub misc_content: Vec<xml::reader::XmlEvent>,
+    pub entry_elems: Vec<Entry>,
+}
+impl System {
+    const XML_LOCAL_NAME: &'static str = "system";
+    const XML_NAMESPACE: Option<&'static str> = None;
+    const XML_PREFIX: Option<&'static str> = None;
+    const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::local("system");
+    pub fn parse_element<R: std::io::Read>(
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        while let Some(event) = iter.next() {
+            return match event {
+                Ok(xml::reader::XmlEvent::StartDocument { .. }) => {
+                    continue;
+                }
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    (None, "system") => Self::parse_children(attributes, iter),
+                    _ => Err(XmlParseError::UnexpectedElement(name)),
+                },
+                Ok(e) => Err(XmlParseError::UnexpectedXmlEvent(e)),
+                Err(e) => Err(e.into()),
+            };
+        }
+        Err(XmlParseError::UnexpectedEof("system element"))
+    }
+    fn parse_children<R: std::io::Read>(
+        attrs: Vec<xml::attribute::OwnedAttribute>,
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        let mut n = Self::default();
+        for attr in attrs.into_iter() {
+            match (
+                attr.name.namespace.as_deref(),
+                attr.name.local_name.as_str(),
+            ) {
+                (ns, name) => {
+                    n.misc_attrs
+                        .insert((ns.map(|s| s.to_string()), name.to_owned()), attr.value);
+                }
+            }
+        }
+        while let Some(e) = iter.next() {
+            match e {
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    (None, "entry") => {
+                        n.entry_elems.push(Entry::parse_children(attributes, iter)?);
+                    }
+                    _ => {
+                        let mut depth: usize = 1;
+                        n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                            name,
+                            attributes,
+                            namespace,
+                        });
+                        while let Some(e) = iter.next() {
+                            match e {
+                                Ok(xml::reader::XmlEvent::StartElement {
+                                    name,
+                                    attributes,
+                                    namespace,
+                                }) => {
+                                    n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                                        name,
+                                        attributes,
+                                        namespace,
+                                    });
+                                    depth += 1;
+                                }
+                                Ok(xml::reader::XmlEvent::EndElement { name }) => {
+                                    n.misc_content
+                                        .push(xml::reader::XmlEvent::EndElement { name });
+                                    depth -= 1;
+                                    if depth == 0 {
+                                        break;
+                                    }
+                                }
+                                Ok(evt) => {
+                                    n.misc_content.push(evt);
+                                }
+                                Err(e) => return Err(e.into()),
+                            }
+                        }
+                    }
+                },
+                Ok(xml::reader::XmlEvent::EndElement { .. }) => {
+                    return Ok(n);
+                }
+                Ok(xml::reader::XmlEvent::Characters(val)) => {
+                    return Err(XmlParseError::UnexpectedCharacters(
+                        XmlDocumentReference::Unknown,
+                    ));
+                }
+                Err(e) => return Err(e.into()),
+                _ => {}
+            }
+        }
+        return Err(XmlParseError::ExpectedEndElement(
+            XmlDocumentReference::Unknown,
+        ));
+    }
+    pub fn write_element<W: std::io::Write>(
+        &self,
+        w: &mut xml::writer::EventWriter<W>,
+        include_ns: bool,
+    ) -> Result<(), XmlWriteError> {
+        let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        if include_ns {
+            for (k, v) in DOCUMENT_NAMESPACES {
+                el_builder = el_builder.ns(*k, *v);
+            }
+        }
+        w.write(el_builder)?;
+        for child in self.entry_elems.iter() {
+            child.write_element(w, false)?;
+        }
+        for elem in self.misc_content.iter() {
+            if let Some(writer_event) = elem.as_writer_event() {
+                w.write(writer_event)?;
+            }
+        }
+        w.write(xml::writer::XmlEvent::end_element())?;
+        Ok(())
+    }
+}
+#[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct Entry {
+    pub r#name: Option<String>,
+    pub misc_attrs: HashMap<(Option<String>, String), String>,
+    #[serde(skip)]
+    pub misc_content: Vec<xml::reader::XmlEvent>,
+    pub value: Option<String>,
+}
+impl Entry {
+    const XML_LOCAL_NAME: &'static str = "entry";
+    const XML_NAMESPACE: Option<&'static str> = None;
+    const XML_PREFIX: Option<&'static str> = None;
+    const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::local("entry");
+    pub fn parse_element<R: std::io::Read>(
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        while let Some(event) = iter.next() {
+            return match event {
+                Ok(xml::reader::XmlEvent::StartDocument { .. }) => {
+                    continue;
+                }
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    (None, "entry") => Self::parse_children(attributes, iter),
+                    _ => Err(XmlParseError::UnexpectedElement(name)),
+                },
+                Ok(e) => Err(XmlParseError::UnexpectedXmlEvent(e)),
+                Err(e) => Err(e.into()),
+            };
+        }
+        Err(XmlParseError::UnexpectedEof("entry element"))
+    }
+    fn parse_children<R: std::io::Read>(
+        attrs: Vec<xml::attribute::OwnedAttribute>,
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        let mut n = Self::default();
+        for attr in attrs.into_iter() {
+            match (
+                attr.name.namespace.as_deref(),
+                attr.name.local_name.as_str(),
+            ) {
+                (None, "name") => {
+                    n.r#name = Some(attr.value);
+                }
+                (ns, name) => {
+                    n.misc_attrs
+                        .insert((ns.map(|s| s.to_string()), name.to_owned()), attr.value);
+                }
+            }
+        }
+        while let Some(e) = iter.next() {
+            match e {
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    _ => {
+                        let mut depth: usize = 1;
+                        n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                            name,
+                            attributes,
+                            namespace,
+                        });
+                        while let Some(e) = iter.next() {
+                            match e {
+                                Ok(xml::reader::XmlEvent::StartElement {
+                                    name,
+                                    attributes,
+                                    namespace,
+                                }) => {
+                                    n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                                        name,
+                                        attributes,
+                                        namespace,
+                                    });
+                                    depth += 1;
+                                }
+                                Ok(xml::reader::XmlEvent::EndElement { name }) => {
+                                    n.misc_content
+                                        .push(xml::reader::XmlEvent::EndElement { name });
+                                    depth -= 1;
+                                    if depth == 0 {
+                                        break;
+                                    }
+                                }
+                                Ok(evt) => {
+                                    n.misc_content.push(evt);
+                                }
+                                Err(e) => return Err(e.into()),
+                            }
+                        }
+                    }
+                },
+                Ok(xml::reader::XmlEvent::EndElement { .. }) => {
+                    return Ok(n);
+                }
+                Ok(xml::reader::XmlEvent::Characters(val)) => {
+                    n.value = Some(val);
+                }
+                Err(e) => return Err(e.into()),
+                _ => {}
+            }
+        }
+        return Err(XmlParseError::ExpectedEndElement(
+            XmlDocumentReference::Unknown,
+        ));
+    }
+    pub fn write_element<W: std::io::Write>(
+        &self,
+        w: &mut xml::writer::EventWriter<W>,
+        include_ns: bool,
+    ) -> Result<(), XmlWriteError> {
+        let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        if let Some(v) = self.r#name.as_ref() {
+            el_builder = el_builder.attr("name", v);
+        }
+        if include_ns {
+            for (k, v) in DOCUMENT_NAMESPACES {
+                el_builder = el_builder.ns(*k, *v);
+            }
+        }
+        w.write(el_builder)?;
+        if let Some(val) = self.value.as_deref() {
+            w.write(xml::writer::XmlEvent::characters(val))?;
+        }
+        for elem in self.misc_content.iter() {
+            if let Some(writer_event) = elem.as_writer_event() {
+                w.write(writer_event)?;
+            }
+        }
+        w.write(xml::writer::XmlEvent::end_element())?;
+        Ok(())
+    }
+}
+#[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct Smm {
+    pub r#state: Option<String>,
+    pub misc_attrs: HashMap<(Option<String>, String), String>,
+    #[serde(skip)]
+    pub misc_content: Vec<xml::reader::XmlEvent>,
+}
+impl Smm {
+    const XML_LOCAL_NAME: &'static str = "smm";
+    const XML_NAMESPACE: Option<&'static str> = None;
+    const XML_PREFIX: Option<&'static str> = None;
+    const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::local("smm");
+    pub fn parse_element<R: std::io::Read>(
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        while let Some(event) = iter.next() {
+            return match event {
+                Ok(xml::reader::XmlEvent::StartDocument { .. }) => {
+                    continue;
+                }
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    (None, "smm") => Self::parse_children(attributes, iter),
+                    _ => Err(XmlParseError::UnexpectedElement(name)),
+                },
+                Ok(e) => Err(XmlParseError::UnexpectedXmlEvent(e)),
+                Err(e) => Err(e.into()),
+            };
+        }
+        Err(XmlParseError::UnexpectedEof("smm element"))
+    }
+    fn parse_children<R: std::io::Read>(
+        attrs: Vec<xml::attribute::OwnedAttribute>,
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        let mut n = Self::default();
+        for attr in attrs.into_iter() {
+            match (
+                attr.name.namespace.as_deref(),
+                attr.name.local_name.as_str(),
+            ) {
+                (None, "state") => {
+                    n.r#state = Some(attr.value);
+                }
+                (ns, name) => {
+                    n.misc_attrs
+                        .insert((ns.map(|s| s.to_string()), name.to_owned()), attr.value);
+                }
+            }
+        }
+        while let Some(e) = iter.next() {
+            match e {
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    _ => {
+                        let mut depth: usize = 1;
+                        n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                            name,
+                            attributes,
+                            namespace,
+                        });
+                        while let Some(e) = iter.next() {
+                            match e {
+                                Ok(xml::reader::XmlEvent::StartElement {
+                                    name,
+                                    attributes,
+                                    namespace,
+                                }) => {
+                                    n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                                        name,
+                                        attributes,
+                                        namespace,
+                                    });
+                                    depth += 1;
+                                }
+                                Ok(xml::reader::XmlEvent::EndElement { name }) => {
+                                    n.misc_content
+                                        .push(xml::reader::XmlEvent::EndElement { name });
+                                    depth -= 1;
+                                    if depth == 0 {
+                                        break;
+                                    }
+                                }
+                                Ok(evt) => {
+                                    n.misc_content.push(evt);
+                                }
+                                Err(e) => return Err(e.into()),
+                            }
+                        }
+                    }
+                },
+                Ok(xml::reader::XmlEvent::EndElement { .. }) => {
+                    return Ok(n);
+                }
+                Ok(xml::reader::XmlEvent::Characters(val)) => {
+                    return Err(XmlParseError::UnexpectedCharacters(
+                        XmlDocumentReference::Unknown,
+                    ));
+                }
+                Err(e) => return Err(e.into()),
+                _ => {}
+            }
+        }
+        return Err(XmlParseError::ExpectedEndElement(
+            XmlDocumentReference::Unknown,
+        ));
+    }
+    pub fn write_element<W: std::io::Write>(
+        &self,
+        w: &mut xml::writer::EventWriter<W>,
+        include_ns: bool,
+    ) -> Result<(), XmlWriteError> {
+        let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        if let Some(v) = self.r#state.as_ref() {
+            el_builder = el_builder.attr("state", v);
+        }
+        if include_ns {
+            for (k, v) in DOCUMENT_NAMESPACES {
+                el_builder = el_builder.ns(*k, *v);
+            }
+        }
+        w.write(el_builder)?;
+        for elem in self.misc_content.iter() {
+            if let Some(writer_event) = elem.as_writer_event() {
+                w.write(writer_event)?;
+            }
+        }
+        w.write(xml::writer::XmlEvent::end_element())?;
+        Ok(())
+    }
+}
+#[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct BackingStore {
+    pub misc_attrs: HashMap<(Option<String>, String), String>,
+    #[serde(skip)]
+    pub misc_content: Vec<xml::reader::XmlEvent>,
+}
+impl BackingStore {
+    const XML_LOCAL_NAME: &'static str = "backingStore";
+    const XML_NAMESPACE: Option<&'static str> = None;
+    const XML_PREFIX: Option<&'static str> = None;
+    const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::local("backingStore");
+    pub fn parse_element<R: std::io::Read>(
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        while let Some(event) = iter.next() {
+            return match event {
+                Ok(xml::reader::XmlEvent::StartDocument { .. }) => {
+                    continue;
+                }
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    (None, "backingStore") => Self::parse_children(attributes, iter),
+                    _ => Err(XmlParseError::UnexpectedElement(name)),
+                },
+                Ok(e) => Err(XmlParseError::UnexpectedXmlEvent(e)),
+                Err(e) => Err(e.into()),
+            };
+        }
+        Err(XmlParseError::UnexpectedEof("backingStore element"))
+    }
+    fn parse_children<R: std::io::Read>(
+        attrs: Vec<xml::attribute::OwnedAttribute>,
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        let mut n = Self::default();
+        for attr in attrs.into_iter() {
+            match (
+                attr.name.namespace.as_deref(),
+                attr.name.local_name.as_str(),
+            ) {
+                (ns, name) => {
+                    n.misc_attrs
+                        .insert((ns.map(|s| s.to_string()), name.to_owned()), attr.value);
+                }
+            }
+        }
+        while let Some(e) = iter.next() {
+            match e {
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    _ => {
+                        let mut depth: usize = 1;
+                        n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                            name,
+                            attributes,
+                            namespace,
+                        });
+                        while let Some(e) = iter.next() {
+                            match e {
+                                Ok(xml::reader::XmlEvent::StartElement {
+                                    name,
+                                    attributes,
+                                    namespace,
+                                }) => {
+                                    n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                                        name,
+                                        attributes,
+                                        namespace,
+                                    });
+                                    depth += 1;
+                                }
+                                Ok(xml::reader::XmlEvent::EndElement { name }) => {
+                                    n.misc_content
+                                        .push(xml::reader::XmlEvent::EndElement { name });
+                                    depth -= 1;
+                                    if depth == 0 {
+                                        break;
+                                    }
+                                }
+                                Ok(evt) => {
+                                    n.misc_content.push(evt);
+                                }
+                                Err(e) => return Err(e.into()),
+                            }
+                        }
+                    }
+                },
+                Ok(xml::reader::XmlEvent::EndElement { .. }) => {
+                    return Ok(n);
+                }
+                Ok(xml::reader::XmlEvent::Characters(val)) => {
+                    return Err(XmlParseError::UnexpectedCharacters(
+                        XmlDocumentReference::Unknown,
+                    ));
+                }
+                Err(e) => return Err(e.into()),
+                _ => {}
+            }
+        }
+        return Err(XmlParseError::ExpectedEndElement(
+            XmlDocumentReference::Unknown,
+        ));
+    }
+    pub fn write_element<W: std::io::Write>(
+        &self,
+        w: &mut xml::writer::EventWriter<W>,
+        include_ns: bool,
+    ) -> Result<(), XmlWriteError> {
+        let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        if include_ns {
+            for (k, v) in DOCUMENT_NAMESPACES {
+                el_builder = el_builder.ns(*k, *v);
+            }
+        }
+        w.write(el_builder)?;
+        for elem in self.misc_content.iter() {
+            if let Some(writer_event) = elem.as_writer_event() {
+                w.write(writer_event)?;
+            }
+        }
+        w.write(xml::writer::XmlEvent::end_element())?;
+        Ok(())
+    }
+}
+#[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct DomainDevicesDiskAlias {
+    pub r#name: Option<String>,
+    pub misc_attrs: HashMap<(Option<String>, String), String>,
+    #[serde(skip)]
+    pub misc_content: Vec<xml::reader::XmlEvent>,
+}
+impl DomainDevicesDiskAlias {
+    const XML_LOCAL_NAME: &'static str = "alias";
+    const XML_NAMESPACE: Option<&'static str> = None;
+    const XML_PREFIX: Option<&'static str> = None;
+    const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::local("alias");
+    pub fn parse_element<R: std::io::Read>(
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        while let Some(event) = iter.next() {
+            return match event {
+                Ok(xml::reader::XmlEvent::StartDocument { .. }) => {
+                    continue;
+                }
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    (None, "alias") => Self::parse_children(attributes, iter),
+                    _ => Err(XmlParseError::UnexpectedElement(name)),
+                },
+                Ok(e) => Err(XmlParseError::UnexpectedXmlEvent(e)),
+                Err(e) => Err(e.into()),
+            };
+        }
+        Err(XmlParseError::UnexpectedEof("alias element"))
+    }
+    fn parse_children<R: std::io::Read>(
+        attrs: Vec<xml::attribute::OwnedAttribute>,
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        let mut n = Self::default();
+        for attr in attrs.into_iter() {
+            match (
+                attr.name.namespace.as_deref(),
+                attr.name.local_name.as_str(),
+            ) {
+                (None, "name") => {
+                    n.r#name = Some(attr.value);
+                }
+                (ns, name) => {
+                    n.misc_attrs
+                        .insert((ns.map(|s| s.to_string()), name.to_owned()), attr.value);
+                }
+            }
+        }
+        while let Some(e) = iter.next() {
+            match e {
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    _ => {
+                        let mut depth: usize = 1;
+                        n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                            name,
+                            attributes,
+                            namespace,
+                        });
+                        while let Some(e) = iter.next() {
+                            match e {
+                                Ok(xml::reader::XmlEvent::StartElement {
+                                    name,
+                                    attributes,
+                                    namespace,
+                                }) => {
+                                    n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                                        name,
+                                        attributes,
+                                        namespace,
+                                    });
+                                    depth += 1;
+                                }
+                                Ok(xml::reader::XmlEvent::EndElement { name }) => {
+                                    n.misc_content
+                                        .push(xml::reader::XmlEvent::EndElement { name });
+                                    depth -= 1;
+                                    if depth == 0 {
+                                        break;
+                                    }
+                                }
+                                Ok(evt) => {
+                                    n.misc_content.push(evt);
+                                }
+                                Err(e) => return Err(e.into()),
+                            }
+                        }
+                    }
+                },
+                Ok(xml::reader::XmlEvent::EndElement { .. }) => {
+                    return Ok(n);
+                }
+                Ok(xml::reader::XmlEvent::Characters(val)) => {
+                    return Err(XmlParseError::UnexpectedCharacters(
+                        XmlDocumentReference::Unknown,
+                    ));
+                }
+                Err(e) => return Err(e.into()),
+                _ => {}
+            }
+        }
+        return Err(XmlParseError::ExpectedEndElement(
+            XmlDocumentReference::Unknown,
+        ));
+    }
+    pub fn write_element<W: std::io::Write>(
+        &self,
+        w: &mut xml::writer::EventWriter<W>,
+        include_ns: bool,
+    ) -> Result<(), XmlWriteError> {
+        let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        if let Some(v) = self.r#name.as_ref() {
+            el_builder = el_builder.attr("name", v);
+        }
+        if include_ns {
+            for (k, v) in DOCUMENT_NAMESPACES {
+                el_builder = el_builder.ns(*k, *v);
+            }
+        }
+        w.write(el_builder)?;
+        for elem in self.misc_content.iter() {
+            if let Some(writer_event) = elem.as_writer_event() {
+                w.write(writer_event)?;
+            }
+        }
+        w.write(xml::writer::XmlEvent::end_element())?;
+        Ok(())
+    }
+}
+#[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct Resolution {
+    pub r#x: Option<String>,
+    pub r#y: Option<String>,
+    pub misc_attrs: HashMap<(Option<String>, String), String>,
+    #[serde(skip)]
+    pub misc_content: Vec<xml::reader::XmlEvent>,
+}
+impl Resolution {
+    const XML_LOCAL_NAME: &'static str = "resolution";
+    const XML_NAMESPACE: Option<&'static str> = None;
+    const XML_PREFIX: Option<&'static str> = None;
+    const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::local("resolution");
+    pub fn parse_element<R: std::io::Read>(
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        while let Some(event) = iter.next() {
+            return match event {
+                Ok(xml::reader::XmlEvent::StartDocument { .. }) => {
+                    continue;
+                }
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    (None, "resolution") => Self::parse_children(attributes, iter),
+                    _ => Err(XmlParseError::UnexpectedElement(name)),
+                },
+                Ok(e) => Err(XmlParseError::UnexpectedXmlEvent(e)),
+                Err(e) => Err(e.into()),
+            };
+        }
+        Err(XmlParseError::UnexpectedEof("resolution element"))
+    }
+    fn parse_children<R: std::io::Read>(
+        attrs: Vec<xml::attribute::OwnedAttribute>,
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        let mut n = Self::default();
+        for attr in attrs.into_iter() {
+            match (
+                attr.name.namespace.as_deref(),
+                attr.name.local_name.as_str(),
+            ) {
+                (None, "x") => {
+                    n.r#x = Some(attr.value);
+                }
+                (None, "y") => {
+                    n.r#y = Some(attr.value);
+                }
+                (ns, name) => {
+                    n.misc_attrs
+                        .insert((ns.map(|s| s.to_string()), name.to_owned()), attr.value);
+                }
+            }
+        }
+        while let Some(e) = iter.next() {
+            match e {
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    _ => {
+                        let mut depth: usize = 1;
+                        n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                            name,
+                            attributes,
+                            namespace,
+                        });
+                        while let Some(e) = iter.next() {
+                            match e {
+                                Ok(xml::reader::XmlEvent::StartElement {
+                                    name,
+                                    attributes,
+                                    namespace,
+                                }) => {
+                                    n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                                        name,
+                                        attributes,
+                                        namespace,
+                                    });
+                                    depth += 1;
+                                }
+                                Ok(xml::reader::XmlEvent::EndElement { name }) => {
+                                    n.misc_content
+                                        .push(xml::reader::XmlEvent::EndElement { name });
+                                    depth -= 1;
+                                    if depth == 0 {
+                                        break;
+                                    }
+                                }
+                                Ok(evt) => {
+                                    n.misc_content.push(evt);
+                                }
+                                Err(e) => return Err(e.into()),
+                            }
+                        }
+                    }
+                },
+                Ok(xml::reader::XmlEvent::EndElement { .. }) => {
+                    return Ok(n);
+                }
+                Ok(xml::reader::XmlEvent::Characters(val)) => {
+                    return Err(XmlParseError::UnexpectedCharacters(
+                        XmlDocumentReference::Unknown,
+                    ));
+                }
+                Err(e) => return Err(e.into()),
+                _ => {}
+            }
+        }
+        return Err(XmlParseError::ExpectedEndElement(
+            XmlDocumentReference::Unknown,
+        ));
+    }
+    pub fn write_element<W: std::io::Write>(
+        &self,
+        w: &mut xml::writer::EventWriter<W>,
+        include_ns: bool,
+    ) -> Result<(), XmlWriteError> {
+        let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        if let Some(v) = self.r#x.as_ref() {
+            el_builder = el_builder.attr("x", v);
+        }
+        if let Some(v) = self.r#y.as_ref() {
+            el_builder = el_builder.attr("y", v);
+        }
+        if include_ns {
+            for (k, v) in DOCUMENT_NAMESPACES {
+                el_builder = el_builder.ns(*k, *v);
+            }
+        }
+        w.write(el_builder)?;
+        for elem in self.misc_content.iter() {
+            if let Some(writer_event) = elem.as_writer_event() {
+                w.write(writer_event)?;
+            }
+        }
+        w.write(xml::writer::XmlEvent::end_element())?;
+        Ok(())
+    }
+}
+#[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct DomainDevicesVideoAlias {
+    pub r#name: Option<String>,
+    pub misc_attrs: HashMap<(Option<String>, String), String>,
+    #[serde(skip)]
+    pub misc_content: Vec<xml::reader::XmlEvent>,
+}
+impl DomainDevicesVideoAlias {
+    const XML_LOCAL_NAME: &'static str = "alias";
+    const XML_NAMESPACE: Option<&'static str> = None;
+    const XML_PREFIX: Option<&'static str> = None;
+    const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::local("alias");
+    pub fn parse_element<R: std::io::Read>(
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        while let Some(event) = iter.next() {
+            return match event {
+                Ok(xml::reader::XmlEvent::StartDocument { .. }) => {
+                    continue;
+                }
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    (None, "alias") => Self::parse_children(attributes, iter),
+                    _ => Err(XmlParseError::UnexpectedElement(name)),
+                },
+                Ok(e) => Err(XmlParseError::UnexpectedXmlEvent(e)),
+                Err(e) => Err(e.into()),
+            };
+        }
+        Err(XmlParseError::UnexpectedEof("alias element"))
+    }
+    fn parse_children<R: std::io::Read>(
+        attrs: Vec<xml::attribute::OwnedAttribute>,
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        let mut n = Self::default();
+        for attr in attrs.into_iter() {
+            match (
+                attr.name.namespace.as_deref(),
+                attr.name.local_name.as_str(),
+            ) {
+                (None, "name") => {
+                    n.r#name = Some(attr.value);
+                }
+                (ns, name) => {
+                    n.misc_attrs
+                        .insert((ns.map(|s| s.to_string()), name.to_owned()), attr.value);
+                }
+            }
+        }
+        while let Some(e) = iter.next() {
+            match e {
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    _ => {
+                        let mut depth: usize = 1;
+                        n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                            name,
+                            attributes,
+                            namespace,
+                        });
+                        while let Some(e) = iter.next() {
+                            match e {
+                                Ok(xml::reader::XmlEvent::StartElement {
+                                    name,
+                                    attributes,
+                                    namespace,
+                                }) => {
+                                    n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                                        name,
+                                        attributes,
+                                        namespace,
+                                    });
+                                    depth += 1;
+                                }
+                                Ok(xml::reader::XmlEvent::EndElement { name }) => {
+                                    n.misc_content
+                                        .push(xml::reader::XmlEvent::EndElement { name });
+                                    depth -= 1;
+                                    if depth == 0 {
+                                        break;
+                                    }
+                                }
+                                Ok(evt) => {
+                                    n.misc_content.push(evt);
+                                }
+                                Err(e) => return Err(e.into()),
+                            }
+                        }
+                    }
+                },
+                Ok(xml::reader::XmlEvent::EndElement { .. }) => {
+                    return Ok(n);
+                }
+                Ok(xml::reader::XmlEvent::Characters(val)) => {
+                    return Err(XmlParseError::UnexpectedCharacters(
+                        XmlDocumentReference::Unknown,
+                    ));
+                }
+                Err(e) => return Err(e.into()),
+                _ => {}
+            }
+        }
+        return Err(XmlParseError::ExpectedEndElement(
+            XmlDocumentReference::Unknown,
+        ));
+    }
+    pub fn write_element<W: std::io::Write>(
+        &self,
+        w: &mut xml::writer::EventWriter<W>,
+        include_ns: bool,
+    ) -> Result<(), XmlWriteError> {
+        let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        if let Some(v) = self.r#name.as_ref() {
+            el_builder = el_builder.attr("name", v);
         }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
