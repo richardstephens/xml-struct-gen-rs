@@ -1,11 +1,11 @@
 [package]
 name = "xmlstructs-podcast"
-version = "0.1.0"
+version = "0.0.1-alpha"
 edition = "2024"
 
 [dependencies]
 anyhow = "1.0.89"
 serde = { version = "1.0.210", features = ["derive"] }
 serde_json = "1.0.128"
-xml-struct-types = {version = "0.1.0", path = "../xml-struct-types"}
+xml-struct-types = {version = "0.0.1-alpha", path = "../xml-struct-types"}
 xml-rs = "1.0.0"

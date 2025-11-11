@@ -1,7 +1,10 @@
 [package]
 name = "xml-struct-gen"
-version = "0.1.0"
+version = "0.0.1-alpha"
 edition = "2024"
+license = "MIT"
+description = "Generates Rust structs for working in a type-safe way with some XML formats"
+repository = "https://github.com/richardstephens/xml-struct-gen-rs"
 
 [dependencies]
 anyhow = "1.0.89"

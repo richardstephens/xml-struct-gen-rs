@@ -379,7 +379,7 @@ dependencies = [
 
 [[package]]
 name = "xml-struct-gen"
-version = "0.1.0"
+version = "0.0.1-alpha"
 dependencies = [
  "anyhow",
  "bimap",
@@ -394,7 +394,7 @@ dependencies = [
 
 [[package]]
 name = "xml-struct-types"
-version = "0.1.0"
+version = "0.0.1-alpha"
 dependencies = [
  "thiserror",
  "xml-rs",
@@ -402,7 +402,7 @@ dependencies = [
 
 [[package]]
 name = "xmlstructs-libvirt"
-version = "0.1.0"
+version = "0.0.1-alpha"
 dependencies = [
  "anyhow",
  "serde",
@@ -413,7 +413,7 @@ dependencies = [
 
 [[package]]
 name = "xmlstructs-podcast"
-version = "0.1.0"
+version = "0.0.1-alpha"
 dependencies = [
  "anyhow",
  "serde",
