@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-pub use xml_struct_types::v1::*;
+pub use xml_struct_types::v1::error::*;
 const DOCUMENT_NAMESPACES: &[(&str, &str)] =
     &[("libosinfo", "http://libosinfo.org/xmlns/libvirt/domain/1.0")];
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -32,16 +32,6 @@ impl DomainDocument {
     const XML_NAMESPACE: Option<&'static str> = None;
     const XML_PREFIX: Option<&'static str> = None;
     const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::local("domain");
-    pub fn parse_document<R: std::io::Read>(mut reader: R) -> Result<Self, XmlParseError> {
-        let mut parser = xml::EventReader::new(reader).into_iter();
-        let root_element = Self::parse_element(&mut parser)?;
-        match parser.next() {
-            Some(Ok(xml::reader::XmlEvent::EndDocument)) => Ok(root_element),
-            None => Ok(root_element),
-            Some(Ok(e)) => Err(XmlParseError::ExpectedEof(e)),
-            Some(Err(e)) => Err(e.into()),
-        }
-    }
     pub fn parse_element<R: std::io::Read>(
         iter: &mut xml::reader::Events<R>,
     ) -> Result<Self, XmlParseError> {
@@ -277,6 +267,18 @@ impl DomainDocument {
         }
         w.write(xml::writer::XmlEvent::end_element())?;
         Ok(())
+    }
+}
+impl xml_struct_types::v1::XmlStructDocument for DomainDocument {
+    fn parse_document<R: std::io::Read>(mut reader: R) -> Result<Self, XmlParseError> {
+        let mut parser = xml::EventReader::new(reader).into_iter();
+        let root_element = Self::parse_element(&mut parser)?;
+        match parser.next() {
+            Some(Ok(xml::reader::XmlEvent::EndDocument)) => Ok(root_element),
+            None => Ok(root_element),
+            Some(Ok(e)) => Err(XmlParseError::ExpectedEof(e)),
+            Some(Err(e)) => Err(e.into()),
+        }
     }
 }
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]

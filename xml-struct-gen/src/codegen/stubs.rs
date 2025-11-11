@@ -41,8 +41,13 @@ pub fn gen_el_struct(
         format_ident!("{xml_name}")
     };
 
-    let maybe_parse_document_impl = if let Some(root_props) = root_props {
-        generate_parse_document(&root_props)
+    let maybe_document_trait = if let Some(root_props) = root_props {
+        let parse_doc = generate_parse_document(&root_props);
+        quote! {
+            impl xml_struct_types::v1::XmlStructDocument for #sn {
+                #parse_doc
+            }
+        }
     } else {
         quote! {}
     };
@@ -69,13 +74,13 @@ pub fn gen_el_struct(
         impl #sn {
             #name_consts
 
-            #maybe_parse_document_impl
             #parse_elem_impl
             #parse_children_impl
 
             #write_element_impl
         }
 
+        #maybe_document_trait
     }
 }
 
@@ -179,7 +184,7 @@ fn elem_matchers(elem_fields: &Vec<(Vec<OwnedName>, Ident, Ident)>) -> Vec<Token
 
 fn generate_parse_document(_elem_props: &ElemProps) -> TokenStream {
     quote! {
-        pub fn parse_document<R: std::io::Read>(mut reader: R) -> Result<Self, XmlParseError>  {
+        fn parse_document<R: std::io::Read>(mut reader: R) -> Result<Self, XmlParseError>  {
             let mut parser = xml::EventReader::new(reader).into_iter();
             let root_element = Self::parse_element(&mut parser)?;
             match parser.next() {

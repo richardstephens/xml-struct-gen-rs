@@ -17,7 +17,7 @@ pub fn generate_code(
 
     let mut s = "use serde::{Deserialize, Serialize};\n".to_string();
     s.push_str("use std::collections::HashMap;\n");
-    s.push_str("pub use xml_struct_types::v1::*;");
+    s.push_str("pub use xml_struct_types::v1::error::*;");
 
     let doc_struct_root_props = e.shift_remove(&vec![]).unwrap();
 

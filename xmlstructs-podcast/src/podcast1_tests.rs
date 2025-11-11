@@ -1,6 +1,7 @@
 use crate::{Enclosure, RssDocument};
 use std::io::{Cursor, Read, Seek, SeekFrom};
 use xml::{EmitterConfig, EventWriter};
+use xml_struct_types::v1::XmlStructDocument;
 
 #[test]
 fn parse_and_check_important_values() {
