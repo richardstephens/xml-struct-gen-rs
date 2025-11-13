@@ -1,4 +1,4 @@
-use crate::{Enclosure, RssDocument};
+use crate::{Enclosure, Language, RssDocument};
 use std::io::{Cursor, Read, Seek, SeekFrom};
 use xml::{EmitterConfig, EventWriter};
 use xml_struct_types::v1::XmlStructDocument;
@@ -121,4 +121,29 @@ fn test_roundtrip_unrecognised_elems() {
         xml_in.trim().replace("  ", ""),
         xml_out.trim().replace("  ", "")
     );
+}
+
+#[test]
+fn test_roundtrip_unrecognised_attrs() {
+    let xml_in: &str = r#"<language a="b">en-us</language>"#;
+    let mut c = Cursor::new(xml_in);
+    let mut r = xml::EventReader::new(&mut c).into_iter();
+    let lang_el = Language::parse_element(&mut r).unwrap();
+    assert_eq!(Some("en-us"), lang_el.value.as_deref());
+
+    // check that the element is actually in the 'misc' hashmap
+    assert_eq!(
+        Some(&"b".to_string()),
+        lang_el.misc_attrs.get(&(None, "a".to_string()))
+    );
+
+    // write it back out and check the xml
+    let mut writer = EmitterConfig::new()
+        .write_document_declaration(false)
+        .perform_indent(false)
+        .create_writer(Cursor::new(Vec::new()));
+    lang_el.write_element(&mut writer, false).unwrap();
+    let xml_out = test_writer_to_string(writer);
+
+    assert_eq!(xml_in, &xml_out);
 }
