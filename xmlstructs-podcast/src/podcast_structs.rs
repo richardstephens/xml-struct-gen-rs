@@ -132,6 +132,9 @@ impl RssDocument {
         if let Some(v) = self.r#version.as_ref() {
             el_builder = el_builder.attr("version", v);
         }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -337,6 +340,9 @@ impl Channel {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -499,6 +505,9 @@ impl RssChannelTitle {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -631,6 +640,9 @@ impl RssChannelLink {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -763,6 +775,9 @@ impl Language {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -895,6 +910,9 @@ impl Copyright {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -1033,6 +1051,9 @@ impl Author {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -1165,6 +1186,9 @@ impl RssChannelDescription {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -1303,6 +1327,9 @@ impl Type {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -1448,6 +1475,9 @@ impl RssChannelItunesImage {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         if let Some(v) = self.r#href.as_ref() {
             el_builder = el_builder.attr("href", v);
+        }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
         }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
@@ -1601,6 +1631,9 @@ impl RssChannelItunesCategory {
         if let Some(v) = self.r#text.as_ref() {
             el_builder = el_builder.attr("text", v);
         }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -1750,6 +1783,9 @@ impl RssChannelItunesCategoryItunesCategory {
         if let Some(v) = self.r#text.as_ref() {
             el_builder = el_builder.attr("text", v);
         }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -1885,6 +1921,9 @@ impl RssChannelItunesExplicit {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -2083,6 +2122,9 @@ impl Item {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -2257,6 +2299,9 @@ impl EpisodeType {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -2395,6 +2440,9 @@ impl RssChannelItemItunesTitle {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -2527,6 +2575,9 @@ impl RssChannelItemDescription {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -2681,6 +2732,9 @@ impl Enclosure {
         if let Some(v) = self.r#url.as_ref() {
             el_builder = el_builder.attr("url", v);
         }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -2810,6 +2864,9 @@ impl Guid {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -2942,6 +2999,9 @@ impl PubDate {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -3080,6 +3140,9 @@ impl Duration {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -3218,6 +3281,9 @@ impl RssChannelItemItunesExplicit {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -3356,6 +3422,9 @@ impl Episode {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -3494,6 +3563,9 @@ impl Season {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -3626,6 +3698,9 @@ impl RssChannelItemTitle {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -3772,6 +3847,9 @@ impl RssChannelItemItunesImage {
         if let Some(v) = self.r#href.as_ref() {
             el_builder = el_builder.attr("href", v);
         }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -3901,6 +3979,9 @@ impl RssChannelItemLink {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);

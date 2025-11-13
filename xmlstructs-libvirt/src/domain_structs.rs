@@ -208,6 +208,9 @@ impl DomainDocument {
         if let Some(v) = self.r#type.as_ref() {
             el_builder = el_builder.attr("type", v);
         }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -410,6 +413,9 @@ impl Name {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -542,6 +548,9 @@ impl Uuid {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -674,6 +683,9 @@ impl Title {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -806,6 +818,9 @@ impl Description {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -944,6 +959,9 @@ impl Metadata {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -1092,6 +1110,9 @@ impl Libosinfo {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -1242,6 +1263,9 @@ impl DomainMetadataLibosinfoLibosinfoLibosinfoOs {
         if let Some(v) = self.r#id.as_ref() {
             el_builder = el_builder.attr("id", v);
         }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -1377,6 +1401,9 @@ impl Memory {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         if let Some(v) = self.r#unit.as_ref() {
             el_builder = el_builder.attr("unit", v);
+        }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
         }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
@@ -1517,6 +1544,9 @@ impl CurrentMemory {
         if let Some(v) = self.r#unit.as_ref() {
             el_builder = el_builder.attr("unit", v);
         }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -1655,6 +1685,9 @@ impl Vcpu {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         if let Some(v) = self.r#placement.as_ref() {
             el_builder = el_builder.attr("placement", v);
+        }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
         }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
@@ -1823,6 +1856,9 @@ impl DomainOs {
         if let Some(v) = self.r#firmware.as_ref() {
             el_builder = el_builder.attr("firmware", v);
         }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -1984,6 +2020,9 @@ impl Type {
         if let Some(v) = self.r#machine.as_ref() {
             el_builder = el_builder.attr("machine", v);
         }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -2122,6 +2161,9 @@ impl Firmware {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -2268,6 +2310,9 @@ impl Feature {
         }
         if let Some(v) = self.r#name.as_ref() {
             el_builder = el_builder.attr("name", v);
+        }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
         }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
@@ -2426,6 +2471,9 @@ impl Loader {
         if let Some(v) = self.r#secure.as_ref() {
             el_builder = el_builder.attr("secure", v);
         }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -2579,6 +2627,9 @@ impl Nvram {
         if let Some(v) = self.r#format.as_ref() {
             el_builder = el_builder.attr("format", v);
         }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -2718,6 +2769,9 @@ impl Boot {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         if let Some(v) = self.r#dev.as_ref() {
             el_builder = el_builder.attr("dev", v);
+        }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
         }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
@@ -2866,6 +2920,9 @@ impl Features {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -3008,6 +3065,9 @@ impl Acpi {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -3138,6 +3198,9 @@ impl Apic {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -3274,6 +3337,9 @@ impl Vmport {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         if let Some(v) = self.r#state.as_ref() {
             el_builder = el_builder.attr("state", v);
+        }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
         }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
@@ -3430,6 +3496,9 @@ impl Cpu {
         }
         if let Some(v) = self.r#migratable.as_ref() {
             el_builder = el_builder.attr("migratable", v);
+        }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
         }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
@@ -3599,6 +3668,9 @@ impl Topology {
         if let Some(v) = self.r#threads.as_ref() {
             el_builder = el_builder.attr("threads", v);
         }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -3739,6 +3811,9 @@ impl Clock {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         if let Some(v) = self.r#offset.as_ref() {
             el_builder = el_builder.attr("offset", v);
+        }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
         }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
@@ -3894,6 +3969,9 @@ impl Timer {
         if let Some(v) = self.r#present.as_ref() {
             el_builder = el_builder.attr("present", v);
         }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -4023,6 +4101,9 @@ impl OnPoweroff {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -4155,6 +4236,9 @@ impl OnReboot {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -4287,6 +4371,9 @@ impl OnCrash {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -4430,6 +4517,9 @@ impl Pm {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -4573,6 +4663,9 @@ impl SuspendToMem {
         if let Some(v) = self.r#enabled.as_ref() {
             el_builder = el_builder.attr("enabled", v);
         }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -4709,6 +4802,9 @@ impl SuspendToDisk {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         if let Some(v) = self.r#enabled.as_ref() {
             el_builder = el_builder.attr("enabled", v);
+        }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
         }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
@@ -4914,6 +5010,9 @@ impl Devices {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -5091,6 +5190,9 @@ impl Emulator {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -5273,6 +5375,9 @@ impl Disk {
         if let Some(v) = self.r#device.as_ref() {
             el_builder = el_builder.attr("device", v);
         }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -5438,6 +5543,9 @@ impl Driver {
         if let Some(v) = self.r#type.as_ref() {
             el_builder = el_builder.attr("type", v);
         }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -5574,6 +5682,9 @@ impl DomainDevicesDiskSource {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         if let Some(v) = self.r#file.as_ref() {
             el_builder = el_builder.attr("file", v);
+        }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
         }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
@@ -5718,6 +5829,9 @@ impl DomainDevicesDiskTarget {
         }
         if let Some(v) = self.r#bus.as_ref() {
             el_builder = el_builder.attr("bus", v);
+        }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
         }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
@@ -5905,6 +6019,9 @@ impl DomainDevicesDiskAddress {
         if let Some(v) = self.r#unit.as_ref() {
             el_builder = el_builder.attr("unit", v);
         }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -6035,6 +6152,9 @@ impl Readonly {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -6210,6 +6330,9 @@ impl Controller {
         }
         if let Some(v) = self.r#ports.as_ref() {
             el_builder = el_builder.attr("ports", v);
+        }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
         }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
@@ -6392,6 +6515,9 @@ impl DomainDevicesControllerAddress {
         if let Some(v) = self.r#multifunction.as_ref() {
             el_builder = el_builder.attr("multifunction", v);
         }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -6528,6 +6654,9 @@ impl DomainDevicesControllerModel {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         if let Some(v) = self.r#name.as_ref() {
             el_builder = el_builder.attr("name", v);
+        }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
         }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
@@ -6672,6 +6801,9 @@ impl DomainDevicesControllerTarget {
         }
         if let Some(v) = self.r#port.as_ref() {
             el_builder = el_builder.attr("port", v);
+        }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
         }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
@@ -6832,6 +6964,9 @@ impl Interface {
         if let Some(v) = self.r#type.as_ref() {
             el_builder = el_builder.attr("type", v);
         }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -6981,6 +7116,9 @@ impl Mac {
         if let Some(v) = self.r#address.as_ref() {
             el_builder = el_builder.attr("address", v);
         }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -7118,6 +7256,9 @@ impl DomainDevicesInterfaceSource {
         if let Some(v) = self.r#network.as_ref() {
             el_builder = el_builder.attr("network", v);
         }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -7254,6 +7395,9 @@ impl DomainDevicesInterfaceModel {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         if let Some(v) = self.r#type.as_ref() {
             el_builder = el_builder.attr("type", v);
+        }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
         }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
@@ -7420,6 +7564,9 @@ impl DomainDevicesInterfaceAddress {
         if let Some(v) = self.r#function.as_ref() {
             el_builder = el_builder.attr("function", v);
         }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -7561,6 +7708,9 @@ impl Serial {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         if let Some(v) = self.r#type.as_ref() {
             el_builder = el_builder.attr("type", v);
+        }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
         }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
@@ -7715,6 +7865,9 @@ impl DomainDevicesSerialTarget {
         if let Some(v) = self.r#port.as_ref() {
             el_builder = el_builder.attr("port", v);
         }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -7854,6 +8007,9 @@ impl DomainDevicesSerialTargetModel {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         if let Some(v) = self.r#name.as_ref() {
             el_builder = el_builder.attr("name", v);
+        }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
         }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
@@ -7997,6 +8153,9 @@ impl Console {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         if let Some(v) = self.r#type.as_ref() {
             el_builder = el_builder.attr("type", v);
+        }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
         }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
@@ -8144,6 +8303,9 @@ impl DomainDevicesConsoleTarget {
         }
         if let Some(v) = self.r#port.as_ref() {
             el_builder = el_builder.attr("port", v);
+        }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
         }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
@@ -8294,6 +8456,9 @@ impl Channel {
         if let Some(v) = self.r#type.as_ref() {
             el_builder = el_builder.attr("type", v);
         }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -8443,6 +8608,9 @@ impl DomainDevicesChannelTarget {
         }
         if let Some(v) = self.r#name.as_ref() {
             el_builder = el_builder.attr("name", v);
+        }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
         }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
@@ -8602,6 +8770,9 @@ impl DomainDevicesChannelAddress {
         if let Some(v) = self.r#port.as_ref() {
             el_builder = el_builder.attr("port", v);
         }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -8750,6 +8921,9 @@ impl Input {
         }
         if let Some(v) = self.r#bus.as_ref() {
             el_builder = el_builder.attr("bus", v);
+        }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
         }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
@@ -8904,6 +9078,9 @@ impl DomainDevicesInputAddress {
         }
         if let Some(v) = self.r#port.as_ref() {
             el_builder = el_builder.attr("port", v);
+        }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
         }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
@@ -9065,6 +9242,9 @@ impl Graphics {
         if let Some(v) = self.r#listen.as_ref() {
             el_builder = el_builder.attr("listen", v);
         }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -9215,6 +9395,9 @@ impl Listen {
         if let Some(v) = self.r#address.as_ref() {
             el_builder = el_builder.attr("address", v);
         }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -9351,6 +9534,9 @@ impl Image {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         if let Some(v) = self.r#compression.as_ref() {
             el_builder = el_builder.attr("compression", v);
+        }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
         }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
@@ -9493,6 +9679,9 @@ impl Sound {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         if let Some(v) = self.r#model.as_ref() {
             el_builder = el_builder.attr("model", v);
+        }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
         }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
@@ -9662,6 +9851,9 @@ impl DomainDevicesSoundAddress {
         if let Some(v) = self.r#function.as_ref() {
             el_builder = el_builder.attr("function", v);
         }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -9805,6 +9997,9 @@ impl Audio {
         }
         if let Some(v) = self.r#type.as_ref() {
             el_builder = el_builder.attr("type", v);
+        }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
         }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
@@ -9951,6 +10146,9 @@ impl Video {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -10137,6 +10335,9 @@ impl DomainDevicesVideoModel {
         if let Some(v) = self.r#vgamem.as_ref() {
             el_builder = el_builder.attr("vgamem", v);
         }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -10305,6 +10506,9 @@ impl DomainDevicesVideoAddress {
         if let Some(v) = self.r#function.as_ref() {
             el_builder = el_builder.attr("function", v);
         }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -10454,6 +10658,9 @@ impl Redirdev {
         }
         if let Some(v) = self.r#type.as_ref() {
             el_builder = el_builder.attr("type", v);
+        }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
         }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
@@ -10609,6 +10816,9 @@ impl DomainDevicesRedirdevAddress {
         if let Some(v) = self.r#port.as_ref() {
             el_builder = el_builder.attr("port", v);
         }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -10753,6 +10963,9 @@ impl Watchdog {
         if let Some(v) = self.r#action.as_ref() {
             el_builder = el_builder.attr("action", v);
         }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -10895,6 +11108,9 @@ impl Memballoon {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         if let Some(v) = self.r#model.as_ref() {
             el_builder = el_builder.attr("model", v);
+        }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
         }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
@@ -11064,6 +11280,9 @@ impl DomainDevicesMemballoonAddress {
         if let Some(v) = self.r#function.as_ref() {
             el_builder = el_builder.attr("function", v);
         }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -11211,6 +11430,9 @@ impl Rng {
         if let Some(v) = self.r#model.as_ref() {
             el_builder = el_builder.attr("model", v);
         }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -11352,6 +11574,9 @@ impl Backend {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         if let Some(v) = self.r#model.as_ref() {
             el_builder = el_builder.attr("model", v);
+        }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
         }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
@@ -11521,6 +11746,9 @@ impl DomainDevicesRngAddress {
         if let Some(v) = self.r#function.as_ref() {
             el_builder = el_builder.attr("function", v);
         }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -11657,6 +11885,9 @@ impl Smbios {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         if let Some(v) = self.r#mode.as_ref() {
             el_builder = el_builder.attr("mode", v);
+        }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
         }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
@@ -11800,6 +12031,9 @@ impl Sysinfo {
         if let Some(v) = self.r#type.as_ref() {
             el_builder = el_builder.attr("type", v);
         }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -11937,6 +12171,9 @@ impl System {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -12075,6 +12312,9 @@ impl Entry {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         if let Some(v) = self.r#name.as_ref() {
             el_builder = el_builder.attr("name", v);
+        }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
         }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
@@ -12216,6 +12456,9 @@ impl Smm {
         if let Some(v) = self.r#state.as_ref() {
             el_builder = el_builder.attr("state", v);
         }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -12346,6 +12589,9 @@ impl BackingStore {
         include_ns: bool,
     ) -> Result<(), XmlWriteError> {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -12482,6 +12728,9 @@ impl DomainDevicesDiskAlias {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         if let Some(v) = self.r#name.as_ref() {
             el_builder = el_builder.attr("name", v);
+        }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
         }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
@@ -12627,6 +12876,9 @@ impl Resolution {
         if let Some(v) = self.r#y.as_ref() {
             el_builder = el_builder.attr("y", v);
         }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {
                 el_builder = el_builder.ns(*k, *v);
@@ -12763,6 +13015,9 @@ impl DomainDevicesVideoAlias {
         let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
         if let Some(v) = self.r#name.as_ref() {
             el_builder = el_builder.attr("name", v);
+        }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
         }
         if include_ns {
             for (k, v) in DOCUMENT_NAMESPACES {

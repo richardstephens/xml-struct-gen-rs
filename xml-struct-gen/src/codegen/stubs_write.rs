@@ -41,6 +41,11 @@ pub fn gen_write_element(
 
             let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
             #(#attr_write_tokens)*
+
+            for ((_ns, attr_local_name), v) in &self.misc_attrs {
+                el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+            }
+
             #include_ns_block
             w.write(el_builder)?;
 
