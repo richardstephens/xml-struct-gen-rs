@@ -27,3 +27,42 @@ losslessly if necessary.
   which contains some error types and util fn's and as of yet no guarantees are made about semver or
   forward/backward compatibility.
 
+## Usage
+
+Install the generator
+
+    cargo install xml-struct-gen@0.0.1-alpha
+
+Add the dependency types
+
+    cargo add xml-struct-types@0.0.1-alpha
+
+Generate some structs! You can specify multiple sample documents and
+types will be gathered from each one.
+
+    xml-struct-gen --input podcast1.xml \
+        --input podcast2.xml \
+        --output src/podcast_structs.rs
+
+Import the structs into your project
+
+```rust
+#[allow(dead_code, unused)]
+pub mod podcast_structs;
+```
+
+Generate the XML for an aweomse podcast
+
+```rust
+    let rss_doc = RssDocument {
+        channel_elems: vec![Channel {
+            rss_channel_title_elems: vec![RssChannelTitle {
+                value: Some("My awesome podcast".into()),
+                ..Default::default()
+            }],
+            ..Default::default()
+        }],
+        ..Default::default()
+    };
+    rss_doc.write_document(&mut stdout()).unwrap();
+```
