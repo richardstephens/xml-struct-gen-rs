@@ -3,7 +3,12 @@ use std::collections::HashMap;
 pub use xml_struct_types::v1::error::*;
 const DOCUMENT_NAMESPACES: &[(&str, &str)] = &[
     ("content", "http://purl.org/rss/1.0/modules/content/"),
+    (
+        "googleplay",
+        "http://www.google.com/schemas/play-podcasts/1.0",
+    ),
     ("itunes", "http://www.itunes.com/dtds/podcast-1.0.dtd"),
+    ("podcast", "https://podcastindex.org/namespace/1.0"),
 ];
 #[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct RssDocument {
@@ -177,7 +182,6 @@ pub struct Channel {
     pub misc_attrs: HashMap<(Option<String>, String), String>,
     #[serde(skip)]
     pub misc_content: Vec<xml::reader::XmlEvent>,
-    pub rss_channel_title_elems: Vec<RssChannelTitle>,
     pub rss_channel_link_elems: Vec<RssChannelLink>,
     pub language_elems: Vec<Language>,
     pub copyright_elems: Vec<Copyright>,
@@ -188,6 +192,10 @@ pub struct Channel {
     pub rss_channel_itunes_category_elems: Vec<RssChannelItunesCategory>,
     pub rss_channel_itunes_explicit_elems: Vec<RssChannelItunesExplicit>,
     pub item_elems: Vec<Item>,
+    pub rss_channel_title_elems: Vec<RssChannelTitle>,
+    pub rss_channel_podcast_block_elems: Vec<RssChannelPodcastBlock>,
+    pub rss_channel_itunes_block_elems: Vec<RssChannelItunesBlock>,
+    pub rss_channel_googleplay_block_elems: Vec<RssChannelGoogleplayBlock>,
 }
 impl Channel {
     const XML_LOCAL_NAME: &'static str = "channel";
@@ -239,10 +247,6 @@ impl Channel {
                     attributes,
                     namespace,
                 }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
-                    (None, "title") => {
-                        n.rss_channel_title_elems
-                            .push(RssChannelTitle::parse_children(attributes, iter)?);
-                    }
                     (None, "link") => {
                         n.rss_channel_link_elems
                             .push(RssChannelLink::parse_children(attributes, iter)?);
@@ -280,6 +284,22 @@ impl Channel {
                     }
                     (None, "item") => {
                         n.item_elems.push(Item::parse_children(attributes, iter)?);
+                    }
+                    (None, "title") => {
+                        n.rss_channel_title_elems
+                            .push(RssChannelTitle::parse_children(attributes, iter)?);
+                    }
+                    (Some("https://podcastindex.org/namespace/1.0"), "block") => {
+                        n.rss_channel_podcast_block_elems
+                            .push(RssChannelPodcastBlock::parse_children(attributes, iter)?);
+                    }
+                    (Some("http://www.itunes.com/dtds/podcast-1.0.dtd"), "block") => {
+                        n.rss_channel_itunes_block_elems
+                            .push(RssChannelItunesBlock::parse_children(attributes, iter)?);
+                    }
+                    (Some("http://www.google.com/schemas/play-podcasts/1.0"), "block") => {
+                        n.rss_channel_googleplay_block_elems
+                            .push(RssChannelGoogleplayBlock::parse_children(attributes, iter)?);
                     }
                     _ => {
                         let mut depth: usize = 1;
@@ -349,9 +369,6 @@ impl Channel {
             }
         }
         w.write(el_builder)?;
-        for child in self.rss_channel_title_elems.iter() {
-            child.write_element(w, false)?;
-        }
         for child in self.rss_channel_link_elems.iter() {
             child.write_element(w, false)?;
         }
@@ -380,6 +397,18 @@ impl Channel {
             child.write_element(w, false)?;
         }
         for child in self.item_elems.iter() {
+            child.write_element(w, false)?;
+        }
+        for child in self.rss_channel_title_elems.iter() {
+            child.write_element(w, false)?;
+        }
+        for child in self.rss_channel_podcast_block_elems.iter() {
+            child.write_element(w, false)?;
+        }
+        for child in self.rss_channel_itunes_block_elems.iter() {
+            child.write_element(w, false)?;
+        }
+        for child in self.rss_channel_googleplay_block_elems.iter() {
             child.write_element(w, false)?;
         }
         for elem in self.misc_content.iter() {
@@ -3898,6 +3927,437 @@ impl RssChannelItemLink {
             };
         }
         Err(XmlParseError::UnexpectedEof("link element"))
+    }
+    fn parse_children<R: std::io::Read>(
+        attrs: Vec<xml::attribute::OwnedAttribute>,
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        let mut n = Self::default();
+        for attr in attrs.into_iter() {
+            match (
+                attr.name.namespace.as_deref(),
+                attr.name.local_name.as_str(),
+            ) {
+                (ns, name) => {
+                    n.misc_attrs
+                        .insert((ns.map(|s| s.to_string()), name.to_owned()), attr.value);
+                }
+            }
+        }
+        while let Some(e) = iter.next() {
+            match e {
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    _ => {
+                        let mut depth: usize = 1;
+                        n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                            name,
+                            attributes,
+                            namespace,
+                        });
+                        while let Some(e) = iter.next() {
+                            match e {
+                                Ok(xml::reader::XmlEvent::StartElement {
+                                    name,
+                                    attributes,
+                                    namespace,
+                                }) => {
+                                    n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                                        name,
+                                        attributes,
+                                        namespace,
+                                    });
+                                    depth += 1;
+                                }
+                                Ok(xml::reader::XmlEvent::EndElement { name }) => {
+                                    n.misc_content
+                                        .push(xml::reader::XmlEvent::EndElement { name });
+                                    depth -= 1;
+                                    if depth == 0 {
+                                        break;
+                                    }
+                                }
+                                Ok(evt) => {
+                                    n.misc_content.push(evt);
+                                }
+                                Err(e) => return Err(e.into()),
+                            }
+                        }
+                    }
+                },
+                Ok(xml::reader::XmlEvent::EndElement { .. }) => {
+                    return Ok(n);
+                }
+                Ok(xml::reader::XmlEvent::Characters(val)) => {
+                    n.value = Some(val);
+                }
+                Err(e) => return Err(e.into()),
+                _ => {}
+            }
+        }
+        return Err(XmlParseError::ExpectedEndElement(
+            XmlDocumentReference::Unknown,
+        ));
+    }
+    pub fn write_element<W: std::io::Write>(
+        &self,
+        w: &mut xml::writer::EventWriter<W>,
+        include_ns: bool,
+    ) -> Result<(), XmlWriteError> {
+        let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
+        if include_ns {
+            for (k, v) in DOCUMENT_NAMESPACES {
+                el_builder = el_builder.ns(*k, *v);
+            }
+        }
+        w.write(el_builder)?;
+        if let Some(val) = self.value.as_deref() {
+            w.write(xml::writer::XmlEvent::characters(val))?;
+        }
+        for elem in self.misc_content.iter() {
+            if let Some(writer_event) = elem.as_writer_event() {
+                w.write(writer_event)?;
+            }
+        }
+        w.write(xml::writer::XmlEvent::end_element())?;
+        Ok(())
+    }
+}
+#[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct RssChannelPodcastBlock {
+    pub r#id: Option<String>,
+    pub misc_attrs: HashMap<(Option<String>, String), String>,
+    #[serde(skip)]
+    pub misc_content: Vec<xml::reader::XmlEvent>,
+    pub value: Option<String>,
+}
+impl RssChannelPodcastBlock {
+    const XML_LOCAL_NAME: &'static str = "block";
+    const XML_NAMESPACE: Option<&'static str> = Some("https://podcastindex.org/namespace/1.0");
+    const XML_PREFIX: Option<&'static str> = Some("podcast");
+    const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::qualified(
+        "block",
+        "https://podcastindex.org/namespace/1.0",
+        Some("podcast"),
+    );
+    pub fn parse_element<R: std::io::Read>(
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        while let Some(event) = iter.next() {
+            return match event {
+                Ok(xml::reader::XmlEvent::StartDocument { .. }) => {
+                    continue;
+                }
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    (Some("https://podcastindex.org/namespace/1.0"), "block") => {
+                        Self::parse_children(attributes, iter)
+                    }
+                    _ => Err(XmlParseError::UnexpectedElement(name)),
+                },
+                Ok(e) => Err(XmlParseError::UnexpectedXmlEvent(e)),
+                Err(e) => Err(e.into()),
+            };
+        }
+        Err(XmlParseError::UnexpectedEof("block element"))
+    }
+    fn parse_children<R: std::io::Read>(
+        attrs: Vec<xml::attribute::OwnedAttribute>,
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        let mut n = Self::default();
+        for attr in attrs.into_iter() {
+            match (
+                attr.name.namespace.as_deref(),
+                attr.name.local_name.as_str(),
+            ) {
+                (None, "id") => {
+                    n.r#id = Some(attr.value);
+                }
+                (ns, name) => {
+                    n.misc_attrs
+                        .insert((ns.map(|s| s.to_string()), name.to_owned()), attr.value);
+                }
+            }
+        }
+        while let Some(e) = iter.next() {
+            match e {
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    _ => {
+                        let mut depth: usize = 1;
+                        n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                            name,
+                            attributes,
+                            namespace,
+                        });
+                        while let Some(e) = iter.next() {
+                            match e {
+                                Ok(xml::reader::XmlEvent::StartElement {
+                                    name,
+                                    attributes,
+                                    namespace,
+                                }) => {
+                                    n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                                        name,
+                                        attributes,
+                                        namespace,
+                                    });
+                                    depth += 1;
+                                }
+                                Ok(xml::reader::XmlEvent::EndElement { name }) => {
+                                    n.misc_content
+                                        .push(xml::reader::XmlEvent::EndElement { name });
+                                    depth -= 1;
+                                    if depth == 0 {
+                                        break;
+                                    }
+                                }
+                                Ok(evt) => {
+                                    n.misc_content.push(evt);
+                                }
+                                Err(e) => return Err(e.into()),
+                            }
+                        }
+                    }
+                },
+                Ok(xml::reader::XmlEvent::EndElement { .. }) => {
+                    return Ok(n);
+                }
+                Ok(xml::reader::XmlEvent::Characters(val)) => {
+                    n.value = Some(val);
+                }
+                Err(e) => return Err(e.into()),
+                _ => {}
+            }
+        }
+        return Err(XmlParseError::ExpectedEndElement(
+            XmlDocumentReference::Unknown,
+        ));
+    }
+    pub fn write_element<W: std::io::Write>(
+        &self,
+        w: &mut xml::writer::EventWriter<W>,
+        include_ns: bool,
+    ) -> Result<(), XmlWriteError> {
+        let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        if let Some(v) = self.r#id.as_ref() {
+            el_builder = el_builder.attr("id", v);
+        }
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
+        if include_ns {
+            for (k, v) in DOCUMENT_NAMESPACES {
+                el_builder = el_builder.ns(*k, *v);
+            }
+        }
+        w.write(el_builder)?;
+        if let Some(val) = self.value.as_deref() {
+            w.write(xml::writer::XmlEvent::characters(val))?;
+        }
+        for elem in self.misc_content.iter() {
+            if let Some(writer_event) = elem.as_writer_event() {
+                w.write(writer_event)?;
+            }
+        }
+        w.write(xml::writer::XmlEvent::end_element())?;
+        Ok(())
+    }
+}
+#[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct RssChannelItunesBlock {
+    pub misc_attrs: HashMap<(Option<String>, String), String>,
+    #[serde(skip)]
+    pub misc_content: Vec<xml::reader::XmlEvent>,
+    pub value: Option<String>,
+}
+impl RssChannelItunesBlock {
+    const XML_LOCAL_NAME: &'static str = "block";
+    const XML_NAMESPACE: Option<&'static str> = Some("http://www.itunes.com/dtds/podcast-1.0.dtd");
+    const XML_PREFIX: Option<&'static str> = Some("itunes");
+    const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::qualified(
+        "block",
+        "http://www.itunes.com/dtds/podcast-1.0.dtd",
+        Some("itunes"),
+    );
+    pub fn parse_element<R: std::io::Read>(
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        while let Some(event) = iter.next() {
+            return match event {
+                Ok(xml::reader::XmlEvent::StartDocument { .. }) => {
+                    continue;
+                }
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    (Some("http://www.itunes.com/dtds/podcast-1.0.dtd"), "block") => {
+                        Self::parse_children(attributes, iter)
+                    }
+                    _ => Err(XmlParseError::UnexpectedElement(name)),
+                },
+                Ok(e) => Err(XmlParseError::UnexpectedXmlEvent(e)),
+                Err(e) => Err(e.into()),
+            };
+        }
+        Err(XmlParseError::UnexpectedEof("block element"))
+    }
+    fn parse_children<R: std::io::Read>(
+        attrs: Vec<xml::attribute::OwnedAttribute>,
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        let mut n = Self::default();
+        for attr in attrs.into_iter() {
+            match (
+                attr.name.namespace.as_deref(),
+                attr.name.local_name.as_str(),
+            ) {
+                (ns, name) => {
+                    n.misc_attrs
+                        .insert((ns.map(|s| s.to_string()), name.to_owned()), attr.value);
+                }
+            }
+        }
+        while let Some(e) = iter.next() {
+            match e {
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    _ => {
+                        let mut depth: usize = 1;
+                        n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                            name,
+                            attributes,
+                            namespace,
+                        });
+                        while let Some(e) = iter.next() {
+                            match e {
+                                Ok(xml::reader::XmlEvent::StartElement {
+                                    name,
+                                    attributes,
+                                    namespace,
+                                }) => {
+                                    n.misc_content.push(xml::reader::XmlEvent::StartElement {
+                                        name,
+                                        attributes,
+                                        namespace,
+                                    });
+                                    depth += 1;
+                                }
+                                Ok(xml::reader::XmlEvent::EndElement { name }) => {
+                                    n.misc_content
+                                        .push(xml::reader::XmlEvent::EndElement { name });
+                                    depth -= 1;
+                                    if depth == 0 {
+                                        break;
+                                    }
+                                }
+                                Ok(evt) => {
+                                    n.misc_content.push(evt);
+                                }
+                                Err(e) => return Err(e.into()),
+                            }
+                        }
+                    }
+                },
+                Ok(xml::reader::XmlEvent::EndElement { .. }) => {
+                    return Ok(n);
+                }
+                Ok(xml::reader::XmlEvent::Characters(val)) => {
+                    n.value = Some(val);
+                }
+                Err(e) => return Err(e.into()),
+                _ => {}
+            }
+        }
+        return Err(XmlParseError::ExpectedEndElement(
+            XmlDocumentReference::Unknown,
+        ));
+    }
+    pub fn write_element<W: std::io::Write>(
+        &self,
+        w: &mut xml::writer::EventWriter<W>,
+        include_ns: bool,
+    ) -> Result<(), XmlWriteError> {
+        let mut el_builder = xml::writer::XmlEvent::start_element(Self::XML_RS_NAME);
+        for ((_ns, attr_local_name), v) in &self.misc_attrs {
+            el_builder = el_builder.attr(attr_local_name.as_str(), &v);
+        }
+        if include_ns {
+            for (k, v) in DOCUMENT_NAMESPACES {
+                el_builder = el_builder.ns(*k, *v);
+            }
+        }
+        w.write(el_builder)?;
+        if let Some(val) = self.value.as_deref() {
+            w.write(xml::writer::XmlEvent::characters(val))?;
+        }
+        for elem in self.misc_content.iter() {
+            if let Some(writer_event) = elem.as_writer_event() {
+                w.write(writer_event)?;
+            }
+        }
+        w.write(xml::writer::XmlEvent::end_element())?;
+        Ok(())
+    }
+}
+#[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct RssChannelGoogleplayBlock {
+    pub misc_attrs: HashMap<(Option<String>, String), String>,
+    #[serde(skip)]
+    pub misc_content: Vec<xml::reader::XmlEvent>,
+    pub value: Option<String>,
+}
+impl RssChannelGoogleplayBlock {
+    const XML_LOCAL_NAME: &'static str = "block";
+    const XML_NAMESPACE: Option<&'static str> =
+        Some("http://www.google.com/schemas/play-podcasts/1.0");
+    const XML_PREFIX: Option<&'static str> = Some("googleplay");
+    const XML_RS_NAME: xml::name::Name<'static> = xml::name::Name::qualified(
+        "block",
+        "http://www.google.com/schemas/play-podcasts/1.0",
+        Some("googleplay"),
+    );
+    pub fn parse_element<R: std::io::Read>(
+        iter: &mut xml::reader::Events<R>,
+    ) -> Result<Self, XmlParseError> {
+        while let Some(event) = iter.next() {
+            return match event {
+                Ok(xml::reader::XmlEvent::StartDocument { .. }) => {
+                    continue;
+                }
+                Ok(xml::reader::XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => match (name.namespace.as_deref(), name.local_name.as_str()) {
+                    (Some("http://www.google.com/schemas/play-podcasts/1.0"), "block") => {
+                        Self::parse_children(attributes, iter)
+                    }
+                    _ => Err(XmlParseError::UnexpectedElement(name)),
+                },
+                Ok(e) => Err(XmlParseError::UnexpectedXmlEvent(e)),
+                Err(e) => Err(e.into()),
+            };
+        }
+        Err(XmlParseError::UnexpectedEof("block element"))
     }
     fn parse_children<R: std::io::Read>(
         attrs: Vec<xml::attribute::OwnedAttribute>,
