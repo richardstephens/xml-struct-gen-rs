@@ -5705,6 +5705,7 @@ impl DomainDevicesDiskSource {
 pub struct DomainDevicesDiskTarget {
     pub r#dev: Option<String>,
     pub r#bus: Option<String>,
+    pub r#removable: Option<String>,
     pub misc_attrs: HashMap<(Option<String>, String), String>,
     #[serde(skip)]
     pub misc_content: Vec<xml::reader::XmlEvent>,
@@ -5751,6 +5752,9 @@ impl DomainDevicesDiskTarget {
                 }
                 (None, "bus") => {
                     n.r#bus = Some(attr.value);
+                }
+                (None, "removable") => {
+                    n.r#removable = Some(attr.value);
                 }
                 (ns, name) => {
                     n.misc_attrs
@@ -5829,6 +5833,9 @@ impl DomainDevicesDiskTarget {
         }
         if let Some(v) = self.r#bus.as_ref() {
             el_builder = el_builder.attr("bus", v);
+        }
+        if let Some(v) = self.r#removable.as_ref() {
+            el_builder = el_builder.attr("removable", v);
         }
         for ((_ns, attr_local_name), v) in &self.misc_attrs {
             el_builder = el_builder.attr(attr_local_name.as_str(), &v);
